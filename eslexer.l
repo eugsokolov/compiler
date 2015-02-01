@@ -2,16 +2,20 @@
 %{
 #include "tokens-manual.h"
 #include <math.h>
+#include <errno.h>
+#include <stdio.h>
 
 int yylinenum = 1;
-
-
+char **files;
+int file_num;
+int file_num_max;
+extern int errno;
 %}
 
 DIG	[0-9]
 LET	[a-zA-Z]
 ID	[a-zA-Z][a-zA-Z0-9]*
-HEXDIG	0[xX][0-9A-Fa-f]+|[\][xX][0-9A-Fa-f]+
+HEXDIG	0[xX][0-9A-Fa-f]+
 STRING	["].*["]
 CHARLIT ['].*[']
 
@@ -50,21 +54,47 @@ unsigned		{keyword(yyin,yylinenum,yytext);return UNSIGNED;}
 void			{keyword(yyin,yylinenum,yytext);return VOID;}
 volatile		{keyword(yyin,yylinenum,yytext);return VOLATILE;}
 while			{keyword(yyin,yylinenum,yytext);return WHILE;}
+_Bool			{keyword(yyin,yylinenum,yytext);return _BOOL;}
+_Complex		{keyword(yyin,yylinenum,yytext);return _COMPLEX;}
+_Imaginary		{keyword(yyin,yylinenum,yytext);return _IMAGINARY;}
 
 
-[++]			{printf("%s\t %d\t PLUSPLUS\n",yyin, yylinenum);}
-[--]			{printf("%s\t %d\t MINUSMINUS\n",yyin, yylinenum);}
+"++"			{printf("%s\t %d\t PLUSPLUS\n",yyin, yylinenum);}
+"--"			{printf("%s\t %d\t MINUSMINUS\n",yyin, yylinenum);}
+".."			{printf("%s\t %d\t ELLIPSIS\n",yyin, yylinenum);}
+"!="			{printf("%s\t %d\t NOTEQ\n",yyin, yylinenum);}
+"+="			{printf("%s\t %d\t PLUSEQ\n",yyin, yylinenum);}
+"-="			{printf("%s\t %d\t MINUSEQ\n",yyin, yylinenum);}
+"/="			{printf("%s\t %d\t DIVEQ\n",yyin, yylinenum);}
+"*="			{printf("%s\t %d\t TIMESEQ\n",yyin, yylinenum);}
+"^="			{printf("%s\t %d\t XOREQ\n",yyin, yylinenum);}
+"|="			{printf("%s\t %d\t OREQ\n",yyin, yylinenum);}
+"&="			{printf("%s\t %d\t ANDEQ\n",yyin, yylinenum);}
+"%="			{printf("%s\t %d\t MODEQ\n",yyin, yylinenum);}
+"="			{printf("%s\t %d\t EQ\n",yyin, yylinenum);}
+"->"			{printf("%s\t %d\t INDSEL\n",yyin, yylinenum);}
+"&&"			{printf("%s\t %d\t LOGAND\n",yyin, yylinenum);}
+"||"			{printf("%s\t %d\t LOGOR\n",yyin, yylinenum);}
+"<"			{printf("%s\t %d\t SHL\n",yyin, yylinenum);}
+">"			{printf("%s\t %d\t SHR\n",yyin, yylinenum);}
+"<="			{printf("%s\t %d\t SHLEQ\n",yyin, yylinenum);}
+">="			{printf("%s\t %d\t SHREQ\n",yyin, yylinenum);}
 
 "["|"]"|"{"|"}"|"("|")"|"."|"+"|"-"|"&"|"*"|"~"|"!"|"/"|"%"|"<"|">"|"^"|"|"|"?"|":"|";"|","		{printf("%s\t %d\t %s\n",yyin, yylinenum, yytext);}
 
 {STRING}		{printf("%s\t %d\t STRING\t %s\n",yyin, yylinenum, yytext);}
-{CHARLIT}		{printf("%s\t %d\t CHARLIT\t %s\n",yyin, yylinenum, yytext);}
+{CHARLIT}		{printf("%s\t %d\t CHARLIT %s\n",yyin, yylinenum, yytext);}
 
-{DIG}+			{printf("%s\t %d\t NUMBER\t %d\n",yyin, yylinenum, atoi(yytext));}
+{DIG}+"LLU"		{printf("%s\t %d\t NUMBER\t INTEGER %d\t UNSIGNED,LONGLONG\n",yyin, yylinenum, atol(yytext));}
+{DIG}+"L"		{printf("%s\t %d\t NUMBER\t INTEGER %d\t LONG\n",yyin, yylinenum, atoi(yytext));}
+{DIG}+"U"		{printf("%s\t %d\t NUMBER\t INTEGER %d\t UNSIGNED,INT\n",yyin, yylinenum, atoi(yytext));}
+
+{DIG}+"."{DIG}+		{printf("%s\t %d\t NUMBER\t REAL %g\t DOUBLE\n",yyin, yylinenum, atof(yytext));}
+
+{DIG}+			{printf("%s\t %d\t NUMBER\t INTEGER %d\t INT\n",yyin, yylinenum, atoi(yytext));}
 {ID}			{printf("%s\t %d\t IDENT\t %s\n",yyin, yylinenum, yytext);}
 
-{HEXDIG}		{printf("%s\t %d\t HEXDIG\t %s\n", yyin,yylinenum,yytext);}
-{DIG}+"."{DIG}+		{printf("%s\t %d\t FLOAT\t %g\n",yyin, yylinenum, atof(yytext));}
+{HEXDIG}		{printf("%s\t %d\t HEXDIG\t %ld\n", yyin,yylinenum,yytext);}
 
 [\n]			{yylinenum++;}
 .			{fprintf(stderr,"Error: undefined token %s\n", yytext);exit(1);}
@@ -82,11 +112,24 @@ while(*p != '\0'){
 
 main(int argc, char *argv[]){
 
+/*
 ++argv, --argc;
 if(argc > 0)
  yyin=fopen(argv[0], "r");
 else
  yyin = stdin;
+*/
+
+file_num=1;
+file_num_max=argc;
+files=argv;
+if(argc>1){
+ if( (yyin = fopen(argv[file_num],"r"))== 0){
+  perror(files[file_num]);
+  exit(1);
+ }
+
+}
 
 while(yylex())
  ;
