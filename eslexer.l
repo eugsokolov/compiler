@@ -4,7 +4,8 @@
 #include <math.h>
 #include <errno.h>
 #include <stdio.h>
-
+#include <stdlib.h>
+extern FILE *yyin;
 int yylinenum = 1;
 char **files;
 int file_num;
@@ -25,6 +26,7 @@ auto			{keyword(yyin,yylinenum,yytext);return AUTO;}
 break			{keyword(yyin,yylinenum,yytext);return BREAK;}
 case			{keyword(yyin,yylinenum,yytext);return CASE;}
 char			{keyword(yyin,yylinenum,yytext);return CHAR;}
+const			{keyword(yyin,yylinenum,yytext);return CONST;}
 continue		{keyword(yyin,yylinenum,yytext);return CONTINUE;}
 default			{keyword(yyin,yylinenum,yytext);return DEFAULT;}
 do			{keyword(yyin,yylinenum,yytext);return DO;}
@@ -59,8 +61,8 @@ _Complex		{keyword(yyin,yylinenum,yytext);return _COMPLEX;}
 _Imaginary		{keyword(yyin,yylinenum,yytext);return _IMAGINARY;}
 
 
-"++"			{printf("%s\t %d\t PLUSPLUS\n",yyin, yylinenum);}
-"--"			{printf("%s\t %d\t MINUSMINUS\n",yyin, yylinenum);}
+"++"			{printf("%s\t %d\t PLUSPLUS\n",yyin,yylinenum);}
+"--"			{printf("%s\t %d\t MINUSMINUS\n",yyin,yylinenum);}
 ".."			{printf("%s\t %d\t ELLIPSIS\n",yyin, yylinenum);}
 "!="			{printf("%s\t %d\t NOTEQ\n",yyin, yylinenum);}
 "+="			{printf("%s\t %d\t PLUSEQ\n",yyin, yylinenum);}
@@ -71,30 +73,39 @@ _Imaginary		{keyword(yyin,yylinenum,yytext);return _IMAGINARY;}
 "|="			{printf("%s\t %d\t OREQ\n",yyin, yylinenum);}
 "&="			{printf("%s\t %d\t ANDEQ\n",yyin, yylinenum);}
 "%="			{printf("%s\t %d\t MODEQ\n",yyin, yylinenum);}
-"="			{printf("%s\t %d\t EQ\n",yyin, yylinenum);}
 "->"			{printf("%s\t %d\t INDSEL\n",yyin, yylinenum);}
 "&&"			{printf("%s\t %d\t LOGAND\n",yyin, yylinenum);}
 "||"			{printf("%s\t %d\t LOGOR\n",yyin, yylinenum);}
-"<"			{printf("%s\t %d\t SHL\n",yyin, yylinenum);}
-">"			{printf("%s\t %d\t SHR\n",yyin, yylinenum);}
 "<="			{printf("%s\t %d\t SHLEQ\n",yyin, yylinenum);}
 ">="			{printf("%s\t %d\t SHREQ\n",yyin, yylinenum);}
+"<<="			{printf("%s\t %d\t SHLEQ\n",yyin, yylinenum);}
+"<<"			{printf("%s\t %d\t SHL\n",yyin, yylinenum);}
+">>="			{printf("%s\t %d\t SHREQ\n",yyin, yylinenum);}
+">>"			{printf("%s\t %d\t SHR\n",yyin, yylinenum);}
+"="			{printf("%s\t %d\t EQ\n",yyin, yylinenum);}
 
 "["|"]"|"{"|"}"|"("|")"|"."|"+"|"-"|"&"|"*"|"~"|"!"|"/"|"%"|"<"|">"|"^"|"|"|"?"|":"|";"|","		{printf("%s\t %d\t %s\n",yyin, yylinenum, yytext);}
 
 {STRING}		{printf("%s\t %d\t STRING\t %s\n",yyin, yylinenum, yytext);}
 {CHARLIT}		{printf("%s\t %d\t CHARLIT %s\n",yyin, yylinenum, yytext);}
 
-{DIG}+"LLU"		{printf("%s\t %d\t NUMBER\t INTEGER %d\t UNSIGNED,LONGLONG\n",yyin, yylinenum, atol(yytext));}
-{DIG}+"L"		{printf("%s\t %d\t NUMBER\t INTEGER %d\t LONG\n",yyin, yylinenum, atoi(yytext));}
+{DIG}+"."{DIG}*"L"	{printf("%s\t %d\t NUMBER\t REAL\t %g\t LONGDOUBLE\n",yyin, yylinenum, atof(yytext));}
+{DIG}+"."{DIG}+		{printf("%s\t %d\t NUMBER\t REAL\t %g\t DOUBLE\n",yyin, yylinenum, atof(yytext));}
+{DIG}+"e"{DIG}+"f"	{printf("%s\t %d\t NUMBER\t REAL\t %g\t FLOAT\n",yyin, yylinenum, atof(yytext));}
+{DIG}+"e+"{DIG}+"f"	{printf("%s\t %d\t NUMBER\t REAL\t %g\t FLOAT\n",yyin, yylinenum, atof(yytext));}
+{DIG}+"e"{DIG}+		{printf("%s\t %d\t NUMBER\t REAL\t %g\t DOUBLE\n",yyin, yylinenum, atof(yytext));}
+{DIG}+"e+"{DIG}+	{printf("%s\t %d\t NUMBER\t REAL\t %g\t DOUBLE\n",yyin, yylinenum, atof(yytext));}
+
+{DIG}+"LLU"		{printf("%s\t %d\t NUMBER\t INTEGER %lld\t UNSIGNED,LONGLONG\n",yyin, yylinenum, atol(yytext));}
+{DIG}+"L"		{printf("%s\t %d\t NUMBER\t INTEGER %ld\t LONG\n",yyin, yylinenum, atol(yytext));}
 {DIG}+"U"		{printf("%s\t %d\t NUMBER\t INTEGER %d\t UNSIGNED,INT\n",yyin, yylinenum, atoi(yytext));}
 
-{DIG}+"."{DIG}+		{printf("%s\t %d\t NUMBER\t REAL %g\t DOUBLE\n",yyin, yylinenum, atof(yytext));}
+{HEXDIG}"L"		{printf("%s\t %d\t NUMBER\t INTEGER %s\t LONG\n", yyin,yylinenum,yytext);}
 
 {DIG}+			{printf("%s\t %d\t NUMBER\t INTEGER %d\t INT\n",yyin, yylinenum, atoi(yytext));}
+{HEXDIG}		{printf("%s\t %d\t NUMBER\t INTEGER %s\t INT\n", yyin,yylinenum,yytext);}
 {ID}			{printf("%s\t %d\t IDENT\t %s\n",yyin, yylinenum, yytext);}
 
-{HEXDIG}		{printf("%s\t %d\t HEXDIG\t %ld\n", yyin,yylinenum,yytext);}
 
 [\n]			{yylinenum++;}
 .			{fprintf(stderr,"Error: undefined token %s\n", yytext);exit(1);}
@@ -112,14 +123,14 @@ while(*p != '\0'){
 
 main(int argc, char *argv[]){
 
-/*
 ++argv, --argc;
 if(argc > 0)
  yyin=fopen(argv[0], "r");
 else
  yyin = stdin;
-*/
 
+
+/*
 file_num=1;
 file_num_max=argc;
 files=argv;
@@ -128,11 +139,12 @@ if(argc>1){
   perror(files[file_num]);
   exit(1);
  }
-
 }
+*/
 
 while(yylex())
  ;
 
 printf("\nEOF\n");
+fclose(yyin);
 }
