@@ -63,7 +63,7 @@ _Imaginary		{keyword(yyin,yylinenum,yytext);return _IMAGINARY;}
 
 "++"			{printf("%s\t %d\t PLUSPLUS\n",yyin,yylinenum);}
 "--"			{printf("%s\t %d\t MINUSMINUS\n",yyin,yylinenum);}
-".."			{printf("%s\t %d\t ELLIPSIS\n",yyin, yylinenum);}
+"..."			{printf("%s\t %d\t ELLIPSIS\n",yyin, yylinenum);}
 "!="			{printf("%s\t %d\t NOTEQ\n",yyin, yylinenum);}
 "+="			{printf("%s\t %d\t PLUSEQ\n",yyin, yylinenum);}
 "-="			{printf("%s\t %d\t MINUSEQ\n",yyin, yylinenum);}
