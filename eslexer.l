@@ -92,6 +92,7 @@ _Imaginary	{keyword(lineno,yytext);return _IMAGINARY;}
 [a-zA-Z][a-zA-Z0-9]*		{printf("%s\t %d\t IDENT\t %s\n",filename, lineno, yytext);}
 
 /* Single character */
+/* http://stackoverflow.com/questions/5403103/hex-to-ascii-string-conversion */
 <INITIAL>\'			{BEGIN(IN_CHAR);}
 <IN_CHAR>\' 			{BEGIN(INITIAL);     return CHARLIT;}
 <IN_CHAR>\\['"?\\]		{}
