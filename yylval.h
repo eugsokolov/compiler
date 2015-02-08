@@ -1,22 +1,28 @@
-
+/*
+EUGENE SOKOLOV
+ECE466: Compilers
+LEXICAL ANALYSIS: YYLVAL definition
+*/
 
 #ifndef _YYLVAL_H
 #define _YYLVAL_H
 
 enum number_type{
-  SIZE_INT=0,
-  SIZE_LONG,
-  SIZE_LONGLONG,
+  TYPE_INT=0,
+  TYPE_LONG,
+  TYPE_LONGLONG,
   SIZE_FLOAT,
-  SIZE_DOUBLE,
-  SIZE_LONGDOUBLE,
-  SIZE_UNSIGNED,
-  SIZE_SIGNED
+  TYPE_DOUBLE,
+  TYPE_LONGDOUBLE,
+  TYPE_UNSIGNED,
+  TYPE_SIGNED
 };
 
 typedef union{
+
   char yychar;
   char *yystring;
+  unsigned int yystring_size;
   //int yyint;
   unsigned long long int yyint;
   long double yydouble;
@@ -24,6 +30,7 @@ typedef union{
   enum number_type num_sign;
 } YYSTYPE;
 
+#define MAX_STRING_LENGTH 4096
 extern YYSTYPE yylval;
 
 #endif
