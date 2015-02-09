@@ -82,8 +82,8 @@ _Imaginary	{keyword(lineno,yytext);return _IMAGINARY;}
 "->"		{printf("%s\t %d\t INDSEL\n",filename, lineno);return INDSEL;}
 "&&"		{printf("%s\t %d\t LOGAND\n",filename, lineno);return LOGAND;}
 "||"		{printf("%s\t %d\t LOGOR\n",filename, lineno);return LOGOR;}
-"<="		{printf("%s\t %d\t SHLEQ\n",filename, lineno);return LTEQ;}
-">="		{printf("%s\t %d\t SHREQ\n",filename, lineno);return GTEQ;}
+"<="		{printf("%s\t %d\t LTEQ\n",filename, lineno);return LTEQ;}
+">="		{printf("%s\t %d\t GTEQ\n",filename, lineno);return GTEQ;}
 "<<="		{printf("%s\t %d\t SHLEQ\n",filename, lineno);return SHLEQ;}
 "<<"		{printf("%s\t %d\t SHL\n",filename, lineno);return SHL;}
 ">>="		{printf("%s\t %d\t SHREQ\n",filename, lineno);return SHREQ;}
