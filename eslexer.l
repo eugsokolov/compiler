@@ -127,7 +127,7 @@ _Imaginary	{keyword(lineno,yytext);return _IMAGINARY;}
 \\[0-7]{1,3} {
         int tmp;
         sscanf(yytext+1, "%o", &tmp);
-        if (tmp > 0xff){
+        if (tmp > 077){
             fprintf(stderr, "%s:%d:Warning:Octal escape sequence %s out of range", filename, lineno, yytext);
             tmp = '\377';
         }
@@ -177,7 +177,7 @@ _Imaginary	{keyword(lineno,yytext);return _IMAGINARY;}
 \\[0-7]{1,3} {
         int tmp;
         sscanf(yytext+1, "%o", &tmp);
-        if (tmp > 0xff){
+        if (tmp > 077){
             fprintf(stderr, "%s:%d:Warning:Octal escape sequence %s out of range\n", filename, lineno, yytext);
             tmp = '\377';
         }
