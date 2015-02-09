@@ -18,7 +18,7 @@ enum number_type{
 	TYPE_SIGNED
 };
 
-typedef union{
+typedef struct{
 	char yychar;
 	char *yystring;
 	unsigned int yystring_size;
