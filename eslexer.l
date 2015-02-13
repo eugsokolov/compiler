@@ -95,7 +95,6 @@ _Imaginary	{keyword(lineno,yytext);return _IMAGINARY;}
 [a-zA-Z][a-zA-Z0-9]*	{
 	yylval.word.yystring=strdup(yytext);
 	yylval.word.yystring_size=strlen(yytext);
-	printf("%s\t %d\t IDENT\t %s\n",filename, lineno, yylval.word.yystring);
 	return IDENT;
 }
 
@@ -107,8 +106,6 @@ _Imaginary	{keyword(lineno,yytext);return _IMAGINARY;}
 	BEGIN(INITIAL); 
 	*tmp_ptr = '\0'; 
 	yylval.word.yychar = tmp_string[0]; 
-	printf("%s\t %d\t CHARLIT\t ",filename, lineno);
-	printchars(tmp_string, tmp_string+1);
 	return CHARLIT;
 	}
 \n 	{fprintf(stderr, "%s:%d:Error:Unterminated string constant\n", filename, lineno);exit(1);}
@@ -158,8 +155,6 @@ _Imaginary	{keyword(lineno,yytext);return _IMAGINARY;}
 	BEGIN(INITIAL); 
 	*tmp_ptr = '\0'; 
 	yylval.word.yystring = tmp_string; 
-	printf("%s\t %d\t STRING\t ",filename, lineno);
-	printchars(tmp_string, tmp_ptr);
 	return STRING;
 	}
 \n 	{fprintf(stderr, "%s:%d:Error:Unterminated string constant\n", filename, lineno);exit(1);}
@@ -208,7 +203,6 @@ _Imaginary	{keyword(lineno,yytext);return _IMAGINARY;}
 	yylval.number.yyint=atoi(yytext);
 	yylval.number.num_type=TYPE_INT;
 	yylval.number.num_sign=TYPE_SIGNED;
-	printf("%s\t %d\t NUMBER\t INTEGER %lld\t INT\n",filename, lineno, yylval.number.yyint);
 	return NUMBER;
 }
 {DIG}"U"	{
@@ -216,7 +210,6 @@ _Imaginary	{keyword(lineno,yytext);return _IMAGINARY;}
 	yylval.number.yyint=atoi(yytext);
 	yylval.number.num_type=TYPE_INT;
 	yylval.number.num_sign=TYPE_UNSIGNED;
-	printf("%s\t %d\t NUMBER\t INTEGER %lld\t UNSIGNED,INT\n",filename, lineno, yylval.number.yyint);
 	return NUMBER;
 }
 
@@ -225,7 +218,6 @@ _Imaginary	{keyword(lineno,yytext);return _IMAGINARY;}
 	yylval.number.yyint=atoi(yytext);
 	yylval.number.num_type=TYPE_LONG;
 	yylval.number.num_sign=TYPE_SIGNED;
-	printf("%s\t %d\t NUMBER\t INTEGER %lld\t LONG\n",filename, lineno, yylval.number.yyint);
 	return NUMBER;
 }
 {DIG}"LL"	{	
@@ -233,7 +225,6 @@ _Imaginary	{keyword(lineno,yytext);return _IMAGINARY;}
 	yylval.number.yyint=atoi(yytext);
 	yylval.number.num_type=TYPE_LONGLONG;
 	yylval.number.num_sign=TYPE_SIGNED;
-	printf("%s\t %d\t NUMBER\t INTEGER %lld\t LONGLONG\n",filename, lineno, yylval.number.yyint);
 	return NUMBER;
 }
 {DIG}"LLU"	{
@@ -241,7 +232,6 @@ _Imaginary	{keyword(lineno,yytext);return _IMAGINARY;}
 	yylval.number.yyint=atoi(yytext);
 	yylval.number.num_type=TYPE_LONGLONG;
 	yylval.number.num_sign=TYPE_UNSIGNED;
-	printf("%s\t %d\t NUMBER\t INTEGER %lld\t UNSIGNED,LONGLONG\n",filename, lineno, yylval.number.yyint);
 	return NUMBER;
 }
 
@@ -249,7 +239,6 @@ _Imaginary	{keyword(lineno,yytext);return _IMAGINARY;}
 	sscanf(yytext, "%llo", &yylval.number.yyint);
 	yylval.number.num_type=TYPE_INT;
 	yylval.number.num_sign=TYPE_SIGNED;
-	printf("%s\t %d\t NUMBER\t INTEGER %lld\t INT\n",filename, lineno, yylval.number.yyint);
 	return NUMBER;
 }
 {OCT}"U"	{
@@ -257,7 +246,6 @@ _Imaginary	{keyword(lineno,yytext);return _IMAGINARY;}
 	sscanf(yytext, "%llo", &yylval.number.yyint);
 	yylval.number.num_type=TYPE_INT;
 	yylval.number.num_sign=TYPE_UNSIGNED;
-	printf("%s\t %d\t NUMBER\t INTEGER %lld\t UNSIGNED,INT\n",filename, lineno, yylval.number.yyint);
 	return NUMBER;
 }
 {OCT}"L"	{
@@ -265,15 +253,13 @@ _Imaginary	{keyword(lineno,yytext);return _IMAGINARY;}
 	sscanf(yytext, "%llo", &yylval.number.yyint);
 	yylval.number.num_type=TYPE_LONG;
 	yylval.number.num_sign=TYPE_SIGNED;
-	printf("%s\t %d\t NUMBER\t INTEGER %lld\t LONG\n",filename, lineno, yylval.number.yyint);
 	return NUMBER;
 }
 {OCT}"LL"	{
 	yytext[yyleng-2] = '\0';
 	sscanf(yytext, "%llo", &yylval.number.yyint);
 	yylval.number.num_type=TYPE_LONGLONG;
-	yylval.number.num_sign=TYPE_UNSIGNED;
-	printf("%s\t %d\t NUMBER\t INTEGER %lld\t LONGLONG\n",filename, lineno, yylval.number.yyint);
+	yylval.number.num_sign=TYPE_SIGNED;
 	return NUMBER;
 }
 {OCT}"LLU"	{
@@ -281,7 +267,6 @@ _Imaginary	{keyword(lineno,yytext);return _IMAGINARY;}
 	sscanf(yytext, "%llo", &yylval.number.yyint);
 	yylval.number.num_type=TYPE_LONGLONG;
 	yylval.number.num_sign=TYPE_UNSIGNED;
-	printf("%s\t %d\t NUMBER\t INTEGER %lld\t UNSIGNED,LONGLONG\n",filename, lineno, yylval.number.yyint);
 	return NUMBER;
 }
 
@@ -289,7 +274,6 @@ _Imaginary	{keyword(lineno,yytext);return _IMAGINARY;}
 	sscanf(yytext, "%llx", &yylval.number.yyint);
 	yylval.number.num_type=TYPE_INT;
 	yylval.number.num_sign=TYPE_SIGNED;
-	printf("%s\t %d\t NUMBER\t INTEGER %lld\t INT\n",filename, lineno, yylval.number.yyint);
 	return NUMBER;
 }
 {HEX}"U"	{
@@ -297,7 +281,6 @@ _Imaginary	{keyword(lineno,yytext);return _IMAGINARY;}
 	sscanf(yytext, "%llx", &yylval.number.yyint);
 	yylval.number.num_type=TYPE_INT;
 	yylval.number.num_sign=TYPE_UNSIGNED;
-	printf("%s\t %d\t NUMBER\t INTEGER %lld\t UNSIGNED,INT\n",filename, lineno, yylval.number.yyint);
 	return NUMBER;
 }
 {HEX}"L"	{
@@ -305,15 +288,13 @@ _Imaginary	{keyword(lineno,yytext);return _IMAGINARY;}
 	sscanf(yytext, "%llx", &yylval.number.yyint);
 	yylval.number.num_type=TYPE_LONG;
 	yylval.number.num_sign=TYPE_SIGNED;
-	printf("%s\t %d\t NUMBER\t INTEGER %lld\t LONG\n",filename, lineno, yylval.number.yyint);
 	return NUMBER;
 }
 {HEX}"LL"	{
 	yytext[yyleng-2] = '\0';
 	sscanf(yytext, "%llx", &yylval.number.yyint);
 	yylval.number.num_type=TYPE_LONGLONG;
-	yylval.number.num_sign=TYPE_UNSIGNED;
-	printf("%s\t %d\t NUMBER\t INTEGER %lld\t LONGLONG\n",filename, lineno, yylval.number.yyint);
+	yylval.number.num_sign=TYPE_SIGNED;
 	return NUMBER;
 }
 {HEX}"LLU"	{
@@ -321,7 +302,6 @@ _Imaginary	{keyword(lineno,yytext);return _IMAGINARY;}
 	sscanf(yytext, "%llx", &yylval.number.yyint);
 	yylval.number.num_type=TYPE_LONGLONG;
 	yylval.number.num_sign=TYPE_UNSIGNED;
-	printf("%s\t %d\t NUMBER\t INTEGER %lld\t UNSIGNED,LONGLONG\n",filename, lineno, yylval.number.yyint);
 	return NUMBER;
 }
 
@@ -329,7 +309,6 @@ _Imaginary	{keyword(lineno,yytext);return _IMAGINARY;}
 	sscanf(yytext, "%Lf", &yylval.number.yydouble);
 	yylval.number.num_type=TYPE_DOUBLE;
 	yylval.number.num_sign=TYPE_SIGNED;
-	printf("%s\t %d\t NUMBER\t REAL\t %Lg\t DOUBLE\n",filename, lineno, yylval.number.yydouble);
 	return NUMBER;
 }
 [0-9]*\.[0-9]*"L"	{
@@ -337,50 +316,19 @@ _Imaginary	{keyword(lineno,yytext);return _IMAGINARY;}
 	sscanf(yytext, "%Lf", &yylval.number.yydouble);
 	yylval.number.num_type=TYPE_LONGDOUBLE;
 	yylval.number.num_sign=TYPE_SIGNED;
-	printf("%s\t %d\t NUMBER\t REAL\t %Lg\t LONGDOUBLE\n",filename, lineno, yylval.number.yydouble);
 	return NUMBER;
 }
 
-{DIG}+{EXP}		{
+({DIG}|{OCT})+{EXP}		{
 	sscanf(yytext, "%Lf", &yylval.number.yydouble);
 	yylval.number.num_type=TYPE_DOUBLE;
 	yylval.number.num_sign=TYPE_SIGNED;
-	printf("%s\t %d\t NUMBER\t REAL\t %Lg\t DOUBLE\n",filename, lineno, yylval.number.yydouble);
 	return NUMBER;
 }
-{OCT}+{EXP}		{
+({DIG}|{OCT}|{HEX})+{MANT}		{
 	sscanf(yytext, "%Lf", &yylval.number.yydouble);
 	yylval.number.num_type=TYPE_DOUBLE;
 	yylval.number.num_sign=TYPE_SIGNED;
-	printf("%s\t %d\t NUMBER\t REAL\t %Lg\t DOUBLE\n",filename, lineno, yylval.number.yydouble);
-	return NUMBER;
-}
-{HEX}+{EXP}		{
-	sscanf(yytext, "%Lf", &yylval.number.yydouble);
-	yylval.number.num_type=TYPE_DOUBLE;
-	yylval.number.num_sign=TYPE_SIGNED;
-	printf("%s\t %d\t NUMBER\t REAL\t %Lg\t DOUBLE\n",filename, lineno, yylval.number.yydouble);
-	return NUMBER;
-}
-{DIG}+{MANT}		{
-	sscanf(yytext, "%Lf", &yylval.number.yydouble);
-	yylval.number.num_type=TYPE_DOUBLE;
-	yylval.number.num_sign=TYPE_SIGNED;
-	printf("%s\t %d\t NUMBER\t REAL\t %Lg\t DOUBLE\n",filename, lineno, yylval.number.yydouble);
-	return NUMBER;
-}
-{OCT}+{MANT}		{
-	sscanf(yytext, "%Lf", &yylval.number.yydouble);
-	yylval.number.num_type=TYPE_DOUBLE;
-	yylval.number.num_sign=TYPE_SIGNED;
-	printf("%s\t %d\t NUMBER\t REAL\t %Lg\t DOUBLE\n",filename, lineno, yylval.number.yydouble);
-	return NUMBER;
-}
-{HEX}+{MANT}		{
-	sscanf(yytext, "%Lf", &yylval.number.yydouble);
-	yylval.number.num_type=TYPE_DOUBLE;
-	yylval.number.num_sign=TYPE_SIGNED;
-	printf("%s\t %d\t NUMBER\t REAL\t %Lg\t DOUBLE\n",filename, lineno, yylval.number.yydouble);
 	return NUMBER;
 }
 
@@ -389,7 +337,6 @@ _Imaginary	{keyword(lineno,yytext);return _IMAGINARY;}
 	sscanf(yytext, "%Lf", &yylval.number.yydouble);
 	yylval.number.num_type=TYPE_FLOAT;
 	yylval.number.num_sign=TYPE_SIGNED;
-	printf("%s\t %d\t NUMBER\t REAL\t %Lg\t FLOAT\n",filename, lineno, yylval.number.yydouble);
 	return NUMBER;
 }
 
@@ -465,11 +412,43 @@ keyword(int lineno, char* yytext){
  	printf("%s\t %d\t %s\n",filename, lineno, yytext);
 }
 
-main(int argc, char *argv[]){
+int main(){
+   int token;
+   while(token=yylex()){
+	switch(token){
+		case IDENT:
+			printf("%s\t %d\t IDENT\t %s\n",filename, lineno, yylval.word.yystring);
+			break;
+		case STRING:
+			printf("%s\t %d\t STRING\t ",filename, lineno);
+			printchars(tmp_string, tmp_ptr);	
+			break;
+		case CHARLIT:
+			printf("%s\t %d\t CHARLIT\t ",filename, lineno);
+			printchars(tmp_string, tmp_string+1);	
+			break;
+		case NUMBER:
+			printf("%s\t %d\t NUMBER\t",filename,lineno);
+			if(yylval.number.num_type==TYPE_INT || yylval.number.num_type==TYPE_LONG)
+				printf("INTEGER\t %lld\t", yylval.number.yyint);
+			else
+				printf("REAL\t %Lg\t", yylval.number.yydouble);
+			if(yylval.number.num_sign==TYPE_UNSIGNED)
+				printf("UNSIGNED,");
+			switch(yylval.number.num_type){
+				case TYPE_INT:	printf("INT\n");break;
+				case TYPE_LONG:	printf("LONG\n");break;
+				case TYPE_LONGLONG: printf("LONGLONG\n");break;
+				case TYPE_LONGDOUBLE: printf("LONGDOUBLE\n");break;
+				case TYPE_DOUBLE: printf("DOUBLE\n");break;
+				case TYPE_FLOAT: printf("FLOAT\n");break;
+				default: printf("error\n");break;
+			}
+			break;
+		default:
+			break;
 
-	while(yylex())
- 	;
+	}
 
-	printf("\nEOF\n");
-	fclose(yyin);
+   }
 }
