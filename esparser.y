@@ -1,14 +1,17 @@
-%option noyywrap
 %{
 //EUGENE SOKOLOV
 //COMPILERS ECE466
-//PARSER ANALYSIS: bison.y
+//PARSER ANALYSIS: parser.y
 
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-int yylex (voic);
+int yylex (void);
+int yyleng;
+int lineno;
+char filename[256];
+FILE *yyin;
 void yyerror (char const*);
 
 %}
@@ -33,8 +36,8 @@ line:
 
 %%
 
-void yyerror(char const *s){
-  fprintf(stderr, "Error: %s\n", s);
+void yyerror(const char *s){
+  fprintf(stderr, "Error: unrecognized syntax %s\n", s);
 }
 
 main(){
