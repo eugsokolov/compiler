@@ -1,0 +1,327 @@
+Grammar
+
+    0 $accept: input $end
+
+    1 input: /* empty */
+    2      | input line
+
+    3 line: '\n'
+    4     | exp '\n'
+    5     | error '\n'
+
+    6 exp: NUM
+    7    | exp '+' exp
+    8    | exp '-' exp
+    9    | exp '*' exp
+   10    | exp '/' exp
+   11    | '-' exp
+   12    | exp '^' exp
+   13    | '(' exp ')'
+
+
+Terminals, with rules where they appear
+
+$end (0) 0
+'\n' (10) 3 4 5
+'(' (40) 13
+')' (41) 13
+'*' (42) 9
+'+' (43) 7
+'-' (45) 8 11
+'/' (47) 10
+'^' (94) 12
+error (256) 5
+NUM (258) 6
+NEG (259)
+
+
+Nonterminals, with rules where they appear
+
+$accept (13)
+    on left: 0
+input (14)
+    on left: 1 2, on right: 0 2
+line (15)
+    on left: 3 4 5, on right: 2
+exp (16)
+    on left: 6 7 8 9 10 11 12 13, on right: 4 7 8 9 10 11 12 13
+
+
+state 0
+
+    0 $accept: . input $end
+
+    $default  reduce using rule 1 (input)
+
+    input  go to state 1
+
+
+state 1
+
+    0 $accept: input . $end
+    2 input: input . line
+
+    $end   shift, and go to state 2
+    error  shift, and go to state 3
+    NUM    shift, and go to state 4
+    '-'    shift, and go to state 5
+    '\n'   shift, and go to state 6
+    '('    shift, and go to state 7
+
+    line  go to state 8
+    exp   go to state 9
+
+
+state 2
+
+    0 $accept: input $end .
+
+    $default  accept
+
+
+state 3
+
+    5 line: error . '\n'
+
+    '\n'  shift, and go to state 10
+
+
+state 4
+
+    6 exp: NUM .
+
+    $default  reduce using rule 6 (exp)
+
+
+state 5
+
+   11 exp: '-' . exp
+
+    NUM  shift, and go to state 4
+    '-'  shift, and go to state 5
+    '('  shift, and go to state 7
+
+    exp  go to state 11
+
+
+state 6
+
+    3 line: '\n' .
+
+    $default  reduce using rule 3 (line)
+
+
+state 7
+
+   13 exp: '(' . exp ')'
+
+    NUM  shift, and go to state 4
+    '-'  shift, and go to state 5
+    '('  shift, and go to state 7
+
+    exp  go to state 12
+
+
+state 8
+
+    2 input: input line .
+
+    $default  reduce using rule 2 (input)
+
+
+state 9
+
+    4 line: exp . '\n'
+    7 exp: exp . '+' exp
+    8    | exp . '-' exp
+    9    | exp . '*' exp
+   10    | exp . '/' exp
+   12    | exp . '^' exp
+
+    '-'   shift, and go to state 13
+    '+'   shift, and go to state 14
+    '*'   shift, and go to state 15
+    '/'   shift, and go to state 16
+    '^'   shift, and go to state 17
+    '\n'  shift, and go to state 18
+
+
+state 10
+
+    5 line: error '\n' .
+
+    $default  reduce using rule 5 (line)
+
+
+state 11
+
+    7 exp: exp . '+' exp
+    8    | exp . '-' exp
+    9    | exp . '*' exp
+   10    | exp . '/' exp
+   11    | '-' exp .
+   12    | exp . '^' exp
+
+    '^'  shift, and go to state 17
+
+    $default  reduce using rule 11 (exp)
+
+
+state 12
+
+    7 exp: exp . '+' exp
+    8    | exp . '-' exp
+    9    | exp . '*' exp
+   10    | exp . '/' exp
+   12    | exp . '^' exp
+   13    | '(' exp . ')'
+
+    '-'  shift, and go to state 13
+    '+'  shift, and go to state 14
+    '*'  shift, and go to state 15
+    '/'  shift, and go to state 16
+    '^'  shift, and go to state 17
+    ')'  shift, and go to state 19
+
+
+state 13
+
+    8 exp: exp '-' . exp
+
+    NUM  shift, and go to state 4
+    '-'  shift, and go to state 5
+    '('  shift, and go to state 7
+
+    exp  go to state 20
+
+
+state 14
+
+    7 exp: exp '+' . exp
+
+    NUM  shift, and go to state 4
+    '-'  shift, and go to state 5
+    '('  shift, and go to state 7
+
+    exp  go to state 21
+
+
+state 15
+
+    9 exp: exp '*' . exp
+
+    NUM  shift, and go to state 4
+    '-'  shift, and go to state 5
+    '('  shift, and go to state 7
+
+    exp  go to state 22
+
+
+state 16
+
+   10 exp: exp '/' . exp
+
+    NUM  shift, and go to state 4
+    '-'  shift, and go to state 5
+    '('  shift, and go to state 7
+
+    exp  go to state 23
+
+
+state 17
+
+   12 exp: exp '^' . exp
+
+    NUM  shift, and go to state 4
+    '-'  shift, and go to state 5
+    '('  shift, and go to state 7
+
+    exp  go to state 24
+
+
+state 18
+
+    4 line: exp '\n' .
+
+    $default  reduce using rule 4 (line)
+
+
+state 19
+
+   13 exp: '(' exp ')' .
+
+    $default  reduce using rule 13 (exp)
+
+
+state 20
+
+    7 exp: exp . '+' exp
+    8    | exp . '-' exp
+    8    | exp '-' exp .
+    9    | exp . '*' exp
+   10    | exp . '/' exp
+   12    | exp . '^' exp
+
+    '*'  shift, and go to state 15
+    '/'  shift, and go to state 16
+    '^'  shift, and go to state 17
+
+    $default  reduce using rule 8 (exp)
+
+
+state 21
+
+    7 exp: exp . '+' exp
+    7    | exp '+' exp .
+    8    | exp . '-' exp
+    9    | exp . '*' exp
+   10    | exp . '/' exp
+   12    | exp . '^' exp
+
+    '*'  shift, and go to state 15
+    '/'  shift, and go to state 16
+    '^'  shift, and go to state 17
+
+    $default  reduce using rule 7 (exp)
+
+
+state 22
+
+    7 exp: exp . '+' exp
+    8    | exp . '-' exp
+    9    | exp . '*' exp
+    9    | exp '*' exp .
+   10    | exp . '/' exp
+   12    | exp . '^' exp
+
+    '^'  shift, and go to state 17
+
+    $default  reduce using rule 9 (exp)
+
+
+state 23
+
+    7 exp: exp . '+' exp
+    8    | exp . '-' exp
+    9    | exp . '*' exp
+   10    | exp . '/' exp
+   10    | exp '/' exp .
+   12    | exp . '^' exp
+
+    '^'  shift, and go to state 17
+
+    $default  reduce using rule 10 (exp)
+
+
+state 24
+
+    7 exp: exp . '+' exp
+    8    | exp . '-' exp
+    9    | exp . '*' exp
+   10    | exp . '/' exp
+   12    | exp . '^' exp
+   12    | exp '^' exp .
+
+    '^'  shift, and go to state 17
+
+    $default  reduce using rule 12 (exp)
