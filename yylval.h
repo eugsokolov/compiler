@@ -18,6 +18,7 @@ enum number_type{
 	TYPE_SIGNED
 };
 
+/*
 typedef union{
 
 	struct word{
@@ -34,6 +35,7 @@ typedef union{
 	}number;
 
 } YYSTYPE;
+*/
 
 #define MAX_STRING_LENGTH 4096
 extern YYSTYPE yylval;

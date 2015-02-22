@@ -37,15 +37,122 @@
    /* Put the tokens into the symbol table, so that GDB and other debuggers
       know about them.  */
    enum yytokentype {
-     NUM = 258,
-     NEG = 259
+     IDENT = 258,
+     CHARLIT = 259,
+     STRING = 260,
+     NUMBER = 261,
+     TIMESEQ = 262,
+     DIVEQ = 263,
+     MODEQ = 264,
+     SHLEQ = 265,
+     SHREQ = 266,
+     ANDEQ = 267,
+     OREQ = 268,
+     XOREQ = 269,
+     PLUSEQ = 270,
+     MINUSEQ = 271,
+     INDSEL = 272,
+     PLUSPLUS = 273,
+     MINUSMINUS = 274,
+     SHL = 275,
+     SHR = 276,
+     LTEQ = 277,
+     GTEQ = 278,
+     EQEQ = 279,
+     NOTEQ = 280,
+     LOGAND = 281,
+     LOGOR = 282,
+     PREINC = 283,
+     POSTINC = 284,
+     PREDEC = 285,
+     POSTDEC = 286,
+     AUTO = 287,
+     BREAK = 288,
+     CASE = 289,
+     CHAR = 290,
+     CONST = 291,
+     ELLIPSIS = 292,
+     CONTINUE = 293,
+     DEFAULT = 294,
+     DO = 295,
+     DOUBLE = 296,
+     ELSE = 297,
+     ENUM = 298,
+     EXTERN = 299,
+     FLOAT = 300,
+     FOR = 301,
+     GOTO = 302,
+     IF = 303,
+     INLINE = 304,
+     INT = 305,
+     LONG = 306,
+     REGISTER = 307,
+     RESTRICT = 308,
+     RETURN = 309,
+     SHORT = 310,
+     SIGNED = 311,
+     SIZEOF = 312,
+     STATIC = 313,
+     STRUCT = 314,
+     SWITCH = 315,
+     TYPEDEF = 316,
+     TYPEDEF_NAME = 317,
+     UNION = 318,
+     UNSIGNED = 319,
+     VOID = 320,
+     VOLATILE = 321,
+     WHILE = 322,
+     _BOOL = 323,
+     _COMPLEX = 324,
+     _IMAGINARY = 325,
+     NEG = 326
    };
 #endif
 
 
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef int YYSTYPE;
+typedef union YYSTYPE
+{
+
+/* Line 2068 of yacc.c  */
+#line 27 "esparser.y"
+
+
+//char *yystring;
+//int yyint;
+//char yychar;
+
+enum number_type{
+        TYPE_INT,
+        TYPE_LONG,
+        TYPE_LONGLONG,
+        TYPE_FLOAT,
+        TYPE_DOUBLE,
+        TYPE_LONGDOUBLE,
+        TYPE_UNSIGNED,
+        TYPE_SIGNED
+};
+
+        struct word{
+                unsigned int yystring_size;
+                char yychar;
+                char *yystring;
+        }word;
+
+        struct number{
+                enum number_type num_type;
+                enum number_type num_sign;
+                unsigned long long int yyint;
+                long double yydouble;
+        }number;
+
+
+
+
+/* Line 2068 of yacc.c  */
+#line 155 "esparser.tab.h"
+} YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1

@@ -4,13 +4,17 @@
 //COMPILERS ECE466
 //LEXICAL ANALYSIS: lex.l
 
-#include "tokens-manual.h"
-#include "yylval.h"
+//#include "tokens-manual.h"
+#include "esparser.tab.h"
+//#include "yylval.h"
+
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-YYSTYPE yylval;
+//YYSTYPE yylval;
+
+#define MAX_STRING_LENGTH 4096
 
 unsigned int lineno = 1;
 unsigned int string_length = 0;
@@ -348,10 +352,9 @@ _Imaginary	{keyword(lineno,yytext);return _IMAGINARY;}
 	.			{}
 }
 
-.			{fprintf(stderr,"Error: undefined token %s\n", yytext);exit(1);}
+.			{fprintf(stderr,"Lexical error: undefined token: %s\n", yytext);exit(1);}
 
 %%
-
 
 printchars(char *str, char *end){
 	while (str != end){

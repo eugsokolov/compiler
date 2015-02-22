@@ -12,35 +12,70 @@
 int debug = 0;
 
 extern int yylex();
+extern int yyparse();
 int yyleng;
 int lineno;
 char filename[256];
 FILE *yyin;
-void yyerror (char const*);
-
-struct sym_table *curr_scope;
+void yyerror (const char *s);
 
 %}
 
-%token NUM
+%union{
+
+//char *yystring;
+//int yyint;
+//char yychar;
+
+enum number_type{
+        TYPE_INT,
+        TYPE_LONG,
+        TYPE_LONGLONG,
+        TYPE_FLOAT,
+        TYPE_DOUBLE,
+        TYPE_LONGDOUBLE,
+        TYPE_UNSIGNED,
+        TYPE_SIGNED
+};
+
+        struct word{
+                unsigned int yystring_size;
+                char yychar;
+                char *yystring;
+        }word;
+
+        struct number{
+                enum number_type num_type;
+                enum number_type num_sign;
+                unsigned long long int yyint;
+                long double yydouble;
+        }number;
+
+}
+
+
+%token <word.yystring> IDENT CHARLIT STRING
+%token <number.yyint> NUMBER TIMESEQ DIVEQ MODEQ SHLEQ SHREQ ANDEQ OREQ XOREQ PLUSEQ MINUSEQ
+%token <number.yyint> INDSEL PLUSPLUS MINUSMINUS SHL SHR LTEQ GTEQ EQEQ NOTEQ LOGAND LOGOR
+%token <number.yyint> PREINC POSTINC PREDEC POSTDEC
+%token <str> AUTO BREAK CASE CHAR CONST ELLIPSIS CONTINUE DEFAULT DO DOUBLE ELSE ENUM EXTERN FLOAT FOR GOTO IF INLINE INT LONG REGISTER RESTRICT RETURN SHORT SIGNED SIZEOF STATIC STRUCT SWITCH TYPEDEF TYPEDEF_NAME UNION UNSIGNED VOID VOLATILE WHILE _BOOL _COMPLEX _IMAGINARY
 %left '-' '+'
 %left '*' '/'
 %left NEG     /* negation--unary minus */
 %right '^'    /* exponentiation        */
 
+%type <number.yyint> exp
+%type <number.yyint> explist
+
+%start explist
 
 %%
 
-input:    /* empty string */
-        | input line
-;
+explist:  exp  { printf ("exp: %d\n", $1); }
+	| explist '\n' exp {printf("exp: %d\n", $1);}
 
-line:     '\n'
-        | exp '\n'  { printf ("\t%.10g\n", $1); }
-	| error '\n' {yyerrok;}
-;
 
-exp:      NUM                { $$ = $1;         }
+exp:      NUMBER                { $$ = $1;         }
         | exp '+' exp        { $$ = $1 + $3;    }
         | exp '-' exp        { $$ = $1 - $3;    }
         | exp '*' exp        { $$ = $1 * $3;    }
@@ -53,15 +88,14 @@ exp:      NUM                { $$ = $1;         }
 %%
 
 void yyerror(const char *s){
-	fprintf(stderr, "Error: unrecognized syntax:: %s\n", s);
+	fprintf(stderr, "Parse Error: unrecognized syntax:: %s\n", s);
 }
 
 main(){
 
-	char *in;
-	int c;
+	printf("parsing..\n");
 
-	
+//	yyin = stdin;	
 	
  
 	yyparse();
