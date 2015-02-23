@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include "esparser.tab.h"
 #include "hash.h"
 #include "sym_table.h"
 
@@ -23,21 +24,6 @@ void yyerror (const char *s);
 
 %union{
 
-//char *yystring;
-//int yyint;
-//char yychar;
-
-enum number_type{
-        TYPE_INT,
-        TYPE_LONG,
-        TYPE_LONGLONG,
-        TYPE_FLOAT,
-        TYPE_DOUBLE,
-        TYPE_LONGDOUBLE,
-        TYPE_UNSIGNED,
-        TYPE_SIGNED
-};
-
         struct word{
                 unsigned int yystring_size;
                 char yychar;
@@ -50,33 +36,33 @@ enum number_type{
                 unsigned long long int yyint;
                 long double yydouble;
         }number;
-
 }
 
 
 %token <word.yystring> IDENT CHARLIT STRING
 %token <number.yyint> NUMBER TIMESEQ DIVEQ MODEQ SHLEQ SHREQ ANDEQ OREQ XOREQ PLUSEQ MINUSEQ
 %token <number.yyint> INDSEL PLUSPLUS MINUSMINUS SHL SHR LTEQ GTEQ EQEQ NOTEQ LOGAND LOGOR
-%token <number.yyint> PREINC POSTINC PREDEC POSTDEC
 %token <str> AUTO BREAK CASE CHAR CONST ELLIPSIS CONTINUE DEFAULT DO DOUBLE ELSE ENUM EXTERN FLOAT FOR GOTO IF INLINE INT LONG REGISTER RESTRICT RETURN SHORT SIGNED SIZEOF STATIC STRUCT SWITCH TYPEDEF TYPEDEF_NAME UNION UNSIGNED VOID VOLATILE WHILE _BOOL _COMPLEX _IMAGINARY
+
 %left '-' '+'
 %left '*' '/'
 %left NEG     /* negation--unary minus */
 %right '^'    /* exponentiation        */
 
 %type <number.yyint> exp
-%type <number.yyint> explist
 
-%start explist
-
+%start calculation
 %%
 
-explist:  exp  { printf ("exp: %d\n", $1); }
-	| explist '\n' exp {printf("exp: %d\n", $1);}
-
+calculation:
+	| calculation line
+;
+line: '\n'
+	| exp '\n' { printf("\tResult: %i\n", $1); }
+;
 
 exp:      NUMBER                { $$ = $1;         }
-        | exp '+' exp        { $$ = $1 + $3;    }
+        | exp '+' exp        { $$ = $1 + $3;  }
         | exp '-' exp        { $$ = $1 - $3;    }
         | exp '*' exp        { $$ = $1 * $3;    }
         | exp '/' exp        { $$ = $1 / $3;    }

@@ -5,16 +5,13 @@
 //LEXICAL ANALYSIS: lex.l
 
 //#include "tokens-manual.h"
-#include "esparser.tab.h"
 //#include "yylval.h"
-
+#include "esparser.tab.h"
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 //YYSTYPE yylval;
-
-#define MAX_STRING_LENGTH 4096
 
 unsigned int lineno = 1;
 unsigned int string_length = 0;
@@ -93,8 +90,32 @@ _Imaginary	{keyword(lineno,yytext);return _IMAGINARY;}
 ">>="		{printf("%s\t %d\t SHREQ\n",filename, lineno);return SHREQ;}
 ">>"		{printf("%s\t %d\t SHR\n",filename, lineno);return SHR;}
 "=="		{printf("%s\t %d\t EQEQ\n",filename, lineno);return EQEQ;}
-"["|"]"|"{"|"}"|"("|")"|"."|"+"|"-"|"&"|"*"|"~"|"!"|"/"|"%"|"<"|">"|"^"|"|"|"?"|":"|";"|","|"=" 	{printf("%s\t %d\t %s\n",filename, lineno, yytext);}
-[\n]		{lineno++;}
+"+"		{return '+';}
+"-"		{return '-';}
+"*"		{return '*';}
+"("		{return '(';}
+")"		{return ')';}
+"["		{return '[';}
+"]"		{return ']';}
+"{"		{return '{';}
+"}"		{return '}';}
+"|"		{return '|';}
+"."		{return '.';}
+"&"		{return '&';}
+"~"		{return '~';}
+"/"		{return '/';}
+"!"		{return '!';}
+"%"		{return '%';}
+"<"		{return '<';}
+">"		{return '>';}
+"^"		{return '^';}
+"?"		{return '?';}
+":"		{return ':';}
+";"		{return ';';}
+","		{return ',';}
+"="		{return '=';}
+
+[\n]		{lineno++; return '\n';}
 
 [a-zA-Z][a-zA-Z0-9]*	{
 	yylval.word.yystring=strdup(yytext);

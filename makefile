@@ -9,7 +9,7 @@ lex.yy.o: eslex.l tokens-manual.h yylval.h
 	gcc -c lex.yy.c
 
 esparser.tab.o: esparser.y tokens-manual.h
-	bison -vd esparser.y
+	bison -v esparser.y
 	gcc -c esparser.tab.c
 
 clean: rm *.o parser.tab.* lex.yy.* parser.output

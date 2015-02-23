@@ -30,6 +30,17 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
+enum number_type{
+        TYPE_INT,
+        TYPE_LONG,
+        TYPE_LONGLONG,
+        TYPE_FLOAT,
+        TYPE_DOUBLE,
+        TYPE_LONGDOUBLE,
+        TYPE_UNSIGNED,
+        TYPE_SIGNED
+};
+#define MAX_STRING_LENGTH 4096
 
 /* Tokens.  */
 #ifndef YYTOKENTYPE
@@ -116,23 +127,8 @@ typedef union YYSTYPE
 {
 
 /* Line 2068 of yacc.c  */
-#line 27 "esparser.y"
+#line 35 "esparser.y"
 
-
-//char *yystring;
-//int yyint;
-//char yychar;
-
-enum number_type{
-        TYPE_INT,
-        TYPE_LONG,
-        TYPE_LONGLONG,
-        TYPE_FLOAT,
-        TYPE_DOUBLE,
-        TYPE_LONGDOUBLE,
-        TYPE_UNSIGNED,
-        TYPE_SIGNED
-};
 
         struct word{
                 unsigned int yystring_size;
@@ -149,14 +145,14 @@ enum number_type{
 
 
 
-
 /* Line 2068 of yacc.c  */
-#line 155 "esparser.tab.h"
+#line 139 "esparser.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 #endif
+
 
 extern YYSTYPE yylval;
 
