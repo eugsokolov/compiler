@@ -22,7 +22,7 @@ struct sym_table{
 	struct hashTable *symbols[4];
 	//int scope;	
 	int line_begin;
-	char filename[256];
+	char *filename;
 	struct sym_table *prev;
 	enum scope_type scope_type;
 } sym_table;

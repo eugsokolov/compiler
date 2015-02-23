@@ -17,7 +17,7 @@ struct sym_table *new(enum scope_type st, int line_begin, char *filename, struct
 	table->line_begin = line_begin;
 	table->filename = strdup(filename);
 	table->prev = prev;
-	table->symbols = hashTable_new();
+	table->symbols = hashTable_new(4);
 	return table;
 }
 
@@ -30,25 +30,24 @@ struct sym_table *pop(struct sym_table *table){
 
 int push(struct sym_table *table, char *symbol, void *ptr){
 
-	struct sym_table st = table;
+	struct sym_table *st = table;
 	while(st != NULL){
-		if(st->symbols->hashTable_contains(st->symbols, symbol))
+		if(st->symbols->hashTable_contains(st->symbols, symbol) == TRUE)
 			return FALSE;
-
 	}
-	st->symbols->push(st-symbols, symbol, ptr);
+	st->symbols->push(st->symbols, symbol, ptr);
 	return TRUE;
 
 }
 
 void *get_symbol(struct sym_table *table, char *symbol){
 
-	struct sym_table st = table;
+	struct sym_table *st = table;
 	void *ptr = NULL;
 	int b = FALSE;
 	
 	while(st != NULL){
-		ptr = st->symbols->hashTable_getPointer(table, symbol, &b);
+		ptr = st->symbols->hashTable_getPointer(table, symbol, b);
 		if(b == TRUE) return ptr;
 		else st = st->prev;
 	}
