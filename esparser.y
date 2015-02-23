@@ -44,6 +44,10 @@ void yyerror (const char *s);
 %token <number.yyint> INDSEL PLUSPLUS MINUSMINUS SHL SHR LTEQ GTEQ EQEQ NOTEQ LOGAND LOGOR
 %token <str> AUTO BREAK CASE CHAR CONST ELLIPSIS CONTINUE DEFAULT DO DOUBLE ELSE ENUM EXTERN FLOAT FOR GOTO IF INLINE INT LONG REGISTER RESTRICT RETURN SHORT SIGNED SIZEOF STATIC STRUCT SWITCH TYPEDEF TYPEDEF_NAME UNION UNSIGNED VOID VOLATILE WHILE _BOOL _COMPLEX _IMAGINARY
 
+%type <node> init_declarator declarator initializer
+
+
+
 %left '-' '+'
 %left '*' '/'
 %left NEG     /* negation--unary minus */
@@ -52,7 +56,23 @@ void yyerror (const char *s);
 %type <number.yyint> exp
 
 %start calculation
+
 %%
+
+init_declarator: declarator {$$ = $1;}
+	| declarator '=' initializer {$$ = $1;}
+	;
+
+initializer: assignment_expression
+	| 
+	;
+
+ident_list : IDENT
+	| ident_list ',' IDENT
+	;
+
+
+
 
 calculation:
 	| calculation line

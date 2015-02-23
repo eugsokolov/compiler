@@ -10,6 +10,10 @@
 #include <string.h>
 #include <errno.h>
 
+#define TRUE 1
+#define FALSE 0
+#define HASH_PRIME 101
+
 struct hashItem{
 	char *key;
 	int isOccupied;
@@ -24,25 +28,25 @@ struct hashTable{
 
 };
 
-struct hashTable *hashTable_new(int size);
+struct hashTable * hashTable_new(int size);
 
-int insert(struct hashTable *table, char *key, void *pv);
+int hashTable_insert(struct hashTable *table, char *key, void *pv);
 
-int contains(struct hashTable *table, char *key);
+int hashTable_contains(struct hashTable *table, char *key);
 
-void * getPointer(struct hashTable *table, char *key, int b);
+void * hashTable_getPointer(struct hashTable *table, char *key, int b);
 
-int setPointer(struct hashTable *table, char *key, void *pv);
+int hashTable_setPointer(struct hashTable *table, char *key, void *pv);
 
-//int remove(struct hashTable *table, char *key);
+int hashTable_remove(struct hashTable *table, char *key);
 
-int hash(struct hashTable *table, char *key);
+int hashTable_hash(struct hashTable *table, char *key);
 
-int findPos(struct hashTable *table, char *key);
+int hashTable_findPos(struct hashTable *table, char *key);
 
 //int rehash(struct hashTable *table);
 
-static unsigned int getPrime(int size);
+static unsigned int hashTable_getPrime(int size);
 
 int hashTable_print(struct hashTable *table);
 

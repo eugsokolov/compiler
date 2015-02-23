@@ -3,11 +3,8 @@
 // hash.c
 
 #include "hash.h"
-#define HASH_PRIME 101
-#define TRUE 1
-#define FALSE 0
 
-struct hashTable *hashTable_new(int size){
+struct hashTable * hashTable_new(int size){
 	
 	struct hashTable *table;
 	if ((table = malloc(sizeof(struct hashTable))) == NULL){
@@ -15,7 +12,7 @@ struct hashTable *hashTable_new(int size){
         	return NULL;
 	}
 	
-	table->capacity = getPrime(size);
+	table->capacity = hashTable_getPrime(size);
 	table->filled = 0;	
 	
 	if ((table->data = calloc(table->capacity, sizeof(struct hashItem))) == NULL){
@@ -32,7 +29,7 @@ struct hashTable *hashTable_new(int size){
 	return table;
 }
 
-int insert(struct hashTable *table, char *key, void *pv){
+int hashTable_insert(struct hashTable *table, char *key, void *pv){
 
 /*
 	if(((double)filled/capacity) > 0.7){
@@ -43,10 +40,10 @@ int insert(struct hashTable *table, char *key, void *pv){
 	}
 */
 
-	if(contains(table, key) == TRUE)
+	if(hashTable_contains(table, key) == TRUE)
 		return TRUE;
 	
-	int i = hash(table, key) % table->capacity;
+	int i = hashTable_hash(table, key) % table->capacity;
 	if (i < 0)
 		i += table->capacity;
 
@@ -67,18 +64,18 @@ int insert(struct hashTable *table, char *key, void *pv){
 	return -1;
 }
 
-int contains(struct hashTable *table, char *key){
+int hashTable_contains(struct hashTable *table, char *key){
 
-	int i = findPos(table, key);
+	int i = hashTable_findPos(table, key);
 	if (i == -1)
 		return -1;
 	
 	return TRUE;
 }
 
-void * getPointer(struct hashTable *table, char *key, int b){
+void * hashTable_getPointer(struct hashTable *table, char *key, int b){
 
-	int i = findPos(table, key);
+	int i = hashTable_hashTable_findPos(table, key);
 	if(i == -1){
 		b = FALSE;
 		return NULL;	
@@ -88,9 +85,9 @@ void * getPointer(struct hashTable *table, char *key, int b){
 	return table->data[i].pv;
 }
 
-int setPointer(struct hashTable *table, char *key, void *pv){
+int hashTable_setPointer(struct hashTable *table, char *key, void *pv){
 
-	int i = findPos(table, key);
+	int i = hashTable_findPos(table, key);
 	if(i == -1)
 		return -1;
 	
@@ -98,19 +95,17 @@ int setPointer(struct hashTable *table, char *key, void *pv){
 	return 0;
 }
 
-/*
-int remove(struct hashTable *table, char *key){
+int hashTable_remove(struct hashTable *table, char *key){
 
-	int i = findPos(table, key);
+	int i = hashTable_findPos(table, key);
 	if(i == -1)
 		return -1;
 	
 	table->data[i].isDeleted = TRUE;
 	return 0;
 }
-*/
 
-int hash(struct hashTable *table, char *key){
+int hashTable_hash(struct hashTable *table, char *key){
 	
 	int h = 0;
 	unsigned int i = 0;
@@ -125,9 +120,9 @@ int hash(struct hashTable *table, char *key){
 	return h;	
 }
 
-int findPos(struct hashTable *table, char *key){
+int hashTable_findPos(struct hashTable *table, char *key){
 
-	int i = hash(table, key) % table->capacity;
+	int i = hashTable_hash(table, key) % table->capacity;
 	while(table->data[i].isOccupied == TRUE){
 		if(table->data[i].key == key && table->data[i].isDeleted == FALSE)
 			return i;
@@ -142,7 +137,7 @@ int rehash(struct hashTable *table){
 }
 */
 
-static unsigned int getPrime(int size){
+static unsigned int hashTable_getPrime(int size){
 	
 	int primeslist[] = {73, 607, 2221, 10103, 60251, 100109, 104729, 100003, 2000009, 122949829, 472882049, 961748941 };
 	int i = 0;
