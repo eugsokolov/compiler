@@ -59,6 +59,8 @@ void yyerror (const char *s);
 
 %%
 
+
+
 init_declarator: declarator {$$ = $1;}
 	| declarator '=' initializer {$$ = $1;}
 	;
