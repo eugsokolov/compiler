@@ -1,3 +1,11 @@
+http://www.csc.villanova.edu/~tway/courses/csc4181/s2012/handouts/Tiny%20Symbol%20Table%20Info.pdf
+http://research.microsoft.com/en-us/um/people/rgal/ar_language/external/compiler.pdf
+http://www.mactech.com/articles/mactech/Vol.16/16.07/UsingFlexandBison/index.html
+
+
+
+
+
 %{
 //EUGENE SOKOLOV
 //COMPILERS ECE466
