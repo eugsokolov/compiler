@@ -20,6 +20,8 @@ char filename[256];
 FILE *yyin;
 void yyerror (const char *s);
 
+struct sym_table *curr;
+
 %}
 
 %union{
@@ -55,28 +57,35 @@ void yyerror (const char *s);
 
 %type <number.yyint> exp
 
-%start calculation
+%start translation_unit
 
 %%
 
-init_declarator: declarator {$$ = $1;}
-	| declarator '=' initializer {$$ = $1;}
+compound_statement: '{' statement_list '}' {
+
+
+	}
 	;
 
-initializer: assignment_expression
+statement_list
+	: statement
+	| statement_list statement
+	;
+
+statement
+	: declaration
 	| 
+
+declaration
+	: INT identifier_list ';'
 	;
 
-ident_list : IDENT
-	| ident_list ',' IDENT
+identifier_list
+	: IDENT {insert_symbol($1); }
+	| identifier_list ',' IDENT {insert_symbol($3); }
 	;
 
 
-
-
-calculation:
-	| calculation line
-;
 line: '\n'
 	| exp '\n' { printf("\tResult: %i\n", $1); }
 ;
@@ -92,6 +101,11 @@ exp:      NUMBER                { $$ = $1;         }
 ;
 
 %%
+
+void insert_symbol(char *s){
+
+
+}
 
 void yyerror(const char *s){
 	fprintf(stderr, "Parse Error: unrecognized syntax:: %s\n", s);
