@@ -1,11 +1,11 @@
+%error-verbose
+%{
+/*
 http://www.csc.villanova.edu/~tway/courses/csc4181/s2012/handouts/Tiny%20Symbol%20Table%20Info.pdf
 http://research.microsoft.com/en-us/um/people/rgal/ar_language/external/compiler.pdf
 http://www.mactech.com/articles/mactech/Vol.16/16.07/UsingFlexandBison/index.html
+*/
 
-
-
-
-%{
 //EUGENE SOKOLOV
 //COMPILERS ECE466
 //PARSER ANALYSIS: parser.y
@@ -33,11 +33,8 @@ struct sym_table *curr;
 
 %union{
 
-        struct word{
-                unsigned int yystring_size;
-                char yychar;
-                char *yystring;
-        }word;
+	char yychar;
+        char *yystring;
 
         struct number{
                 enum number_type num_type;
@@ -48,12 +45,13 @@ struct sym_table *curr;
 }
 
 
-%token <word.yystring> IDENT CHARLIT STRING
-%token <number.yyint> NUMBER TIMESEQ DIVEQ MODEQ SHLEQ SHREQ ANDEQ OREQ XOREQ PLUSEQ MINUSEQ
-%token <number.yyint> INDSEL PLUSPLUS MINUSMINUS SHL SHR LTEQ GTEQ EQEQ NOTEQ LOGAND LOGOR
-%token <str> AUTO BREAK CASE CHAR CONST ELLIPSIS CONTINUE DEFAULT DO DOUBLE ELSE ENUM EXTERN FLOAT FOR GOTO IF INLINE INT LONG REGISTER RESTRICT RETURN SHORT SIGNED SIZEOF STATIC STRUCT SWITCH TYPEDEF TYPEDEF_NAME UNION UNSIGNED VOID VOLATILE WHILE _BOOL _COMPLEX _IMAGINARY
+%token <yychar> CHARLIT
+%token <yystring> IDENT STRING
+%token <number.yyint> NUMBER 
+%token TIMESEQ DIVEQ MODEQ SHLEQ SHREQ ANDEQ OREQ XOREQ PLUSEQ MINUSEQ
+%token INDSEL PLUSPLUS MINUSMINUS SHL SHR LTEQ GTEQ EQEQ NOTEQ LOGAND LOGOR
+%token AUTO BREAK CASE CHAR CONST ELLIPSIS CONTINUE DEFAULT DO DOUBLE ELSE ENUM EXTERN FLOAT FOR GOTO IF INLINE INT LONG REGISTER RESTRICT RETURN SHORT SIGNED SIZEOF STATIC STRUCT SWITCH TYPEDEF TYPEDEF_NAME UNION UNSIGNED VOID VOLATILE WHILE _BOOL _COMPLEX _IMAGINARY
 
-%type <node> init_declarator declarator initializer
 
 
 
@@ -67,6 +65,22 @@ struct sym_table *curr;
 %start translation_unit
 
 %%
+
+translation_unit
+	: top_level_declartaion
+	| translation_unit top_level_declaration
+	;
+
+top_level_declaration
+	: declaration
+	| function_def
+	;
+
+function_def
+	: function_def_specifier compound_statement	
+	;
+
+
 
 compound_statement: '{' statement_list '}' {
 
@@ -93,6 +107,29 @@ identifier_list
 	;
 
 
+
+
+
+
+
+
+
+
+
+
+val
+	: IDENT	{
+		struct symbol *s = curr->symTable_getSymbol(curr, $1);
+		if(s != FALSE)
+			$$=s;
+		else{
+			$$=0;
+			fprintf(stderr, "Error: undefinied identifier %s", $1);
+		}
+	}
+	;
+
+
 line: '\n'
 	| exp '\n' { printf("\tResult: %i\n", $1); }
 ;
@@ -111,7 +148,11 @@ exp:      NUMBER                { $$ = $1;         }
 
 void insert_symbol(char *s){
 
-
+	struct *st = symTable_new(SCOPE , lineno, filename, curr);
+	if(curr->symTable_push(curr, s, st) != FALSE){
+		st = curr->symTable_getSymbol(curr,s);
+		fprintf(stderr, "Error: %s previously defined in %s:%d\n", s, st->filename, st->lineno);
+	}
 }
 
 void yyerror(const char *s){
