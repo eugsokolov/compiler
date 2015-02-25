@@ -5,7 +5,6 @@ http://www.mactech.com/articles/mactech/Vol.16/16.07/UsingFlexandBison/index.htm
 
 
 
-
 %{
 //EUGENE SOKOLOV
 //COMPILERS ECE466
@@ -52,9 +51,10 @@ struct sym_table *curr;
 %token <word.yystring> IDENT CHARLIT STRING
 %token <number.yyint> NUMBER TIMESEQ DIVEQ MODEQ SHLEQ SHREQ ANDEQ OREQ XOREQ PLUSEQ MINUSEQ
 %token <number.yyint> INDSEL PLUSPLUS MINUSMINUS SHL SHR LTEQ GTEQ EQEQ NOTEQ LOGAND LOGOR
-%token <inumber.yyint> AUTO BREAK CASE CHAR CONST ELLIPSIS CONTINUE DEFAULT DO DOUBLE ELSE ENUM EXTERN FLOAT FOR GOTO IF INLINE INT LONG REGISTER RESTRICT RETURN SHORT SIGNED SIZEOF STATIC STRUCT SWITCH TYPEDEF TYPEDEF_NAME UNION UNSIGNED VOID VOLATILE WHILE _BOOL _COMPLEX _IMAGINARY
+%token <str> AUTO BREAK CASE CHAR CONST ELLIPSIS CONTINUE DEFAULT DO DOUBLE ELSE ENUM EXTERN FLOAT FOR GOTO IF INLINE INT LONG REGISTER RESTRICT RETURN SHORT SIGNED SIZEOF STATIC STRUCT SWITCH TYPEDEF TYPEDEF_NAME UNION UNSIGNED VOID VOLATILE WHILE _BOOL _COMPLEX _IMAGINARY
 
-%type <number.yyint> declaration ident_list
+%type <node> init_declarator declarator initializer
+
 
 
 %left '-' '+'
@@ -64,31 +64,38 @@ struct sym_table *curr;
 
 %type <number.yyint> exp
 
-
-%start declaration
+%start translation_unit
 
 %%
 
-declaration: 
-	decltype ident_list ';'	{
+compound_statement: '{' statement_list '}' {
+
 
 	}
 	;
 
-	ident_list : IDENT	{push(curr, $1, ptr);}
-	| ident_list ',' IDENT
+statement_list
+	: statement
+	| statement_list statement
 	;
 
+statement
+	: declaration
+	| 
 
+declaration
+	: INT identifier_list ';'
+	;
 
-decltype
-	: NUMBER {$$ = TYPE_INT; }
-	;	
+identifier_list
+	: IDENT {insert_symbol($1); }
+	| identifier_list ',' IDENT {insert_symbol($3); }
+	;
 
 
 line: '\n'
 	| exp '\n' { printf("\tResult: %i\n", $1); }
-	;
+;
 
 exp:      NUMBER                { $$ = $1;         }
         | exp '+' exp        { $$ = $1 + $3;  }
@@ -98,9 +105,14 @@ exp:      NUMBER                { $$ = $1;         }
         | '-' exp  %prec NEG { $$ = -$2;        }
         | exp '^' exp        { $$ = pow ($1, $3); }
         | '(' exp ')'        { $$ = $2;         }
-	;
+;
 
 %%
+
+void insert_symbol(char *s){
+
+
+}
 
 void yyerror(const char *s){
 	fprintf(stderr, "Parse Error: unrecognized syntax:: %s\n", s);
@@ -116,3 +128,4 @@ main(){
 	yyparse();
 	printf("EOF\n");
 }
+
