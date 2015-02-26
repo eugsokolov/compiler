@@ -29,7 +29,7 @@
    
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
-
+#define MAX_STRING_LENGTH 4096
 enum number_type{
         TYPE_INT,
         TYPE_LONG,
@@ -40,7 +40,7 @@ enum number_type{
         TYPE_UNSIGNED,
         TYPE_SIGNED
 };
-#define MAX_STRING_LENGTH 4096
+
 
 /* Tokens.  */
 #ifndef YYTOKENTYPE
@@ -48,75 +48,70 @@ enum number_type{
    /* Put the tokens into the symbol table, so that GDB and other debuggers
       know about them.  */
    enum yytokentype {
-     IDENT = 258,
-     CHARLIT = 259,
+     CHARLIT = 258,
+     IDENT = 259,
      STRING = 260,
      NUMBER = 261,
-     TIMESEQ = 262,
-     DIVEQ = 263,
-     MODEQ = 264,
-     SHLEQ = 265,
-     SHREQ = 266,
-     ANDEQ = 267,
-     OREQ = 268,
-     XOREQ = 269,
-     PLUSEQ = 270,
-     MINUSEQ = 271,
-     INDSEL = 272,
-     PLUSPLUS = 273,
-     MINUSMINUS = 274,
-     SHL = 275,
-     SHR = 276,
-     LTEQ = 277,
-     GTEQ = 278,
-     EQEQ = 279,
-     NOTEQ = 280,
-     LOGAND = 281,
-     LOGOR = 282,
-     PREINC = 283,
-     POSTINC = 284,
-     PREDEC = 285,
-     POSTDEC = 286,
-     AUTO = 287,
-     BREAK = 288,
-     CASE = 289,
-     CHAR = 290,
-     CONST = 291,
-     ELLIPSIS = 292,
-     CONTINUE = 293,
-     DEFAULT = 294,
-     DO = 295,
-     DOUBLE = 296,
-     ELSE = 297,
-     ENUM = 298,
-     EXTERN = 299,
-     FLOAT = 300,
-     FOR = 301,
-     GOTO = 302,
-     IF = 303,
-     INLINE = 304,
-     INT = 305,
-     LONG = 306,
-     REGISTER = 307,
-     RESTRICT = 308,
-     RETURN = 309,
-     SHORT = 310,
-     SIGNED = 311,
-     SIZEOF = 312,
-     STATIC = 313,
-     STRUCT = 314,
-     SWITCH = 315,
-     TYPEDEF = 316,
-     TYPEDEF_NAME = 317,
-     UNION = 318,
-     UNSIGNED = 319,
-     VOID = 320,
-     VOLATILE = 321,
-     WHILE = 322,
-     _BOOL = 323,
-     _COMPLEX = 324,
-     _IMAGINARY = 325,
-     NEG = 326
+     INDSEL = 262,
+     PLUSPLUS = 263,
+     MINUSMINUS = 264,
+     SHL = 265,
+     SHR = 266,
+     LTEQ = 267,
+     GTEQ = 268,
+     EQEQ = 269,
+     NOTEQ = 270,
+     LOGAND = 271,
+     LOGOR = 272,
+     ELLIPSIS = 273,
+     TIMESEQ = 274,
+     DIVEQ = 275,
+     MODEQ = 276,
+     PLUSEQ = 277,
+     MINUSEQ = 278,
+     SHLEQ = 279,
+     SHREQ = 280,
+     ANDEQ = 281,
+     OREQ = 282,
+     XOREQ = 283,
+     AUTO = 284,
+     BREAK = 285,
+     CASE = 286,
+     CHAR = 287,
+     CONST = 288,
+     CONTINUE = 289,
+     DEFAULT = 290,
+     DO = 291,
+     DOUBLE = 292,
+     ELSE = 293,
+     ENUM = 294,
+     EXTERN = 295,
+     FLOAT = 296,
+     FOR = 297,
+     GOTO = 298,
+     IF = 299,
+     INLINE = 300,
+     INT = 301,
+     LONG = 302,
+     REGISTER = 303,
+     RESTRICT = 304,
+     RETURN = 305,
+     SHORT = 306,
+     SIGNED = 307,
+     SIZEOF = 308,
+     STATIC = 309,
+     STRUCT = 310,
+     SWITCH = 311,
+     TYPEDEF = 312,
+     TYPEDEF_NAME = 313,
+     UNION = 314,
+     UNSIGNED = 315,
+     VOID = 316,
+     VOLATILE = 317,
+     WHILE = 318,
+     _BOOL = 319,
+     _COMPLEX = 320,
+     _IMAGINARY = 321
    };
 #endif
 
@@ -127,14 +122,11 @@ typedef union YYSTYPE
 {
 
 /* Line 2068 of yacc.c  */
-#line 35 "esparser.y"
+#line 34 "esparser.y"
 
 
-        struct word{
-                unsigned int yystring_size;
-                char yychar;
-                char *yystring;
-        }word;
+	char yychar;
+        char *yystring;
 
         struct number{
                 enum number_type num_type;
@@ -142,17 +134,18 @@ typedef union YYSTYPE
                 unsigned long long int yyint;
                 long double yydouble;
         }number;
+	
+struct symbol *lval;
 
 
 
 /* Line 2068 of yacc.c  */
-#line 139 "esparser.tab.h"
+#line 133 "esparser.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 #endif
-
 
 extern YYSTYPE yylval;
 

@@ -739,7 +739,11 @@ char filename[MAX_STRING_LENGTH];
 char *tmp_ptr;
 char tmp_string[MAX_STRING_LENGTH];
 
-#line 743 "lex.yy.c"
+void keyword(int lineno, char* yytext);
+void printchars(char *str, char *end);
+
+
+#line 747 "lex.yy.c"
 
 #define INITIAL 0
 #define IN_CHAR 1
@@ -929,10 +933,10 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 31 "eslex.l"
+#line 35 "eslex.l"
 
 
-#line 936 "lex.yy.c"
+#line 940 "lex.yy.c"
 
 	if ( !(yy_init) )
 		{
@@ -1017,519 +1021,519 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 33 "eslex.l"
+#line 37 "eslex.l"
 {keyword(lineno,yytext);return AUTO;}
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 34 "eslex.l"
+#line 38 "eslex.l"
 {keyword(lineno,yytext);return BREAK;}
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 35 "eslex.l"
+#line 39 "eslex.l"
 {keyword(lineno,yytext);return CASE;}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 36 "eslex.l"
+#line 40 "eslex.l"
 {keyword(lineno,yytext);return CHAR;}
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 37 "eslex.l"
+#line 41 "eslex.l"
 {keyword(lineno,yytext);return CONST;}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 38 "eslex.l"
+#line 42 "eslex.l"
 {keyword(lineno,yytext);return CONTINUE;}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 39 "eslex.l"
+#line 43 "eslex.l"
 {keyword(lineno,yytext);return DEFAULT;}
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 40 "eslex.l"
+#line 44 "eslex.l"
 {keyword(lineno,yytext);return DO;}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 41 "eslex.l"
+#line 45 "eslex.l"
 {keyword(lineno,yytext);return DOUBLE;}
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 42 "eslex.l"
+#line 46 "eslex.l"
 {keyword(lineno,yytext);return ELSE;}
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 43 "eslex.l"
+#line 47 "eslex.l"
 {keyword(lineno,yytext);return ENUM;}
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 44 "eslex.l"
+#line 48 "eslex.l"
 {keyword(lineno,yytext);return EXTERN;}
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 45 "eslex.l"
+#line 49 "eslex.l"
 {keyword(lineno,yytext);return FLOAT;}
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 46 "eslex.l"
+#line 50 "eslex.l"
 {keyword(lineno,yytext);return FOR;}
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 47 "eslex.l"
+#line 51 "eslex.l"
 {keyword(lineno,yytext);return GOTO;}
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 48 "eslex.l"
+#line 52 "eslex.l"
 {keyword(lineno,yytext);return IF;}
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 49 "eslex.l"
+#line 53 "eslex.l"
 {keyword(lineno,yytext);return INLINE;}
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 50 "eslex.l"
+#line 54 "eslex.l"
 {keyword(lineno,yytext);return INT;}
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 51 "eslex.l"
+#line 55 "eslex.l"
 {keyword(lineno,yytext);return LONG;}
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 52 "eslex.l"
+#line 56 "eslex.l"
 {keyword(lineno,yytext);return REGISTER;}
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 53 "eslex.l"
+#line 57 "eslex.l"
 {keyword(lineno,yytext);return RESTRICT;}
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 54 "eslex.l"
+#line 58 "eslex.l"
 {keyword(lineno,yytext);return RETURN;}
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 55 "eslex.l"
+#line 59 "eslex.l"
 {keyword(lineno,yytext);return SHORT;}
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 56 "eslex.l"
+#line 60 "eslex.l"
 {keyword(lineno,yytext);return SIGNED;}
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 57 "eslex.l"
+#line 61 "eslex.l"
 {keyword(lineno,yytext);return SIZEOF;}
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 58 "eslex.l"
+#line 62 "eslex.l"
 {keyword(lineno,yytext);return STATIC;}
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 59 "eslex.l"
+#line 63 "eslex.l"
 {keyword(lineno,yytext);return STRUCT;}
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 60 "eslex.l"
+#line 64 "eslex.l"
 {keyword(lineno,yytext);return SWITCH;}
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 61 "eslex.l"
+#line 65 "eslex.l"
 {keyword(lineno,yytext);return TYPEDEF;}
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 62 "eslex.l"
+#line 66 "eslex.l"
 {keyword(lineno,yytext);return UNION;}
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 63 "eslex.l"
+#line 67 "eslex.l"
 {keyword(lineno,yytext);return UNSIGNED;}
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 64 "eslex.l"
+#line 68 "eslex.l"
 {keyword(lineno,yytext);return VOID;}
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 65 "eslex.l"
+#line 69 "eslex.l"
 {keyword(lineno,yytext);return VOLATILE;}
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 66 "eslex.l"
+#line 70 "eslex.l"
 {keyword(lineno,yytext);return WHILE;}
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 67 "eslex.l"
+#line 71 "eslex.l"
 {keyword(lineno,yytext);return _BOOL;}
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 68 "eslex.l"
+#line 72 "eslex.l"
 {keyword(lineno,yytext);return _COMPLEX;}
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 69 "eslex.l"
+#line 73 "eslex.l"
 {keyword(lineno,yytext);return _IMAGINARY;}
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 71 "eslex.l"
+#line 75 "eslex.l"
 {printf("%s\t %d\t PLUSPLUS\n",filename,lineno);return PLUSPLUS;}
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 72 "eslex.l"
+#line 76 "eslex.l"
 {printf("%s\t %d\t MINUSMINUS\n",filename,lineno);return MINUSMINUS;}
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 73 "eslex.l"
+#line 77 "eslex.l"
 {printf("%s\t %d\t ELLIPSIS\n",filename, lineno);return ELLIPSIS;}
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 74 "eslex.l"
+#line 78 "eslex.l"
 {printf("%s\t %d\t NOTEQ\n",filename, lineno);return NOTEQ;}
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 75 "eslex.l"
+#line 79 "eslex.l"
 {printf("%s\t %d\t PLUSEQ\n",filename, lineno);return PLUSEQ;}
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 76 "eslex.l"
+#line 80 "eslex.l"
 {printf("%s\t %d\t MINUSEQ\n",filename, lineno);return MINUSEQ;}
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 77 "eslex.l"
+#line 81 "eslex.l"
 {printf("%s\t %d\t DIVEQ\n",filename, lineno);return DIVEQ;}
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 78 "eslex.l"
+#line 82 "eslex.l"
 {printf("%s\t %d\t TIMESEQ\n",filename, lineno);return TIMESEQ;}
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 79 "eslex.l"
+#line 83 "eslex.l"
 {printf("%s\t %d\t XOREQ\n",filename, lineno);return XOREQ;}
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 80 "eslex.l"
+#line 84 "eslex.l"
 {printf("%s\t %d\t OREQ\n",filename, lineno);return OREQ;}
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 81 "eslex.l"
+#line 85 "eslex.l"
 {printf("%s\t %d\t ANDEQ\n",filename, lineno);return ANDEQ;}
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 82 "eslex.l"
+#line 86 "eslex.l"
 {printf("%s\t %d\t MODEQ\n",filename, lineno);return MODEQ;}
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 83 "eslex.l"
+#line 87 "eslex.l"
 {printf("%s\t %d\t INDSEL\n",filename, lineno);return INDSEL;}
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 84 "eslex.l"
+#line 88 "eslex.l"
 {printf("%s\t %d\t LOGAND\n",filename, lineno);return LOGAND;}
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 85 "eslex.l"
+#line 89 "eslex.l"
 {printf("%s\t %d\t LOGOR\n",filename, lineno);return LOGOR;}
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 86 "eslex.l"
+#line 90 "eslex.l"
 {printf("%s\t %d\t LTEQ\n",filename, lineno);return LTEQ;}
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 87 "eslex.l"
+#line 91 "eslex.l"
 {printf("%s\t %d\t GTEQ\n",filename, lineno);return GTEQ;}
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 88 "eslex.l"
+#line 92 "eslex.l"
 {printf("%s\t %d\t SHLEQ\n",filename, lineno);return SHLEQ;}
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 89 "eslex.l"
+#line 93 "eslex.l"
 {printf("%s\t %d\t SHL\n",filename, lineno);return SHL;}
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
-#line 90 "eslex.l"
+#line 94 "eslex.l"
 {printf("%s\t %d\t SHREQ\n",filename, lineno);return SHREQ;}
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
-#line 91 "eslex.l"
+#line 95 "eslex.l"
 {printf("%s\t %d\t SHR\n",filename, lineno);return SHR;}
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
-#line 92 "eslex.l"
+#line 96 "eslex.l"
 {printf("%s\t %d\t EQEQ\n",filename, lineno);return EQEQ;}
 	YY_BREAK
 case 60:
 YY_RULE_SETUP
-#line 93 "eslex.l"
+#line 97 "eslex.l"
 {return '+';}
 	YY_BREAK
 case 61:
 YY_RULE_SETUP
-#line 94 "eslex.l"
+#line 98 "eslex.l"
 {return '-';}
 	YY_BREAK
 case 62:
 YY_RULE_SETUP
-#line 95 "eslex.l"
+#line 99 "eslex.l"
 {return '*';}
 	YY_BREAK
 case 63:
 YY_RULE_SETUP
-#line 96 "eslex.l"
+#line 100 "eslex.l"
 {return '(';}
 	YY_BREAK
 case 64:
 YY_RULE_SETUP
-#line 97 "eslex.l"
+#line 101 "eslex.l"
 {return ')';}
 	YY_BREAK
 case 65:
 YY_RULE_SETUP
-#line 98 "eslex.l"
+#line 102 "eslex.l"
 {return '[';}
 	YY_BREAK
 case 66:
 YY_RULE_SETUP
-#line 99 "eslex.l"
+#line 103 "eslex.l"
 {return ']';}
 	YY_BREAK
 case 67:
 YY_RULE_SETUP
-#line 100 "eslex.l"
+#line 104 "eslex.l"
 {return '{';}
 	YY_BREAK
 case 68:
 YY_RULE_SETUP
-#line 101 "eslex.l"
+#line 105 "eslex.l"
 {return '}';}
 	YY_BREAK
 case 69:
 YY_RULE_SETUP
-#line 102 "eslex.l"
+#line 106 "eslex.l"
 {return '|';}
 	YY_BREAK
 case 70:
 YY_RULE_SETUP
-#line 103 "eslex.l"
+#line 107 "eslex.l"
 {return '.';}
 	YY_BREAK
 case 71:
 YY_RULE_SETUP
-#line 104 "eslex.l"
+#line 108 "eslex.l"
 {return '&';}
 	YY_BREAK
 case 72:
 YY_RULE_SETUP
-#line 105 "eslex.l"
+#line 109 "eslex.l"
 {return '~';}
 	YY_BREAK
 case 73:
 YY_RULE_SETUP
-#line 106 "eslex.l"
+#line 110 "eslex.l"
 {return '/';}
 	YY_BREAK
 case 74:
 YY_RULE_SETUP
-#line 107 "eslex.l"
+#line 111 "eslex.l"
 {return '!';}
 	YY_BREAK
 case 75:
 YY_RULE_SETUP
-#line 108 "eslex.l"
+#line 112 "eslex.l"
 {return '%';}
 	YY_BREAK
 case 76:
 YY_RULE_SETUP
-#line 109 "eslex.l"
+#line 113 "eslex.l"
 {return '<';}
 	YY_BREAK
 case 77:
 YY_RULE_SETUP
-#line 110 "eslex.l"
+#line 114 "eslex.l"
 {return '>';}
 	YY_BREAK
 case 78:
 YY_RULE_SETUP
-#line 111 "eslex.l"
+#line 115 "eslex.l"
 {return '^';}
 	YY_BREAK
 case 79:
 YY_RULE_SETUP
-#line 112 "eslex.l"
+#line 116 "eslex.l"
 {return '?';}
 	YY_BREAK
 case 80:
 YY_RULE_SETUP
-#line 113 "eslex.l"
+#line 117 "eslex.l"
 {return ':';}
 	YY_BREAK
 case 81:
 YY_RULE_SETUP
-#line 114 "eslex.l"
+#line 118 "eslex.l"
 {return ';';}
 	YY_BREAK
 case 82:
 YY_RULE_SETUP
-#line 115 "eslex.l"
+#line 119 "eslex.l"
 {return ',';}
 	YY_BREAK
 case 83:
 YY_RULE_SETUP
-#line 116 "eslex.l"
+#line 120 "eslex.l"
 {return '=';}
 	YY_BREAK
 case 84:
 /* rule 84 can match eol */
 YY_RULE_SETUP
-#line 118 "eslex.l"
+#line 122 "eslex.l"
 {lineno++; return '\n';}
 	YY_BREAK
 case 85:
 YY_RULE_SETUP
-#line 120 "eslex.l"
+#line 124 "eslex.l"
 {
-	yylval.word.yystring=strdup(yytext);
-	yylval.word.yystring_size=strlen(yytext);
+	yylval.yystring=strdup(yytext);
+	//yylval.yystring_size=strlen(yytext);
 	return IDENT;
 }
 	YY_BREAK
 case 86:
 YY_RULE_SETUP
-#line 126 "eslex.l"
+#line 130 "eslex.l"
 {tmp_ptr=tmp_string;string_length=0;BEGIN(IN_CHAR);}
 	YY_BREAK
 case 87:
 YY_RULE_SETUP
-#line 127 "eslex.l"
+#line 131 "eslex.l"
 {tmp_ptr=tmp_string;string_length=0;BEGIN(IN_STRING);}
 	YY_BREAK
 
 case 88:
 YY_RULE_SETUP
-#line 130 "eslex.l"
+#line 134 "eslex.l"
 {
 	BEGIN(INITIAL); 
 	*tmp_ptr = '\0'; 
-	yylval.word.yychar = tmp_string[0]; 
+	yylval.yychar = tmp_string[0]; 
 	return CHARLIT;
 	}
 	YY_BREAK
 case 89:
 /* rule 89 can match eol */
 YY_RULE_SETUP
-#line 136 "eslex.l"
+#line 140 "eslex.l"
 {fprintf(stderr, "%s:%d:Error:Unterminated string constant\n", filename, lineno);exit(1);}
 	YY_BREAK
 case 90:
 YY_RULE_SETUP
-#line 137 "eslex.l"
+#line 141 "eslex.l"
 {*tmp_ptr='\0';tmp_ptr++;}
 	YY_BREAK
 case 91:
 YY_RULE_SETUP
-#line 138 "eslex.l"
+#line 142 "eslex.l"
 {*tmp_ptr='\a';tmp_ptr++;}
 	YY_BREAK
 case 92:
 YY_RULE_SETUP
-#line 139 "eslex.l"
+#line 143 "eslex.l"
 {*tmp_ptr='\b';tmp_ptr++;}
 	YY_BREAK
 case 93:
 YY_RULE_SETUP
-#line 140 "eslex.l"
+#line 144 "eslex.l"
 {*tmp_ptr='\f';tmp_ptr++;}
 	YY_BREAK
 case 94:
 YY_RULE_SETUP
-#line 141 "eslex.l"
+#line 145 "eslex.l"
 {*tmp_ptr='\n';tmp_ptr++;}
 	YY_BREAK
 case 95:
 YY_RULE_SETUP
-#line 142 "eslex.l"
+#line 146 "eslex.l"
 {*tmp_ptr='\r';tmp_ptr++;}
 	YY_BREAK
 case 96:
 YY_RULE_SETUP
-#line 143 "eslex.l"
+#line 147 "eslex.l"
 {*tmp_ptr='\t';tmp_ptr++;}
 	YY_BREAK
 case 97:
 YY_RULE_SETUP
-#line 144 "eslex.l"
+#line 148 "eslex.l"
 {*tmp_ptr='\v';tmp_ptr++;}
 	YY_BREAK
 case 98:
 YY_RULE_SETUP
-#line 145 "eslex.l"
+#line 149 "eslex.l"
 {*tmp_ptr='\"';tmp_ptr++;}
 	YY_BREAK
 case 99:
 YY_RULE_SETUP
-#line 146 "eslex.l"
+#line 150 "eslex.l"
 {*tmp_ptr='\\';tmp_ptr++;}
 	YY_BREAK
 case 100:
 YY_RULE_SETUP
-#line 147 "eslex.l"
+#line 151 "eslex.l"
 {*tmp_ptr='\'';tmp_ptr++;}
 	YY_BREAK
 case 101:
 YY_RULE_SETUP
-#line 148 "eslex.l"
+#line 152 "eslex.l"
 {
         int tmp;
         sscanf(yytext+1, "%o", &tmp);
@@ -1543,7 +1547,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 102:
 YY_RULE_SETUP
-#line 158 "eslex.l"
+#line 162 "eslex.l"
 {
         int tmp;
         sscanf(yytext+2, "%x", &tmp);
@@ -1558,12 +1562,12 @@ YY_RULE_SETUP
 case 103:
 /* rule 103 can match eol */
 YY_RULE_SETUP
-#line 168 "eslex.l"
+#line 172 "eslex.l"
 {*tmp_ptr=yytext[1];tmp_ptr++;}
 	YY_BREAK
 case 104:
 YY_RULE_SETUP
-#line 169 "eslex.l"
+#line 173 "eslex.l"
 {
 	char *yptr = yytext;
         while (*yptr){
@@ -1576,78 +1580,78 @@ YY_RULE_SETUP
 
 case 105:
 YY_RULE_SETUP
-#line 179 "eslex.l"
+#line 183 "eslex.l"
 {
 	BEGIN(INITIAL); 
 	*tmp_ptr = '\0'; 
-	yylval.word.yystring = tmp_string; 
+	yylval.yystring = tmp_string; 
 	return STRING;
 	}
 	YY_BREAK
 case 106:
 /* rule 106 can match eol */
 YY_RULE_SETUP
-#line 185 "eslex.l"
+#line 189 "eslex.l"
 {fprintf(stderr, "%s:%d:Error:Unterminated string constant\n", filename, lineno);exit(1);}
 	YY_BREAK
 case 107:
 YY_RULE_SETUP
-#line 186 "eslex.l"
+#line 190 "eslex.l"
 {*tmp_ptr='\0';tmp_ptr++;}
 	YY_BREAK
 case 108:
 YY_RULE_SETUP
-#line 187 "eslex.l"
+#line 191 "eslex.l"
 {*tmp_ptr='\a';tmp_ptr++;}
 	YY_BREAK
 case 109:
 YY_RULE_SETUP
-#line 188 "eslex.l"
+#line 192 "eslex.l"
 {*tmp_ptr='\b';tmp_ptr++;}
 	YY_BREAK
 case 110:
 YY_RULE_SETUP
-#line 189 "eslex.l"
+#line 193 "eslex.l"
 {*tmp_ptr='\f';tmp_ptr++;}
 	YY_BREAK
 case 111:
 YY_RULE_SETUP
-#line 190 "eslex.l"
+#line 194 "eslex.l"
 {*tmp_ptr='\n';tmp_ptr++;}
 	YY_BREAK
 case 112:
 YY_RULE_SETUP
-#line 191 "eslex.l"
+#line 195 "eslex.l"
 {*tmp_ptr='\r';tmp_ptr++;}
 	YY_BREAK
 case 113:
 YY_RULE_SETUP
-#line 192 "eslex.l"
+#line 196 "eslex.l"
 {*tmp_ptr='\t';tmp_ptr++;}
 	YY_BREAK
 case 114:
 YY_RULE_SETUP
-#line 193 "eslex.l"
+#line 197 "eslex.l"
 {*tmp_ptr='\v';tmp_ptr++;}
 	YY_BREAK
 case 115:
 YY_RULE_SETUP
-#line 194 "eslex.l"
+#line 198 "eslex.l"
 {*tmp_ptr='\"';tmp_ptr++;}
 	YY_BREAK
 case 116:
 YY_RULE_SETUP
-#line 195 "eslex.l"
+#line 199 "eslex.l"
 {*tmp_ptr='\\';tmp_ptr++;}
 	YY_BREAK
 case 117:
 YY_RULE_SETUP
-#line 196 "eslex.l"
+#line 200 "eslex.l"
 {*tmp_ptr='\'';tmp_ptr++;}
 	YY_BREAK
 case 118:
 YY_RULE_SETUP
-#line 197 "eslex.l"
+#line 201 "eslex.l"
 {
         int tmp;
         sscanf(yytext+1, "%o", &tmp);
@@ -1661,7 +1665,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 119:
 YY_RULE_SETUP
-#line 207 "eslex.l"
+#line 211 "eslex.l"
 {
         int tmp;
         sscanf(yytext+2, "%x", &tmp);
@@ -1676,12 +1680,12 @@ YY_RULE_SETUP
 case 120:
 /* rule 120 can match eol */
 YY_RULE_SETUP
-#line 217 "eslex.l"
+#line 221 "eslex.l"
 {*tmp_ptr=yytext[1];tmp_ptr++;}
 	YY_BREAK
 case 121:
 YY_RULE_SETUP
-#line 218 "eslex.l"
+#line 222 "eslex.l"
 {
         char *yptr = yytext;
         while (*yptr){
@@ -1693,7 +1697,7 @@ YY_RULE_SETUP
 
 case 122:
 YY_RULE_SETUP
-#line 227 "eslex.l"
+#line 231 "eslex.l"
 {
 	yylval.number.yyint=atoi(yytext);
 	yylval.number.num_type=TYPE_INT;
@@ -1703,7 +1707,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 123:
 YY_RULE_SETUP
-#line 233 "eslex.l"
+#line 237 "eslex.l"
 {
 	yytext[yyleng-1] = '\0';
 	yylval.number.yyint=atoi(yytext);
@@ -1714,7 +1718,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 124:
 YY_RULE_SETUP
-#line 241 "eslex.l"
+#line 245 "eslex.l"
 {
 	yytext[yyleng-1] = '\0';
 	yylval.number.yyint=atoi(yytext);
@@ -1725,7 +1729,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 125:
 YY_RULE_SETUP
-#line 248 "eslex.l"
+#line 252 "eslex.l"
 {	
 	yytext[yyleng-2] = '\0';
 	yylval.number.yyint=atoi(yytext);
@@ -1736,7 +1740,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 126:
 YY_RULE_SETUP
-#line 255 "eslex.l"
+#line 259 "eslex.l"
 {
 	yytext[yyleng-3] = '\0';
 	yylval.number.yyint=atoi(yytext);
@@ -1747,7 +1751,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 127:
 YY_RULE_SETUP
-#line 263 "eslex.l"
+#line 267 "eslex.l"
 {
 	sscanf(yytext, "%llo", &yylval.number.yyint);
 	yylval.number.num_type=TYPE_INT;
@@ -1757,7 +1761,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 128:
 YY_RULE_SETUP
-#line 269 "eslex.l"
+#line 273 "eslex.l"
 {
 	yytext[yyleng-1] = '\0';
 	sscanf(yytext, "%llo", &yylval.number.yyint);
@@ -1768,7 +1772,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 129:
 YY_RULE_SETUP
-#line 276 "eslex.l"
+#line 280 "eslex.l"
 {
 	yytext[yyleng-1] = '\0';
 	sscanf(yytext, "%llo", &yylval.number.yyint);
@@ -1779,7 +1783,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 130:
 YY_RULE_SETUP
-#line 283 "eslex.l"
+#line 287 "eslex.l"
 {
 	yytext[yyleng-2] = '\0';
 	sscanf(yytext, "%llo", &yylval.number.yyint);
@@ -1790,7 +1794,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 131:
 YY_RULE_SETUP
-#line 290 "eslex.l"
+#line 294 "eslex.l"
 {
 	yytext[yyleng-3] = '\0';
 	sscanf(yytext, "%llo", &yylval.number.yyint);
@@ -1801,7 +1805,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 132:
 YY_RULE_SETUP
-#line 298 "eslex.l"
+#line 302 "eslex.l"
 {
 	sscanf(yytext, "%llx", &yylval.number.yyint);
 	yylval.number.num_type=TYPE_INT;
@@ -1811,7 +1815,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 133:
 YY_RULE_SETUP
-#line 304 "eslex.l"
+#line 308 "eslex.l"
 {
 	yytext[yyleng-1] = '\0';
 	sscanf(yytext, "%llx", &yylval.number.yyint);
@@ -1822,7 +1826,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 134:
 YY_RULE_SETUP
-#line 311 "eslex.l"
+#line 315 "eslex.l"
 {
 	yytext[yyleng-1] = '\0';
 	sscanf(yytext, "%llx", &yylval.number.yyint);
@@ -1833,7 +1837,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 135:
 YY_RULE_SETUP
-#line 318 "eslex.l"
+#line 322 "eslex.l"
 {
 	yytext[yyleng-2] = '\0';
 	sscanf(yytext, "%llx", &yylval.number.yyint);
@@ -1844,7 +1848,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 136:
 YY_RULE_SETUP
-#line 325 "eslex.l"
+#line 329 "eslex.l"
 {
 	yytext[yyleng-3] = '\0';
 	sscanf(yytext, "%llx", &yylval.number.yyint);
@@ -1855,7 +1859,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 137:
 YY_RULE_SETUP
-#line 333 "eslex.l"
+#line 337 "eslex.l"
 {
 	sscanf(yytext, "%Lf", &yylval.number.yydouble);
 	yylval.number.num_type=TYPE_DOUBLE;
@@ -1865,7 +1869,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 138:
 YY_RULE_SETUP
-#line 339 "eslex.l"
+#line 343 "eslex.l"
 {
 	yytext[yyleng-1] = '\0';
 	sscanf(yytext, "%Lf", &yylval.number.yydouble);
@@ -1876,7 +1880,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 139:
 YY_RULE_SETUP
-#line 347 "eslex.l"
+#line 351 "eslex.l"
 {
 	sscanf(yytext, "%Lf", &yylval.number.yydouble);
 	yylval.number.num_type=TYPE_DOUBLE;
@@ -1886,7 +1890,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 140:
 YY_RULE_SETUP
-#line 353 "eslex.l"
+#line 357 "eslex.l"
 {
 	sscanf(yytext, "%Lf", &yylval.number.yydouble);
 	yylval.number.num_type=TYPE_DOUBLE;
@@ -1896,7 +1900,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 141:
 YY_RULE_SETUP
-#line 360 "eslex.l"
+#line 364 "eslex.l"
 {
 	yytext[yyleng-1] = '\0';
 	sscanf(yytext, "%Lf", &yylval.number.yydouble);
@@ -1907,44 +1911,44 @@ YY_RULE_SETUP
 	YY_BREAK
 case 142:
 YY_RULE_SETUP
-#line 368 "eslex.l"
+#line 372 "eslex.l"
 {BEGIN(IN_FILE);}
 	YY_BREAK
 
 case 143:
 /* rule 143 can match eol */
 YY_RULE_SETUP
-#line 370 "eslex.l"
+#line 374 "eslex.l"
 {BEGIN(INITIAL);}
 	YY_BREAK
 case 144:
 YY_RULE_SETUP
-#line 371 "eslex.l"
+#line 375 "eslex.l"
 {}
 	YY_BREAK
 case 145:
 /* rule 145 can match eol */
 YY_RULE_SETUP
-#line 372 "eslex.l"
+#line 376 "eslex.l"
 {strncpy(filename, yytext+1, strlen(yytext)-2);filename[strlen(yytext)-2]='\0';}
 	YY_BREAK
 case 146:
 YY_RULE_SETUP
-#line 373 "eslex.l"
+#line 377 "eslex.l"
 {}
 	YY_BREAK
 
 case 147:
 YY_RULE_SETUP
-#line 376 "eslex.l"
+#line 380 "eslex.l"
 {fprintf(stderr,"Lexical error: undefined token: %s\n", yytext);exit(1);}
 	YY_BREAK
 case 148:
 YY_RULE_SETUP
-#line 378 "eslex.l"
+#line 382 "eslex.l"
 ECHO;
 	YY_BREAK
-#line 1948 "lex.yy.c"
+#line 1952 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(IN_CHAR):
 case YY_STATE_EOF(IN_STRING):
@@ -2945,11 +2949,11 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 378 "eslex.l"
+#line 382 "eslex.l"
 
 
 
-printchars(char *str, char *end){
+void printchars(char *str, char *end){
 	while (str != end){
 		switch (*str){
 		    case '\0':
@@ -2998,14 +3002,16 @@ printchars(char *str, char *end){
 	printf("\n");
 }
 
-keyword(int lineno, char* yytext){
+void keyword(int lineno, char* yytext){
 
+/*
 	char *p = yytext;
 	while(*p != '\0'){
 		*p=toupper(*p);
  		p++;
 	}
  	printf("%s\t %d\t %s\n",filename, lineno, yytext);
+*/
 }
 
 /*
@@ -3014,7 +3020,7 @@ int main(){
    while(token=yylex()){
 	switch(token){
 		case IDENT:
-			printf("%s\t %d\t IDENT\t %s\n",filename, lineno, yylval.word.yystring);
+			printf("%s\t %d\t IDENT\t %s\n",filename, lineno, yylval.yystring);
 			break;
 		case STRING:
 			printf("%s\t %d\t STRING\t ",filename, lineno);

@@ -46,7 +46,7 @@ int symTable_push(struct sym_table *table, char *symbol, void *ptr){
 		if(hashTable_contains(st->symbols, symbol) == TRUE)
 			return FALSE;
 	}
-	symTable_push(st, symbol, ptr);
+	hashTable_insert(st->symbols, symbol, ptr);
 	return TRUE;
 
 }

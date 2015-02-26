@@ -18,6 +18,10 @@ unsigned int string_length = 0;
 char filename[MAX_STRING_LENGTH];
 char *tmp_ptr;
 char tmp_string[MAX_STRING_LENGTH];
+
+void keyword(int lineno, char* yytext);
+void printchars(char *str, char *end);
+
 %}
 
 %x IN_CHAR IN_STRING IN_FILE
@@ -118,8 +122,8 @@ _Imaginary	{keyword(lineno,yytext);return _IMAGINARY;}
 [\n]		{lineno++; return '\n';}
 
 [a-zA-Z][a-zA-Z0-9]*	{
-	yylval.word.yystring=strdup(yytext);
-	yylval.word.yystring_size=strlen(yytext);
+	yylval.yystring=strdup(yytext);
+	//yylval.yystring_size=strlen(yytext);
 	return IDENT;
 }
 
@@ -130,7 +134,7 @@ _Imaginary	{keyword(lineno,yytext);return _IMAGINARY;}
 \'	{
 	BEGIN(INITIAL); 
 	*tmp_ptr = '\0'; 
-	yylval.word.yychar = tmp_string[0]; 
+	yylval.yychar = tmp_string[0]; 
 	return CHARLIT;
 	}
 \n 	{fprintf(stderr, "%s:%d:Error:Unterminated string constant\n", filename, lineno);exit(1);}
@@ -179,7 +183,7 @@ _Imaginary	{keyword(lineno,yytext);return _IMAGINARY;}
 \" 	{
 	BEGIN(INITIAL); 
 	*tmp_ptr = '\0'; 
-	yylval.word.yystring = tmp_string; 
+	yylval.yystring = tmp_string; 
 	return STRING;
 	}
 \n 	{fprintf(stderr, "%s:%d:Error:Unterminated string constant\n", filename, lineno);exit(1);}
@@ -377,7 +381,7 @@ _Imaginary	{keyword(lineno,yytext);return _IMAGINARY;}
 
 %%
 
-printchars(char *str, char *end){
+void printchars(char *str, char *end){
 	while (str != end){
 		switch (*str){
 		    case '\0':
@@ -426,14 +430,16 @@ printchars(char *str, char *end){
 	printf("\n");
 }
 
-keyword(int lineno, char* yytext){
+void keyword(int lineno, char* yytext){
 
+/*
 	char *p = yytext;
 	while(*p != '\0'){
 		*p=toupper(*p);
  		p++;
 	}
  	printf("%s\t %d\t %s\n",filename, lineno, yytext);
+*/
 }
 
 /*
@@ -442,7 +448,7 @@ int main(){
    while(token=yylex()){
 	switch(token){
 		case IDENT:
-			printf("%s\t %d\t IDENT\t %s\n",filename, lineno, yylval.word.yystring);
+			printf("%s\t %d\t IDENT\t %s\n",filename, lineno, yylval.yystring);
 			break;
 		case STRING:
 			printf("%s\t %d\t STRING\t ",filename, lineno);

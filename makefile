@@ -15,4 +15,4 @@ esparser.tab.o: esparser.y tokens-manual.h
 	bison -v esparser.y
 	gcc -c esparser.tab.c
 
-clean: rm *.o parser.tab.* lex.yy.* *.output
+clean: rm *.o esparser.tab.* lex.yy.* *.output

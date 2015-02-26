@@ -10,7 +10,8 @@
 #include <string.h>
 #include <errno.h>
 #include "hash.h"
-#include "esparser.tab.h"
+
+#define MAX_STRING_LENGTH 4096
 
 enum scope_type{
 	FILE_SCOPE,
