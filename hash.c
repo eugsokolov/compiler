@@ -75,7 +75,7 @@ int hashTable_contains(struct hashTable *table, char *key){
 
 void * hashTable_getPointer(struct hashTable *table, char *key, int b){
 
-	int i = hashTable_hashTable_findPos(table, key);
+	int i = hashTable_findPos(table, key);
 	if(i == -1){
 		b = FALSE;
 		return NULL;	

@@ -10,6 +10,7 @@
 #include <string.h>
 #include <errno.h>
 #include "hash.h"
+#include "esparser.tab.h"
 
 enum scope_type{
 	FILE_SCOPE,
@@ -18,8 +19,15 @@ enum scope_type{
 	PROTO_SCOPE,
 };
 
+struct symbol{
+	int value;
+	char filename[MAX_STRING_LENGTH];
+	int linenumber;
+
+} symbol;
+
 struct sym_table{
-	struct hashTable *symbols[4];
+	struct hashTable *symbols;
 	//int scope;	
 	int line_begin;
 	char *filename;
@@ -27,14 +35,16 @@ struct sym_table{
 	enum scope_type scope_type;
 } sym_table;
 
-struct sym_table *new(enum scope_type st, int line_begin, char *filename, struct sym_table *prev);
+struct sym_table * symTable_new(enum scope_type st, int line_begin, char *filename, struct sym_table *prev);
 
-struct sym_table *pop(struct sym_table *table);
+struct symbol * sym_new(char *filename, int linenumber);
 
-int push(struct sym_table *table, char *symbol, void *ptr);
+struct sym_table * symTable_pop(struct sym_table *table);
 
-void *get_symbol(struct sym_table *table, char *symbol);
+int push(struct sym_table * symTable_table, char *symbol, void *ptr);
 
-void print(struct sym_table *table);
+struct symbol * symTable_getSymbol(struct sym_table *table, char *symbol);
+
+void symTable_print(struct sym_table *table);
 
 #endif

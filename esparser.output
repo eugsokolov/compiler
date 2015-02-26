@@ -1,23 +1,23 @@
 Nonterminals useless in grammar
 
-   ident_list
+   compound_statement
+   statement_list
+   statement
+   declaration
+   identifier_list
+   logical
+   assignment
+   val
+   line
+   exp
 
 
 Terminals unused in grammar
 
-   IDENT
    CHARLIT
+   IDENT
    STRING
-   TIMESEQ
-   DIVEQ
-   MODEQ
-   SHLEQ
-   SHREQ
-   ANDEQ
-   OREQ
-   XOREQ
-   PLUSEQ
-   MINUSEQ
+   NUMBER
    INDSEL
    PLUSPLUS
    MINUSMINUS
@@ -29,12 +29,22 @@ Terminals unused in grammar
    NOTEQ
    LOGAND
    LOGOR
+   ELLIPSIS
+   TIMESEQ
+   DIVEQ
+   MODEQ
+   PLUSEQ
+   MINUSEQ
+   SHLEQ
+   SHREQ
+   ANDEQ
+   OREQ
+   XOREQ
    AUTO
    BREAK
    CASE
    CHAR
    CONST
-   ELLIPSIS
    CONTINUE
    DEFAULT
    DO
@@ -68,79 +78,132 @@ Terminals unused in grammar
    _BOOL
    _COMPLEX
    _IMAGINARY
+   '-'
+   '+'
+   '*'
+   '/'
+   '^'
+   '{'
+   '}'
+   ';'
    ','
+   '|'
+   '&'
+   '?'
+   ':'
+   '='
+   '\n'
+   '('
+   ')'
 
 
 Rules useless in grammar
 
-   13 ident_list: IDENT
-   14           | ident_list ',' IDENT
+    2 compound_statement: '{' statement_list '}'
+
+    3 statement_list: statement
+    4               | statement_list statement
+
+    5 statement: declaration
+    6          | /* empty */
+
+    7 declaration: INT identifier_list ';'
+
+    8 identifier_list: IDENT
+    9                | identifier_list ',' IDENT
+
+   10 logical: exp '|' exp
+   11        | exp '&' exp
+   12        | exp '^' exp
+   13        | exp LOGOR exp
+   14        | exp LOGAND exp
+   15        | exp '?' exp ':' exp
+
+   16 assignment: val '=' exp
+   17           | val TIMESEQ exp
+   18           | val DIVEQ exp
+   19           | val PLUSEQ exp
+   20           | val MINUSEQ exp
+   21           | val SHLEQ exp
+   22           | val SHREQ exp
+   23           | val ANDEQ exp
+   24           | val OREQ exp
+   25           | val XOREQ exp
+
+   26 val: IDENT
+
+   27 line: '\n'
+   28     | exp '\n'
+
+   29 exp: NUMBER
+   30    | exp '+' exp
+   31    | exp '-' exp
+   32    | exp '*' exp
+   33    | exp '/' exp
+   34    | '-' exp
+   35    | exp '^' exp
+   36    | '(' exp ')'
 
 
 Grammar
 
-    0 $accept: calculation $end
+    0 $accept: translation_unit $end
 
-    1 calculation: /* empty */
-    2            | calculation line
-
-    3 line: '\n'
-    4     | exp '\n'
-
-    5 exp: NUMBER
-    6    | exp '+' exp
-    7    | exp '-' exp
-    8    | exp '*' exp
-    9    | exp '/' exp
-   10    | '-' exp
-   11    | exp '^' exp
-   12    | '(' exp ')'
+    1 translation_unit: /* empty */
 
 
 Terminals, with rules where they appear
 
 $end (0) 0
-'\n' (10) 3 4
-'(' (40) 12
-')' (41) 12
-'*' (42) 8
-'+' (43) 6
+'\n' (10)
+'&' (38)
+'(' (40)
+')' (41)
+'*' (42)
+'+' (43)
 ',' (44)
-'-' (45) 7 10
-'/' (47) 9
-'^' (94) 11
+'-' (45)
+'/' (47)
+':' (58)
+';' (59)
+'=' (61)
+'?' (63)
+'^' (94)
+'{' (123)
+'|' (124)
+'}' (125)
 error (256)
-IDENT (258)
-CHARLIT (259)
+CHARLIT (258)
+IDENT (259)
 STRING (260)
-NUMBER (261) 5
-TIMESEQ (262)
-DIVEQ (263)
-MODEQ (264)
-SHLEQ (265)
-SHREQ (266)
-ANDEQ (267)
-OREQ (268)
-XOREQ (269)
-PLUSEQ (270)
-MINUSEQ (271)
-INDSEL (272)
-PLUSPLUS (273)
-MINUSMINUS (274)
-SHL (275)
-SHR (276)
-LTEQ (277)
-GTEQ (278)
-EQEQ (279)
-NOTEQ (280)
-LOGAND (281)
-LOGOR (282)
-AUTO (283)
-BREAK (284)
-CASE (285)
-CHAR (286)
-CONST (287)
-ELLIPSIS (288)
+NUMBER (261)
+INDSEL (262)
+PLUSPLUS (263)
+MINUSMINUS (264)
+SHL (265)
+SHR (266)
+LTEQ (267)
+GTEQ (268)
+EQEQ (269)
+NOTEQ (270)
+LOGAND (271)
+LOGOR (272)
+ELLIPSIS (273)
+TIMESEQ (274)
+DIVEQ (275)
+MODEQ (276)
+PLUSEQ (277)
+MINUSEQ (278)
+SHLEQ (279)
+SHREQ (280)
+ANDEQ (281)
+OREQ (282)
+XOREQ (283)
+AUTO (284)
+BREAK (285)
+CASE (286)
+CHAR (287)
+CONST (288)
 CONTINUE (289)
 DEFAULT (290)
 DO (291)
@@ -174,281 +237,34 @@ WHILE (318)
 _BOOL (319)
 _COMPLEX (320)
 _IMAGINARY (321)
-NEG (322)
 
 
 Nonterminals, with rules where they appear
 
-$accept (77)
+$accept (84)
     on left: 0
-calculation (78)
-    on left: 1 2, on right: 0 2
-line (79)
-    on left: 3 4, on right: 2
-exp (80)
-    on left: 5 6 7 8 9 10 11 12, on right: 4 6 7 8 9 10 11 12
+translation_unit (85)
+    on left: 1, on right: 0
 
 
 state 0
 
-    0 $accept: . calculation $end
+    0 $accept: . translation_unit $end
 
-    $default  reduce using rule 1 (calculation)
+    $default  reduce using rule 1 (translation_unit)
 
-    calculation  go to state 1
+    translation_unit  go to state 1
 
 
 state 1
 
-    0 $accept: calculation . $end
-    2 calculation: calculation . line
+    0 $accept: translation_unit . $end
 
-    $end    shift, and go to state 2
-    NUMBER  shift, and go to state 3
-    '-'     shift, and go to state 4
-    '\n'    shift, and go to state 5
-    '('     shift, and go to state 6
-
-    line  go to state 7
-    exp   go to state 8
+    $end  shift, and go to state 2
 
 
 state 2
 
-    0 $accept: calculation $end .
+    0 $accept: translation_unit $end .
 
     $default  accept
-
-
-state 3
-
-    5 exp: NUMBER .
-
-    $default  reduce using rule 5 (exp)
-
-
-state 4
-
-   10 exp: '-' . exp
-
-    NUMBER  shift, and go to state 3
-    '-'     shift, and go to state 4
-    '('     shift, and go to state 6
-
-    exp  go to state 9
-
-
-state 5
-
-    3 line: '\n' .
-
-    $default  reduce using rule 3 (line)
-
-
-state 6
-
-   12 exp: '(' . exp ')'
-
-    NUMBER  shift, and go to state 3
-    '-'     shift, and go to state 4
-    '('     shift, and go to state 6
-
-    exp  go to state 10
-
-
-state 7
-
-    2 calculation: calculation line .
-
-    $default  reduce using rule 2 (calculation)
-
-
-state 8
-
-    4 line: exp . '\n'
-    6 exp: exp . '+' exp
-    7    | exp . '-' exp
-    8    | exp . '*' exp
-    9    | exp . '/' exp
-   11    | exp . '^' exp
-
-    '-'   shift, and go to state 11
-    '+'   shift, and go to state 12
-    '*'   shift, and go to state 13
-    '/'   shift, and go to state 14
-    '^'   shift, and go to state 15
-    '\n'  shift, and go to state 16
-
-
-state 9
-
-    6 exp: exp . '+' exp
-    7    | exp . '-' exp
-    8    | exp . '*' exp
-    9    | exp . '/' exp
-   10    | '-' exp .
-   11    | exp . '^' exp
-
-    '^'  shift, and go to state 15
-
-    $default  reduce using rule 10 (exp)
-
-
-state 10
-
-    6 exp: exp . '+' exp
-    7    | exp . '-' exp
-    8    | exp . '*' exp
-    9    | exp . '/' exp
-   11    | exp . '^' exp
-   12    | '(' exp . ')'
-
-    '-'  shift, and go to state 11
-    '+'  shift, and go to state 12
-    '*'  shift, and go to state 13
-    '/'  shift, and go to state 14
-    '^'  shift, and go to state 15
-    ')'  shift, and go to state 17
-
-
-state 11
-
-    7 exp: exp '-' . exp
-
-    NUMBER  shift, and go to state 3
-    '-'     shift, and go to state 4
-    '('     shift, and go to state 6
-
-    exp  go to state 18
-
-
-state 12
-
-    6 exp: exp '+' . exp
-
-    NUMBER  shift, and go to state 3
-    '-'     shift, and go to state 4
-    '('     shift, and go to state 6
-
-    exp  go to state 19
-
-
-state 13
-
-    8 exp: exp '*' . exp
-
-    NUMBER  shift, and go to state 3
-    '-'     shift, and go to state 4
-    '('     shift, and go to state 6
-
-    exp  go to state 20
-
-
-state 14
-
-    9 exp: exp '/' . exp
-
-    NUMBER  shift, and go to state 3
-    '-'     shift, and go to state 4
-    '('     shift, and go to state 6
-
-    exp  go to state 21
-
-
-state 15
-
-   11 exp: exp '^' . exp
-
-    NUMBER  shift, and go to state 3
-    '-'     shift, and go to state 4
-    '('     shift, and go to state 6
-
-    exp  go to state 22
-
-
-state 16
-
-    4 line: exp '\n' .
-
-    $default  reduce using rule 4 (line)
-
-
-state 17
-
-   12 exp: '(' exp ')' .
-
-    $default  reduce using rule 12 (exp)
-
-
-state 18
-
-    6 exp: exp . '+' exp
-    7    | exp . '-' exp
-    7    | exp '-' exp .
-    8    | exp . '*' exp
-    9    | exp . '/' exp
-   11    | exp . '^' exp
-
-    '*'  shift, and go to state 13
-    '/'  shift, and go to state 14
-    '^'  shift, and go to state 15
-
-    $default  reduce using rule 7 (exp)
-
-
-state 19
-
-    6 exp: exp . '+' exp
-    6    | exp '+' exp .
-    7    | exp . '-' exp
-    8    | exp . '*' exp
-    9    | exp . '/' exp
-   11    | exp . '^' exp
-
-    '*'  shift, and go to state 13
-    '/'  shift, and go to state 14
-    '^'  shift, and go to state 15
-
-    $default  reduce using rule 6 (exp)
-
-
-state 20
-
-    6 exp: exp . '+' exp
-    7    | exp . '-' exp
-    8    | exp . '*' exp
-    8    | exp '*' exp .
-    9    | exp . '/' exp
-   11    | exp . '^' exp
-
-    '^'  shift, and go to state 15
-
-    $default  reduce using rule 8 (exp)
-
-
-state 21
-
-    6 exp: exp . '+' exp
-    7    | exp . '-' exp
-    8    | exp . '*' exp
-    9    | exp . '/' exp
-    9    | exp '/' exp .
-   11    | exp . '^' exp
-
-    '^'  shift, and go to state 15
-
-    $default  reduce using rule 9 (exp)
-
-
-state 22
-
-    6 exp: exp . '+' exp
-    7    | exp . '-' exp
-    8    | exp . '*' exp
-    9    | exp . '/' exp
-   11    | exp . '^' exp
-   11    | exp '^' exp .
-
-    '^'  shift, and go to state 15
-
-    $default  reduce using rule 11 (exp)

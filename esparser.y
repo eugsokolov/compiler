@@ -47,38 +47,24 @@ struct sym_table *curr;
 
 %token <yychar> CHARLIT
 %token <yystring> IDENT STRING
-%token <number.yyint> NUMBER 
-%token TIMESEQ DIVEQ MODEQ SHLEQ SHREQ ANDEQ OREQ XOREQ PLUSEQ MINUSEQ
-%token INDSEL PLUSPLUS MINUSMINUS SHL SHR LTEQ GTEQ EQEQ NOTEQ LOGAND LOGOR
-%token AUTO BREAK CASE CHAR CONST ELLIPSIS CONTINUE DEFAULT DO DOUBLE ELSE ENUM EXTERN FLOAT FOR GOTO IF INLINE INT LONG REGISTER RESTRICT RETURN SHORT SIGNED SIZEOF STATIC STRUCT SWITCH TYPEDEF TYPEDEF_NAME UNION UNSIGNED VOID VOLATILE WHILE _BOOL _COMPLEX _IMAGINARY
+%token <number> NUMBER 
+%token INDSEL PLUSPLUS MINUSMINUS SHL SHR LTEQ GTEQ EQEQ NOTEQ LOGAND LOGOR ELLIPSIS TIMESEQ DIVEQ MODEQ PLUSEQ MINUSEQ SHLEQ SHREQ ANDEQ OREQ XOREQ
+%token AUTO BREAK CASE CHAR CONST CONTINUE DEFAULT DO DOUBLE ELSE ENUM EXTERN FLOAT FOR GOTO IF INLINE INT LONG REGISTER RESTRICT RETURN SHORT SIGNED SIZEOF STATIC STRUCT SWITCH TYPEDEF TYPEDEF_NAME UNION UNSIGNED VOID VOLATILE WHILE _BOOL _COMPLEX _IMAGINARY
 
-
-
+%type <number.yyint> logical assignment
+%type <number.yyint> val exp
 
 %left '-' '+'
 %left '*' '/'
-%left NEG     /* negation--unary minus */
 %right '^'    /* exponentiation        */
-
-%type <number.yyint> exp
 
 %start translation_unit
 
 %%
 
-translation_unit
-	: top_level_declartaion
-	| translation_unit top_level_declaration
+translation_unit:
 	;
 
-top_level_declaration
-	: declaration
-	| function_def
-	;
-
-function_def
-	: function_def_specifier compound_statement	
-	;
 
 
 
@@ -108,14 +94,26 @@ identifier_list
 
 
 
+logical
+	: exp '|' exp {$$ = $1 | $3; }
+	| exp '&' exp {$$ = $1 & $3; }
+	| exp '^' exp {$$ = $1 ^ $3; }
+	| exp LOGOR exp {$$ = $1 || $3; }
+	| exp LOGAND exp {$$ = $1 && $3; }
+	| exp '?' exp ':' exp {$$ = $1 ? $3 : $5; }
 
-
-
-
-
-
-
-
+assignment
+	: val '=' exp {$$ = $3; printf("exprval=%lld\n", $$); }
+	| val TIMESEQ exp {$$ = $1->value * $3; $1->value = $$; }
+	| val DIVEQ exp {$$ = $1->value / $3; $1->value = $$; }
+	| val PLUSEQ exp {$$ = $1-> value + $3; $1->value = $$; }
+	| val MINUSEQ exp {$$ = $1-> value - $3; $1->value = $$; }
+	| val SHLEQ exp {$$ = $1-> value << $3; $1->value = $$; }
+	| val SHREQ exp {$$ = $1-> value >> $3; $1->value = $$; }
+	| val ANDEQ exp {$$ = $1-> value & $3; $1->value = $$; }
+	| val OREQ exp {$$ = $1-> value | $3; $1->value = $$; }
+	| val XOREQ exp {$$ = $1-> value ^ $3; $1->value = $$; }
+	; 
 
 val
 	: IDENT	{
@@ -139,7 +137,7 @@ exp:      NUMBER                { $$ = $1;         }
         | exp '-' exp        { $$ = $1 - $3;    }
         | exp '*' exp        { $$ = $1 * $3;    }
         | exp '/' exp        { $$ = $1 / $3;    }
-        | '-' exp  %prec NEG { $$ = -$2;        }
+        | '-' exp		 { $$ = -$2;        }
         | exp '^' exp        { $$ = pow ($1, $3); }
         | '(' exp ')'        { $$ = $2;         }
 ;
@@ -148,10 +146,10 @@ exp:      NUMBER                { $$ = $1;         }
 
 void insert_symbol(char *s){
 
-	struct *st = symTable_new(SCOPE , lineno, filename, curr);
-	if(curr->symTable_push(curr, s, st) != FALSE){
-		st = curr->symTable_getSymbol(curr,s);
-		fprintf(stderr, "Error: %s previously defined in %s:%d\n", s, st->filename, st->lineno);
+	struct symbol *st = sym_new(filename, lineno);
+	if(symTable_push(curr, s, st) != FALSE){
+		st = symTable_getSymbol(curr,s);
+		fprintf(stderr, "Error: %s previously defined in %s:%d\n", s, st->filename, st->linenumber);
 	}
 }
 
