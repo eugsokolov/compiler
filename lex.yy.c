@@ -731,7 +731,7 @@ char *yytext;
 #include <stdio.h>
 #include <stdlib.h>
 
-//YYSTYPE yylval;
+YYSTYPE yylval;
 
 unsigned int lineno = 1;
 unsigned int string_length = 0;
@@ -1207,112 +1207,112 @@ YY_RULE_SETUP
 case 38:
 YY_RULE_SETUP
 #line 75 "eslex.l"
-{printf("%s\t %d\t PLUSPLUS\n",filename,lineno);return PLUSPLUS;}
+{return PLUSPLUS;}
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
 #line 76 "eslex.l"
-{printf("%s\t %d\t MINUSMINUS\n",filename,lineno);return MINUSMINUS;}
+{return MINUSMINUS;}
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
 #line 77 "eslex.l"
-{printf("%s\t %d\t ELLIPSIS\n",filename, lineno);return ELLIPSIS;}
+{return ELLIPSIS;}
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
 #line 78 "eslex.l"
-{printf("%s\t %d\t NOTEQ\n",filename, lineno);return NOTEQ;}
+{return NOTEQ;}
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
 #line 79 "eslex.l"
-{printf("%s\t %d\t PLUSEQ\n",filename, lineno);return PLUSEQ;}
+{return PLUSEQ;}
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
 #line 80 "eslex.l"
-{printf("%s\t %d\t MINUSEQ\n",filename, lineno);return MINUSEQ;}
+{return MINUSEQ;}
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
 #line 81 "eslex.l"
-{printf("%s\t %d\t DIVEQ\n",filename, lineno);return DIVEQ;}
+{return DIVEQ;}
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
 #line 82 "eslex.l"
-{printf("%s\t %d\t TIMESEQ\n",filename, lineno);return TIMESEQ;}
+{return TIMESEQ;}
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
 #line 83 "eslex.l"
-{printf("%s\t %d\t XOREQ\n",filename, lineno);return XOREQ;}
+{return XOREQ;}
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
 #line 84 "eslex.l"
-{printf("%s\t %d\t OREQ\n",filename, lineno);return OREQ;}
+{return OREQ;}
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
 #line 85 "eslex.l"
-{printf("%s\t %d\t ANDEQ\n",filename, lineno);return ANDEQ;}
+{return ANDEQ;}
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
 #line 86 "eslex.l"
-{printf("%s\t %d\t MODEQ\n",filename, lineno);return MODEQ;}
+{return MODEQ;}
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
 #line 87 "eslex.l"
-{printf("%s\t %d\t INDSEL\n",filename, lineno);return INDSEL;}
+{return INDSEL;}
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
 #line 88 "eslex.l"
-{printf("%s\t %d\t LOGAND\n",filename, lineno);return LOGAND;}
+{return LOGAND;}
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
 #line 89 "eslex.l"
-{printf("%s\t %d\t LOGOR\n",filename, lineno);return LOGOR;}
+{return LOGOR;}
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
 #line 90 "eslex.l"
-{printf("%s\t %d\t LTEQ\n",filename, lineno);return LTEQ;}
+{return LTEQ;}
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
 #line 91 "eslex.l"
-{printf("%s\t %d\t GTEQ\n",filename, lineno);return GTEQ;}
+{return GTEQ;}
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
 #line 92 "eslex.l"
-{printf("%s\t %d\t SHLEQ\n",filename, lineno);return SHLEQ;}
+{return SHLEQ;}
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
 #line 93 "eslex.l"
-{printf("%s\t %d\t SHL\n",filename, lineno);return SHL;}
+{return SHL;}
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
 #line 94 "eslex.l"
-{printf("%s\t %d\t SHREQ\n",filename, lineno);return SHREQ;}
+{return SHREQ;}
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
 #line 95 "eslex.l"
-{printf("%s\t %d\t SHR\n",filename, lineno);return SHR;}
+{return SHR;}
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
 #line 96 "eslex.l"
-{printf("%s\t %d\t EQEQ\n",filename, lineno);return EQEQ;}
+{return EQEQ;}
 	YY_BREAK
 case 60:
 YY_RULE_SETUP
@@ -1584,7 +1584,7 @@ YY_RULE_SETUP
 {
 	BEGIN(INITIAL); 
 	*tmp_ptr = '\0'; 
-	yylval.yystring = tmp_string; 
+	yylval.yystring = strdup(tmp_string); 
 	return STRING;
 	}
 	YY_BREAK
@@ -2954,6 +2954,7 @@ void yyfree (void * ptr )
 
 
 void printchars(char *str, char *end){
+/*
 	while (str != end){
 		switch (*str){
 		    case '\0':
@@ -3000,10 +3001,10 @@ void printchars(char *str, char *end){
 		str++;
     	}
 	printf("\n");
+*/
 }
 
 void keyword(int lineno, char* yytext){
-
 /*
 	char *p = yytext;
 	while(*p != '\0'){

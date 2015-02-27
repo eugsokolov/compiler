@@ -1,0 +1,72 @@
+%type <number.yyint> constant_expr primary_expr postfix_expr 
+
+initializer
+        : assignment_expr
+        | '{' initializer_list '}'
+        | '{' initializer_list ',' '}'
+        ;
+
+initializer_list
+        : initializer
+        | initializer_list ',' initializer
+        | designation initializer
+        | initializer_list ',' designation initializer
+        ;
+
+designation
+        : designator_list '='
+        ;
+
+designator_list
+        : designator
+        | designator_list designator
+        ;
+
+designator
+        : '[' constant_expr ']'
+        | '.' IDENT
+        ;
+
+constant_expr
+        : conditional_expr
+        ;
+
+
+
+----
+
+declaration
+	: INT initialized_decl_list ';'
+
+initialized_decl_list
+	: initialized_decl_list { insert_symbol($1); }
+	| initialized_decl_list ',' initialized_decl { insert_symbol($3); }
+
+initialized_decl
+	: declarator initializer_part
+
+declarator
+	: direct_declarator
+
+direct_declarator
+	: simple_declarator
+	| '(' declarator ')'
+
+simple_declarator
+	: IDENT { insert_symbol($1); }
+
+initializer
+	: assignment_expr
+	| '{' initializer_list '}'
+
+initializer_list
+	: initializer 
+	| initializer_list ',' initializer
+
+
+
+
+
+
+
+

@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-//YYSTYPE yylval;
+YYSTYPE yylval;
 
 unsigned int lineno = 1;
 unsigned int string_length = 0;
@@ -72,28 +72,28 @@ _Bool		{keyword(lineno,yytext);return _BOOL;}
 _Complex	{keyword(lineno,yytext);return _COMPLEX;}
 _Imaginary	{keyword(lineno,yytext);return _IMAGINARY;}
 
-"++"		{printf("%s\t %d\t PLUSPLUS\n",filename,lineno);return PLUSPLUS;}
-"--"		{printf("%s\t %d\t MINUSMINUS\n",filename,lineno);return MINUSMINUS;}
-"..."		{printf("%s\t %d\t ELLIPSIS\n",filename, lineno);return ELLIPSIS;}
-"!="		{printf("%s\t %d\t NOTEQ\n",filename, lineno);return NOTEQ;}
-"+="		{printf("%s\t %d\t PLUSEQ\n",filename, lineno);return PLUSEQ;}
-"-="		{printf("%s\t %d\t MINUSEQ\n",filename, lineno);return MINUSEQ;}
-"/="		{printf("%s\t %d\t DIVEQ\n",filename, lineno);return DIVEQ;}
-"*="		{printf("%s\t %d\t TIMESEQ\n",filename, lineno);return TIMESEQ;}
-"^="		{printf("%s\t %d\t XOREQ\n",filename, lineno);return XOREQ;}
-"|="		{printf("%s\t %d\t OREQ\n",filename, lineno);return OREQ;}
-"&="		{printf("%s\t %d\t ANDEQ\n",filename, lineno);return ANDEQ;}
-"%="		{printf("%s\t %d\t MODEQ\n",filename, lineno);return MODEQ;}
-"->"		{printf("%s\t %d\t INDSEL\n",filename, lineno);return INDSEL;}
-"&&"		{printf("%s\t %d\t LOGAND\n",filename, lineno);return LOGAND;}
-"||"		{printf("%s\t %d\t LOGOR\n",filename, lineno);return LOGOR;}
-"<="		{printf("%s\t %d\t LTEQ\n",filename, lineno);return LTEQ;}
-">="		{printf("%s\t %d\t GTEQ\n",filename, lineno);return GTEQ;}
-"<<="		{printf("%s\t %d\t SHLEQ\n",filename, lineno);return SHLEQ;}
-"<<"		{printf("%s\t %d\t SHL\n",filename, lineno);return SHL;}
-">>="		{printf("%s\t %d\t SHREQ\n",filename, lineno);return SHREQ;}
-">>"		{printf("%s\t %d\t SHR\n",filename, lineno);return SHR;}
-"=="		{printf("%s\t %d\t EQEQ\n",filename, lineno);return EQEQ;}
+"++"		{return PLUSPLUS;}
+"--"		{return MINUSMINUS;}
+"..."		{return ELLIPSIS;}
+"!="		{return NOTEQ;}
+"+="		{return PLUSEQ;}
+"-="		{return MINUSEQ;}
+"/="		{return DIVEQ;}
+"*="		{return TIMESEQ;}
+"^="		{return XOREQ;}
+"|="		{return OREQ;}
+"&="		{return ANDEQ;}
+"%="		{return MODEQ;}
+"->"		{return INDSEL;}
+"&&"		{return LOGAND;}
+"||"		{return LOGOR;}
+"<="		{return LTEQ;}
+">="		{return GTEQ;}
+"<<="		{return SHLEQ;}
+"<<"		{return SHL;}
+">>="		{return SHREQ;}
+">>"		{return SHR;}
+"=="		{return EQEQ;}
 "+"		{return '+';}
 "-"		{return '-';}
 "*"		{return '*';}
@@ -183,7 +183,7 @@ _Imaginary	{keyword(lineno,yytext);return _IMAGINARY;}
 \" 	{
 	BEGIN(INITIAL); 
 	*tmp_ptr = '\0'; 
-	yylval.yystring = tmp_string; 
+	yylval.yystring = strdup(tmp_string); 
 	return STRING;
 	}
 \n 	{fprintf(stderr, "%s:%d:Error:Unterminated string constant\n", filename, lineno);exit(1);}
@@ -382,6 +382,7 @@ _Imaginary	{keyword(lineno,yytext);return _IMAGINARY;}
 %%
 
 void printchars(char *str, char *end){
+/*
 	while (str != end){
 		switch (*str){
 		    case '\0':
@@ -428,10 +429,10 @@ void printchars(char *str, char *end){
 		str++;
     	}
 	printf("\n");
+*/
 }
 
 void keyword(int lineno, char* yytext){
-
 /*
 	char *p = yytext;
 	while(*p != '\0'){
