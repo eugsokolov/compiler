@@ -11,13 +11,24 @@
 #include <errno.h>
 #include "hash.h"
 
-#define MAX_STRING_LENGTH 4096
+#define MAX_STRING_LENGTH 4096 
+
+enum number_type{
+        TYPE_INT,
+        TYPE_LONG,
+        TYPE_LONGLONG,
+        TYPE_FLOAT,
+        TYPE_DOUBLE,
+        TYPE_LONGDOUBLE,
+        TYPE_UNSIGNED,
+        TYPE_SIGNED
+};
 
 enum scope_type{
 	FILE_SCOPE,
 	FUNCTION_SCOPE,
 	BLOCK_SCOPE,
-	PROTO_SCOPE,
+	PROTOTYPE_SCOPE,
 };
 
 struct symbol{
@@ -25,7 +36,7 @@ struct symbol{
 	char filename[MAX_STRING_LENGTH];
 	int linenumber;
 
-} symbol;
+};
 
 struct sym_table{
 	struct hashTable *symbols;
@@ -34,7 +45,7 @@ struct sym_table{
 	char *filename;
 	struct sym_table *prev;
 	enum scope_type scope_type;
-} sym_table;
+};
 
 struct sym_table * symTable_new(enum scope_type st, int line_begin, char *filename, struct sym_table *prev);
 

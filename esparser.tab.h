@@ -29,17 +29,6 @@
    
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
-#define MAX_STRING_LENGTH 4096
-enum number_type{
-        TYPE_INT,
-        TYPE_LONG,
-        TYPE_LONGLONG,
-        TYPE_FLOAT,
-        TYPE_DOUBLE,
-        TYPE_LONGDOUBLE,
-        TYPE_UNSIGNED,
-        TYPE_SIGNED
-};
 
 
 /* Tokens.  */
@@ -131,16 +120,17 @@ typedef union YYSTYPE
         struct number{
                 enum number_type num_type;
                 enum number_type num_sign;
-                unsigned long long int yyint;
+                long long yyint;
                 long double yydouble;
         }number;
-	
-struct symbol *lval;
+
+	void *nil;
+	struct sym *lval;
 
 
 
 /* Line 2068 of yacc.c  */
-#line 133 "esparser.tab.h"
+#line 134 "esparser.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

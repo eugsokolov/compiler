@@ -14,7 +14,6 @@ http://www.mactech.com/articles/mactech/Vol.16/16.07/UsingFlexandBison/index.htm
 #include <stdlib.h>
 #include <math.h>
 #include "esparser.tab.h"
-#include "hash.h"
 #include "sym_table.h"
 
 int debug = 0;
@@ -40,31 +39,36 @@ struct sym_table *curr;
         struct number{
                 enum number_type num_type;
                 enum number_type num_sign;
-                unsigned long long int yyint;
+                long long yyint;
                 long double yydouble;
         }number;
-	
+
+	void *nil;
+	struct sym *lval;
 }
 
 %token <yychar> CHARLIT
 %token <yystring> IDENT STRING
 %token <number> NUMBER 
-%token INDSEL PLUSPLUS MINUSMINUS SHL SHR LTEQ GTEQ EQEQ NOTEQ 
-%token LOGAND LOGOR ELLIPSIS TIMESEQ DIVEQ MODEQ PLUSEQ MINUSEQ 
-%token SHLEQ SHREQ ANDEQ OREQ XOREQ
-%token AUTO BREAK CASE CHAR CONST CONTINUE DEFAULT DO DOUBLE 
-%token ELSE ENUM EXTERN FLOAT FOR GOTO IF INLINE INT LONG 
-%token REGISTER RESTRICT RETURN SHORT SIGNED SIZEOF STATIC 
-%token STRUCT SWITCH TYPEDEF TYPEDEF_NAME UNION UNSIGNED 
-%token VOID VOLATILE WHILE _BOOL _COMPLEX _IMAGINARY
 
-%type <number.yyint> primary_expr postfix_expr 
+%token <nil> INDSEL PLUSPLUS MINUSMINUS SHL SHR LTEQ GTEQ EQEQ NOTEQ
+%token <nil> LOGAND LOGOR ELLIPSIS TIMESEQ DIVEQ MODEQ PLUSEQ MINUSEQ
+%token <nil> SHLEQ SHREQ ANDEQ OREQ XOREQ
+%token <nil> AUTO BREAK CASE CHAR CONST CONTINUE DEFAULT DO DOUBLE
+%token <nil> ELSE ENUM EXTERN FLOAT FOR GOTO IF INLINE INT LONG
+%token <nil> REGISTER RESTRICT RETURN SHORT SIGNED SIZEOF STATIC
+%token <nil> STRUCT SWITCH TYPEDEF TYPEDEF_NAME UNION UNSIGNED
+%token <nil> VOID VOLATILE WHILE _BOOL _COMPLEX _IMAGINARY
+
+%type <number.yyint> constant_expr primary_expr postfix_expr 
 %type <number.yyint> function_call expression_list cast_expr 
 %type <number.yyint> unary_expr multiplicative_expr additive_expr 
 %type <number.yyint> shift_expr relational_expr equality_expr
 %type <number.yyint>  bit_or_expr bit_xor_expr bit_and_expr 
 %type <number.yyint> logical_or_expr logical_and_expr conditional_expr 
 %type <number.yyint> assignment_expr expr
+%type <nil> compound_statement
+%type <lval> lval
 
 %start translation_unit
 
@@ -92,33 +96,31 @@ function_specifier
         ;
 
 compound_statement
-        : '{' '}'
+        : '{' '}' { $$ = NULL; }
         | '{' { //midaction rule
                 if (curr->scope_type == FILE_SCOPE)
                         curr = symTable_new(FUNCTION_SCOPE, lineno, filename, curr);
                 else
                         curr = symTable_new(BLOCK_SCOPE, lineno, filename, curr);
-        } declaration_list '}' {
-                curr = symTable_pop(curr);
-        }
-        | '{' { //midaction rule
-                if (curr->scope_type == FILE_SCOPE)
-                        curr = symTable_new(FUNCTION_SCOPE, lineno, filename, curr);
-                else
-                        curr = symTable_new(BLOCK_SCOPE, lineno, filename, curr);
-        } statement_list '}' {
+        } declaration_or_statement_list '}' {
                 curr = symTable_pop(curr);
         }
         ;
 
-statement_list
-        : statement
-        | statement_list statement
+declaration_or_statement_list
+	: declaration_or_statement
+	| declaration_or_statement_list declaration_or_statement
+	;
+
+declaration_or_statement
+        : declaration
+	| statement
         ;
 
 statement
         : expr ';' { fprintf(stderr, "Parse statement expression value = %lld", $1); }
-        | ';'
+        | compound_statement
+	| ';'
         ;
 
 declaration_list
@@ -132,24 +134,55 @@ declaration
 
 
 
+initializer
+        : assignment_expr
+        | '{' initializer_list '}'
+        | '{' initializer_list ',' '}'
+        ;
 
+initializer_list
+        : initializer
+        | initializer_list ',' initializer
+        | designation initializer
+        | initializer_list ',' designation initializer
+        ;
 
+designation
+        : designator_list '='
+        ;
+
+designator_list
+        : designator
+        | designator_list designator
+        ;
+
+designator
+        : '[' constant_expr ']'
+        | '.' IDENT
+        ;
 
 identifier_list
         : identifier_list ',' IDENT { insert_symbol($3); }
         | IDENT { insert_symbol($1); }
         ;
 
+constant_expr
+        : conditional_expr
+        ;
+
 primary_expr
         : IDENT {
-                struct symbol *s = symTable_getSymbol(curr, $1);
-                if (s != NULL) $$ = s->value;
+		char *ident = yylval.yystring;
+		ident[strlen(yylval.yystring)] = '\0';
+                struct symbol *s = symTable_getSymbol(curr, ident);
+                if (s != NULL) $$ = s;
                 else {
                         $$ = 0;
                         fprintf(stderr, "Undefined identifier %s", $1);
                 }
         }
         | NUMBER {
+	
                 if ($1.num_type == TYPE_INT || $1.num_type == TYPE_LONG || $1.num_type == TYPE_LONGLONG)
                         $$ = $1.yyint;
                 else {
@@ -176,8 +209,8 @@ postfix_expr
                 $$ = 0;
         }
 	| function_call	
-        | postfix_expr PLUSPLUS { $$ = $1++; }
-        | postfix_expr MINUSMINUS { $$ = $1--; }
+        | lval PLUSPLUS { $$ = $1->value++; }
+        | lval MINUSMINUS { $$ = $1->value--; }
         ;
 
 function_call
@@ -192,7 +225,7 @@ expression_list
 
 cast_expr
         : unary_expr
-        | '(' INT ')' cast_expr 
+        | '(' INT ')' cast_expr {$$ = (int)$4; } 
         ;
 
 unary_expr
@@ -204,8 +237,8 @@ unary_expr
         | '~' cast_expr { $$ = ~$2; }
         | '&' cast_expr { $$ = (long long) &$2; }
         | '*' cast_expr { $$ = $2; }
-        | PLUSPLUS unary_expr { $$ = ++$2; }
-        | MINUSMINUS unary_expr { $$ = --$2; }
+        | PLUSPLUS lval { $$ = ++$2->value; }
+        | MINUSMINUS lval { $$ = --$2->value; }
         ;
 
 multiplicative_expr
@@ -279,26 +312,37 @@ conditional_expr
 
 assignment_expr
         : conditional_expr
-        | unary_expr '=' assignment_expr { $$ = $3;printf( "exprval=%lld", $$); }
-        | unary_expr PLUSEQ assignment_expr {$$ = $1 + $3;$1 = $$; }
-        | unary_expr MINUSEQ assignment_expr { $$ = $1 - $3;$1 = $$;}
-	| unary_expr TIMESEQ assignment_expr { $$ = $1 * $3;$1 = $$; }
-        | unary_expr DIVEQ assignment_expr { $$ = $1 / $3;$1 = $$; }
-        | unary_expr MODEQ assignment_expr { $$ = $1 % $3;$1 = $$; }
-        | unary_expr SHLEQ assignment_expr { $$ = $1 << $3;$1 = $$; }
-        | unary_expr SHREQ assignment_expr { $$ = $1 >> $3;$1 = $$; }
-        | unary_expr ANDEQ assignment_expr { $$ = $1 & $3;$1 = $$; }
-        | unary_expr OREQ assignment_expr { $$ = $1 | $3;$1 = $$; }
-        | unary_expr XOREQ assignment_expr { $$ = $1 ^ $3;$1 = $$; }
+        | lval '=' assignment_expr { $$ = $3;printf( "exprval=%lld", $$); }
+        | lval PLUSEQ assignment_expr {$$ = $1->value + $3;$1->value = $$; }
+        | lval MINUSEQ assignment_expr { $$ = $1->value - $3;$1->value = $$;}
+	| lval TIMESEQ assignment_expr { $$ = $1->value * $3;$1->value = $$; }
+        | lval DIVEQ assignment_expr { $$ = $1->value / $3;$1->value = $$; }
+        | lval MODEQ assignment_expr { $$ = $1->value % $3;$1->value = $$; }
+        | lval SHLEQ assignment_expr { $$ = $1->value << $3;$1->value = $$; }
+        | lval SHREQ assignment_expr { $$ = $1->value >> $3;$1->value = $$; }
+        | lval ANDEQ assignment_expr { $$ = $1->value & $3;$1->value = $$; }
+        | lval OREQ assignment_expr { $$ = $1->value | $3;$1->value = $$; }
+        | lval XOREQ assignment_expr { $$ = $1->value ^ $3;$1->value = $$; }
         ;
 
 expr
 	: assignment_expr
 	| expr ',' assignment_expr { $$ = $3; }
         ;
+lval
+        : IDENT {
+                struct symbol *s = symTable_getSymbol(curr, $1);
+                if (s != NULL) $$ = s;
+                else {
+                        fprintf(stderr, "Unidentified identifier %s", $1);
+                        $$ = 0;
+                }
+        }
+        ;
+
+
 
 %%
-
 
 void insert_symbol(char *s){
 
@@ -323,4 +367,3 @@ main(){
 
 	printf("EOF\n");
 }
-

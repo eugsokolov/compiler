@@ -1,7 +1,46 @@
-%type <number.yyint> constant_expr primary_expr postfix_expr 
+
+
+declaration
+	: INT initialized_decl_list ';'
+
+initialized_declarator_list
+        : initialized_declarator { $$ = $1; }
+        | initialized_declarator_list ',' initialized_declarator { $$ = ast_push_back($1,$3,NEXT); }
+        ;
+
+initialized_declarator
+        : declarator
+        | declarator '=' initializer { $$ = $1; }
+        ;
+
+declarator
+        : direct_declarator
+        ;
+
+direct_declarator
+        : simple_declarator
+        | '(' declarator ')' {$$ = $2;} 
+        ;
+
+simple_declarator
+        : IDENT 
+            {
+                int ret;
+                $$ = ast_newnode(AST_VAR);
+                $$->scope = current_scope->scope;
+                strcpy($$->attributes.identifier, yylval.yystring);
+                $$->attributes.ln_effective = line_number;
+                strcpy($$->attributes.file_name, filename);
+                ret = insert_ident(current_scope, yylval.yystring, $$, NAMESPACE_OTHER);
+                if (!ret){
+                    fprintf(stderr, "Error: Previous Declaration of Identifier %s - %s: %d\n", yylval.yystring, filename, line_number);
+                }
+            }
+        ;
+
 
 initializer
-        : assignment_expr
+        : assignment_expression
         | '{' initializer_list '}'
         | '{' initializer_list ',' '}'
         ;
@@ -23,46 +62,13 @@ designator_list
         ;
 
 designator
-        : '[' constant_expr ']'
+        : '[' constant_expression ']'
         | '.' IDENT
         ;
 
-constant_expr
-        : conditional_expr
+constant_expression
+        : conditional_expression
         ;
-
-
-
-----
-
-declaration
-	: INT initialized_decl_list ';'
-
-initialized_decl_list
-	: initialized_decl_list { insert_symbol($1); }
-	| initialized_decl_list ',' initialized_decl { insert_symbol($3); }
-
-initialized_decl
-	: declarator initializer_part
-
-declarator
-	: direct_declarator
-
-direct_declarator
-	: simple_declarator
-	| '(' declarator ')'
-
-simple_declarator
-	: IDENT { insert_symbol($1); }
-
-initializer
-	: assignment_expr
-	| '{' initializer_list '}'
-
-initializer_list
-	: initializer 
-	| initializer_list ',' initializer
-
 
 
 

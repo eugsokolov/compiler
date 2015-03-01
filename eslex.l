@@ -10,6 +10,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "sym_table.h"
 
 YYSTYPE yylval;
 
@@ -119,6 +120,7 @@ _Imaginary	{keyword(lineno,yytext);return _IMAGINARY;}
 ","		{return ',';}
 "="		{return '=';}
 
+" "		{}
 [\n]		{lineno++; return '\n';}
 
 [a-zA-Z][a-zA-Z0-9]*	{
