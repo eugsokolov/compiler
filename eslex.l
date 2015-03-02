@@ -120,8 +120,9 @@ _Imaginary	{keyword(lineno,yytext);return _IMAGINARY;}
 ","		{return ',';}
 "="		{return '=';}
 
-" "		{}
-[\n]		{lineno++; return '\n';}
+[ ]		{}
+[\t]		{}
+[\n]		{lineno++;}
 
 [a-zA-Z][a-zA-Z0-9]*	{
 	yylval.yystring=strdup(yytext);

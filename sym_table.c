@@ -28,7 +28,7 @@ struct symbol * sym_new(char *filename, int linenumber){
 		return NULL;
 	}
 	strcpy(s->filename, filename);
-	s->linenumber;
+	s->linenumber = linenumber;
 	return s;
 }
 
@@ -45,8 +45,9 @@ int symTable_push(struct sym_table *table, char *symbol, void *ptr){
 	while(st != NULL){
 		if(hashTable_contains(st->symbols, symbol) == TRUE)
 			return FALSE;
+		st = st->prev;
 	}
-	hashTable_insert(st->symbols, symbol, ptr);
+	hashTable_insert(table->symbols, symbol, ptr);
 	return TRUE;
 
 }

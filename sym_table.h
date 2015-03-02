@@ -13,6 +13,7 @@
 
 #define MAX_STRING_LENGTH 4096 
 
+/*
 enum number_type{
         TYPE_INT,
         TYPE_LONG,
@@ -23,6 +24,7 @@ enum number_type{
         TYPE_UNSIGNED,
         TYPE_SIGNED
 };
+*/
 
 enum scope_type{
 	FILE_SCOPE,
@@ -32,7 +34,7 @@ enum scope_type{
 };
 
 struct symbol{
-	int value;
+	long long value;
 	char filename[MAX_STRING_LENGTH];
 	int linenumber;
 

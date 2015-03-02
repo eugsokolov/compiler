@@ -111,26 +111,35 @@ typedef union YYSTYPE
 {
 
 /* Line 2068 of yacc.c  */
-#line 34 "esparser.y"
+#line 36 "esparser.y"
 
 
 	char yychar;
-        char *yystring;
+	char *yystring;
 
-        struct number{
-                enum number_type num_type;
-                enum number_type num_sign;
-                long long yyint;
-                long double yydouble;
-        }number;
+	struct number{
+		enum number_type{
+			TYPE_INT,
+			TYPE_LONG,
+			TYPE_LONGLONG,
+			TYPE_FLOAT,
+			TYPE_DOUBLE,
+			TYPE_LONGDOUBLE
+		} num_type;
+		enum sign_type{
+			TYPE_UNSIGNED,
+			TYPE_SIGNED
+		} num_sign;
+		long long yyint;
+		long double yydouble;
+	}number;
 
 	void *nil;
-	struct sym *lval;
 
 
 
 /* Line 2068 of yacc.c  */
-#line 134 "esparser.tab.h"
+#line 143 "esparser.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

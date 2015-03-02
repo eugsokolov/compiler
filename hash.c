@@ -41,8 +41,13 @@ int hashTable_insert(struct hashTable *table, char *key, void *pv){
 */
 
 	if(hashTable_contains(table, key) == TRUE)
-		return TRUE;
+		return FALSE;
 	
+	if(table->capacity * 0.7 < table->filled){
+		fprintf(stderr, "Hash table about to exceed size..\n");
+		exit(1);
+	}
+
 	int i = hashTable_hash(table, key) % table->capacity;
 	if (i < 0)
 		i += table->capacity;
@@ -51,17 +56,16 @@ int hashTable_insert(struct hashTable *table, char *key, void *pv){
 		i++;
 		i %= table->capacity;
 	}
-	
 	if((table->data[i].isOccupied == FALSE) || (table->data[i].isDeleted == TRUE)){
 		table->data[i].key = key;
 		table->data[i].isOccupied = TRUE;
 		table->data[i].isDeleted = FALSE;
 		table->data[i].pv = pv;
 		table->filled++;
-		return 0;
+		return TRUE;
 	}
 
-	return -1;
+	return FALSE;
 }
 
 int hashTable_contains(struct hashTable *table, char *key){
