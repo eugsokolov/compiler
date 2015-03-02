@@ -13,19 +13,6 @@
 
 #define MAX_STRING_LENGTH 4096 
 
-/*
-enum number_type{
-        TYPE_INT,
-        TYPE_LONG,
-        TYPE_LONGLONG,
-        TYPE_FLOAT,
-        TYPE_DOUBLE,
-        TYPE_LONGDOUBLE,
-        TYPE_UNSIGNED,
-        TYPE_SIGNED
-};
-*/
-
 enum scope_type{
 	FILE_SCOPE,
 	FUNCTION_SCOPE,

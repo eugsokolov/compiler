@@ -72,7 +72,7 @@ int hashTable_contains(struct hashTable *table, char *key){
 
 	int i = hashTable_findPos(table, key);
 	if (i == -1)
-		return -1;
+		return FALSE;
 	
 	return TRUE;
 }

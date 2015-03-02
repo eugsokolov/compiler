@@ -183,7 +183,7 @@ primary_expr
 		char *ident = yylval.yystring;
 		ident[strlen(yylval.yystring)] = '\0';
                 struct symbol *s = symTable_getSymbol(curr, $1);
-		fprintf(stderr, "sym: %d\n", s);
+		fprintf(stderr, "sym: %d\n", (long long)s);
 		if (s != NULL) $$ = (long long)s;
                 else {
                         $$ = 0;
@@ -348,7 +348,7 @@ void insert_symbol(char *s){
 		st = symTable_getSymbol(curr,s);
 		fprintf(stderr, "Error: %s previously defined around %s:%d\n", s, st->filename, st->linenumber);
 	}
-
+fprintf(stderr, "sym val: %lld\n"st->value);
 }
 
 void yyerror(const char *s){

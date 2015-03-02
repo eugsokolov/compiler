@@ -39,17 +39,18 @@ struct sym_table * symTable_pop(struct sym_table *table){
 
 }
 
-int symTable_push(struct sym_table *table, char *symbol, void *ptr){
+int symTable_push(struct sym_table *table, char *ident, void *ptr){
 
 	struct sym_table *st = table;
 	while(st != NULL){
-		if(hashTable_contains(st->symbols, symbol) == TRUE)
+		if(hashTable_contains(st->symbols, ident) == TRUE)
 			return FALSE;
 		st = st->prev;
 	}
-	hashTable_insert(table->symbols, symbol, ptr);
-	return TRUE;
+	if(hashTable_insert(table->symbols, ident, ptr) == TRUE)
+		return TRUE;
 
+	return FALSE;
 }
 
 struct symbol * symTable_getSymbol(struct sym_table *table, char *symbol){
