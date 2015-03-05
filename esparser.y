@@ -1,12 +1,6 @@
 %error-verbose
 %debug
 %{
-/*
-http://www.csc.villanova.edu/~tway/courses/csc4181/s2012/handouts/Tiny%20Symbol%20Table%20Info.pdf
-http://research.microsoft.com/en-us/um/people/rgal/ar_language/external/compiler.pdf
-http://www.mactech.com/articles/mactech/Vol.16/16.07/UsingFlexandBison/index.html
-*/
-
 //EUGENE SOKOLOV
 //COMPILERS ECE466
 //PARSER ANALYSIS: parser.y
@@ -84,72 +78,17 @@ struct sym_table *curr;
 
 %%
 
-translation_unit
-        : top_level_declaration
-        | translation_unit top_level_declaration
-        ;
 
-top_level_declaration
-        : declaration
-        | function_definition
-        ;
 
-function_definition
-        : function_specifier compound_statement
-        ;
 
-function_specifier
-        : IDENT '(' ')' {
-		//no parameters currently
-                insert_symbol($1);
-        }
-        ;
 
-compound_statement
-        : '{' '}' { $$ = NULL; }
-        | '{' { //midaction rule
-                if (curr->scope_type == FILE_SCOPE)
-                        curr = symTable_new(FUNCTION_SCOPE, lineno, filename, curr);
-                else
-                        curr = symTable_new(BLOCK_SCOPE, lineno, filename, curr);
-        } declaration_or_statement_list '}' {
-                curr = symTable_pop(curr);
-        }
-        ;
-
-declaration_or_statement_list
-	: declaration_or_statement
-	| declaration_or_statement_list declaration_or_statement
-	;
-
-declaration_or_statement
-        : declaration
-	| statement
-        ;
-
-statement
-        : expr ';' 
-        | compound_statement
-	| ';'
-        ;
-
-declaration_list
-        : declaration
-        | declaration_list declaration
-        ;
 
 declaration
         : INT identifier_list ';'
 	| declaration_specifiers initialized_declarator_list ';'
 	;
 
-declaration_specifiers
-	: '+++'
-	;
 
-function_specifier
-	: '+++'
-	;
 
 initialized_declarator_list
 	: '+++'
@@ -182,15 +121,13 @@ designator
         | '.' IDENT
         ;
 
-identifier_list
-        : identifier_list ',' IDENT { insert_symbol($3); }
-        | IDENT { insert_symbol($1); }
-        ;
+
 
 constant_expr
         : conditional_expr
         ;
 
+/* Expressions: Chapter 7 of H&S */
 primary_expr
         : IDENT {
 		char *ident = yylval.yystring;
@@ -218,15 +155,15 @@ primary_expr
 postfix_expr
 	: primary_expr
 	| postfix_expr '[' expr ']' {
-                fprintf(stderr, "Arrays not implemented\n");
+                fprintf(stderr, "Error: arrays not supported at: %s: %d\n",filename, lineno); 
                 $$ = 0;
         }
         | postfix_expr '.' IDENT {
-                fprintf(stderr, "component-selection not implemented\n");
+		fprintf(stderr, "Error: direct component-selection not supported at: %s: %d\n",filename, lineno); 
                 $$ = 0;
         }
         | postfix_expr INDSEL IDENT {
-                fprintf(stderr, "component-selection not implemented\n");
+f		printf(stderr, "Error: indirect component-selection not supported at: %s: %d\n",filename, lineno); 
                 $$ = 0;
         }
 	| function_call	
@@ -350,6 +287,207 @@ expr
 	: assignment_expr
 	| expr ',' assignment_expr { $$ = $3; }
         ;
+
+/* Statements: Chapter 8 of H&S */
+statement
+        : expression_statement 
+        | labeled_statement { $$ = NULL; }
+        | compound_statement
+        | conditional_statement 
+        | iterative_statement 
+        | switch_statement 
+        | break_statement { $$ = NULL; }
+        | continue_statement { $$ = NULL; }
+        | return_statement { $$ = NULL; } 
+        | goto_statement { $$ = NULL; }
+        | null_statement
+	;
+
+conditional_statement
+        : if_statement
+        | if_else_statement
+        ;
+
+iterative_statement
+        : do_statement
+        | while_statement
+        | for_statement
+        ;
+
+statement
+        : expr ';' 
+        ;
+
+labeled_statement
+        : label ':' statement
+        ;
+
+label
+        : named_label
+        | case_label
+        | default_label
+        ;
+
+
+compound_statement
+        : '{' '}' { $$ = NULL; }
+        | '{' { //midaction rule
+                if (curr->scope_type == FILE_SCOPE)
+                        curr = symTable_new(FUNCTION_SCOPE, lineno, filename, curr);
+                else
+                        curr = symTable_new(BLOCK_SCOPE, lineno, filename, curr);
+        } declaration_or_statement_list '}' {
+                curr = symTable_pop(curr);
+        }
+        ;
+
+declaration_or_statement_list
+	: declaration_or_statement
+	| declaration_or_statement_list declaration_or_statement
+	;
+
+declaration_or_statement
+        : declaration
+	| statement
+        ;
+
+conditional_statement
+        : if_statement
+        | if_else_statement
+        ;
+
+if_statement
+        : IF '(' expression ')' statement {
+
+	}
+        ;
+
+if_else_statement
+        : IF '(' expression ')' statement ELSE statement {
+
+	}
+        ;
+
+iterative_statement
+        : do_statement
+        | while_statement
+        | for_statement
+        ;
+
+do_statement
+        : DO statement WHILE '(' expression ')' ';' {
+	
+	}
+        ;
+
+while_statement
+        : WHILE '(' expression ')' statement {
+
+	}
+        ;
+
+for_statement
+        : FOR for_expressions statement { $$ = $2; $$->body = $3; }
+        ;
+
+for_expressions
+	:
+	;
+
+switch_statement
+        : SWITCH '(' expression ')' statement {
+	
+	}
+        ;
+
+case_label
+        : CASE constant_expression
+        ;
+
+default_label
+        : DEFAULT
+        ;
+
+break_statement
+        : BREAK ';'
+        ;
+    
+continue_statement
+        : CONTINUE ';'
+        ;
+
+return_statement
+        : RETURN ';'
+        | RETURN expression ';'
+        ;
+
+goto_statement
+        : GOTO named_label ';'
+        ;
+
+named_label
+        : IDENT 
+        ;
+
+null_statement
+        : ';' { $$ = NULL; }
+        ;
+
+/* Functions: Chapter 9 of H&S */
+translation_unit
+        : top_level_declaration
+        | translation_unit top_level_declaration
+        ;
+
+top_level_declaration
+        : declaration
+        | function_definition
+        ;
+
+function_definition
+        : function_specifier compound_statement
+        ;
+
+function_specifier
+        : IDENT '(' ')' {
+		//no parameters currently
+                insert_symbol($1);
+        }
+	| declaration_specifier declarator declaration_list
+        ;
+
+declaration_list
+        : declaration
+        | declaration_list declaration
+        ;
+
+function_declarator
+        : direct_declarator '(' parameter_type_list ')' { fprintf(stderr, "Error: function prototypes not supported at: %s: %d\n",filename, lineno); }
+        | direct_declarator '(' ')' { }
+        | direct_declarator '(' identifier_list ')' { fprintf(stderr, "Error: function arguments not supported at: %s: %d\n",filename, lineno); }
+        ;
+
+parameter_type_list
+        : parameter_list
+        | parameter_list ',' ELLIPSIS
+        ;
+
+parameter_list
+        : parameter_declaration
+        | parameter_list ',' parameter_declaration
+        ;
+
+parameter_declaration
+        : declaration_specifiers declarator
+        | declaration_specifiers
+        | declaration_specifiers abstract_declarator
+        ;
+
+identifier_list
+        : IDENT { insert_symbol($1); }
+        | identifier_list ',' IDENT { insert_symbol($3); }
+        ;
+
 
 %%
 
