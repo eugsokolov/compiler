@@ -195,10 +195,7 @@ primary_expr
         : IDENT {
 		char *ident = yylval.yystring;
 		ident[strlen(yylval.yystring)] = '\0';
-		fprintf(stderr, "ident: %s\n", ident);
                 struct symbol *s = symTable_getSymbol(curr, $1, curr->scope_type);
-		//symTable_print(curr);
-		//fprintf(stderr, "sym: %d\n", (long long)s);
 		if (s != NULL) $$ = (long long)s;
                 else {
                         $$ = 0;
@@ -363,7 +360,7 @@ void insert_symbol(char *s){
 		st = symTable_getSymbol(curr,s, curr->scope_type);
 		fprintf(stderr, "Error: %s previously defined around %s:%d\n", s, st->filename, st->linenumber);
 	}
-symTable_print(curr);
+//symTable_print(curr);
 //fprintf(stderr, "sym val: %s with %lld\n", s,st->value);
 }
 

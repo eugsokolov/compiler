@@ -574,14 +574,14 @@ static const yytype_uint16 yyrline[] =
 {
        0,    88,    88,    89,    93,    94,    98,   102,   109,   110,
      110,   121,   122,   126,   127,   131,   132,   133,   142,   143,
-     147,   151,   155,   186,   187,   195,   208,   218,   222,   223,
-     227,   231,   235,   236,   237,   241,   242,   246,   247,   251,
-     252,   256,   257,   258,   259,   260,   261,   262,   263,   264,
-     265,   269,   270,   271,   278,   282,   283,   284,   288,   289,
-     290,   294,   295,   296,   297,   298,   302,   303,   304,   308,
-     309,   313,   314,   318,   319,   323,   324,   328,   329,   333,
-     334,   338,   339,   340,   341,   342,   343,   344,   345,   346,
-     347,   348,   349,   353,   354
+     147,   151,   155,   186,   187,   195,   205,   215,   219,   220,
+     224,   228,   232,   233,   234,   238,   239,   243,   244,   248,
+     249,   253,   254,   255,   256,   257,   258,   259,   260,   261,
+     262,   266,   267,   268,   275,   279,   280,   281,   285,   286,
+     287,   291,   292,   293,   294,   295,   299,   300,   301,   305,
+     306,   310,   311,   315,   316,   320,   321,   325,   326,   330,
+     331,   335,   336,   337,   338,   339,   340,   341,   342,   343,
+     344,   345,   346,   350,   351
 };
 #endif
 
@@ -1719,10 +1719,7 @@ yyreduce:
     {
 		char *ident = yylval.yystring;
 		ident[strlen(yylval.yystring)] = '\0';
-		fprintf(stderr, "ident: %s\n", ident);
                 struct symbol *s = symTable_getSymbol(curr, (yyvsp[(1) - (1)].yystring), curr->scope_type);
-		//symTable_print(curr);
-		//fprintf(stderr, "sym: %d\n", (long long)s);
 		if (s != NULL) (yyval.number.yyint) = (long long)s;
                 else {
                         (yyval.number.yyint) = 0;
@@ -1734,7 +1731,7 @@ yyreduce:
   case 26:
 
 /* Line 1806 of yacc.c  */
-#line 208 "esparser.y"
+#line 205 "esparser.y"
     {
 	
                 if ((yyvsp[(1) - (1)].number).num_type == TYPE_INT || (yyvsp[(1) - (1)].number).num_type == TYPE_LONG || (yyvsp[(1) - (1)].number).num_type == TYPE_LONGLONG)
@@ -1750,14 +1747,14 @@ yyreduce:
   case 27:
 
 /* Line 1806 of yacc.c  */
-#line 218 "esparser.y"
+#line 215 "esparser.y"
     { (yyval.number.yyint) = (long long)(yyvsp[(2) - (3)].number.yyint); }
     break;
 
   case 29:
 
 /* Line 1806 of yacc.c  */
-#line 223 "esparser.y"
+#line 220 "esparser.y"
     {
                 fprintf(stderr, "Arrays not implemented\n");
                 (yyval.number.yyint) = 0;
@@ -1767,7 +1764,7 @@ yyreduce:
   case 30:
 
 /* Line 1806 of yacc.c  */
-#line 227 "esparser.y"
+#line 224 "esparser.y"
     {
                 fprintf(stderr, "component-selection not implemented\n");
                 (yyval.number.yyint) = 0;
@@ -1777,7 +1774,7 @@ yyreduce:
   case 31:
 
 /* Line 1806 of yacc.c  */
-#line 231 "esparser.y"
+#line 228 "esparser.y"
     {
                 fprintf(stderr, "component-selection not implemented\n");
                 (yyval.number.yyint) = 0;
@@ -1787,98 +1784,98 @@ yyreduce:
   case 33:
 
 /* Line 1806 of yacc.c  */
-#line 236 "esparser.y"
+#line 233 "esparser.y"
     { (yyval.number.yyint) = (yyvsp[(1) - (2)].number.yyint)++; }
     break;
 
   case 34:
 
 /* Line 1806 of yacc.c  */
-#line 237 "esparser.y"
+#line 234 "esparser.y"
     { (yyval.number.yyint) = (yyvsp[(1) - (2)].number.yyint)--; }
     break;
 
   case 40:
 
 /* Line 1806 of yacc.c  */
-#line 252 "esparser.y"
+#line 249 "esparser.y"
     {(yyval.number.yyint) = (int)(yyvsp[(4) - (4)].number.yyint); }
     break;
 
   case 42:
 
 /* Line 1806 of yacc.c  */
-#line 257 "esparser.y"
+#line 254 "esparser.y"
     { (yyval.number.yyint) = sizeof(long long); }
     break;
 
   case 43:
 
 /* Line 1806 of yacc.c  */
-#line 258 "esparser.y"
+#line 255 "esparser.y"
     { (yyval.number.yyint) = -(yyvsp[(2) - (2)].number.yyint); }
     break;
 
   case 44:
 
 /* Line 1806 of yacc.c  */
-#line 259 "esparser.y"
+#line 256 "esparser.y"
     { (yyval.number.yyint) = (yyvsp[(2) - (2)].number.yyint);  printf("exprval=%lld\n",(yyval.number.yyint)); }
     break;
 
   case 45:
 
 /* Line 1806 of yacc.c  */
-#line 260 "esparser.y"
+#line 257 "esparser.y"
     { (yyval.number.yyint) = !(yyvsp[(2) - (2)].number.yyint); }
     break;
 
   case 46:
 
 /* Line 1806 of yacc.c  */
-#line 261 "esparser.y"
+#line 258 "esparser.y"
     { (yyval.number.yyint) = ~(yyvsp[(2) - (2)].number.yyint); }
     break;
 
   case 47:
 
 /* Line 1806 of yacc.c  */
-#line 262 "esparser.y"
+#line 259 "esparser.y"
     { (yyval.number.yyint) = (long long) &(yyvsp[(2) - (2)].number.yyint); }
     break;
 
   case 48:
 
 /* Line 1806 of yacc.c  */
-#line 263 "esparser.y"
+#line 260 "esparser.y"
     { (yyval.number.yyint) = (yyvsp[(2) - (2)].number.yyint); }
     break;
 
   case 49:
 
 /* Line 1806 of yacc.c  */
-#line 264 "esparser.y"
+#line 261 "esparser.y"
     { (yyval.number.yyint) = ++(yyvsp[(2) - (2)].number.yyint); }
     break;
 
   case 50:
 
 /* Line 1806 of yacc.c  */
-#line 265 "esparser.y"
+#line 262 "esparser.y"
     { (yyval.number.yyint) = --(yyvsp[(2) - (2)].number.yyint); }
     break;
 
   case 52:
 
 /* Line 1806 of yacc.c  */
-#line 270 "esparser.y"
+#line 267 "esparser.y"
     { (yyval.number.yyint) = (yyvsp[(1) - (3)].number.yyint) * (yyvsp[(3) - (3)].number.yyint); }
     break;
 
   case 53:
 
 /* Line 1806 of yacc.c  */
-#line 271 "esparser.y"
+#line 268 "esparser.y"
     {
 		if ((yyvsp[(3) - (3)].number.yyint) != 0) (yyval.number.yyint) = (yyvsp[(1) - (3)].number.yyint) / (yyvsp[(3) - (3)].number.yyint);
 		else {
@@ -1891,210 +1888,210 @@ yyreduce:
   case 54:
 
 /* Line 1806 of yacc.c  */
-#line 278 "esparser.y"
+#line 275 "esparser.y"
     { (yyval.number.yyint) = (yyvsp[(1) - (3)].number.yyint) % (yyvsp[(3) - (3)].number.yyint); }
     break;
 
   case 56:
 
 /* Line 1806 of yacc.c  */
-#line 283 "esparser.y"
+#line 280 "esparser.y"
     { (yyval.number.yyint) = (yyvsp[(1) - (3)].number.yyint) + (yyvsp[(3) - (3)].number.yyint); }
     break;
 
   case 57:
 
 /* Line 1806 of yacc.c  */
-#line 284 "esparser.y"
+#line 281 "esparser.y"
     { (yyval.number.yyint) = (yyvsp[(1) - (3)].number.yyint) - (yyvsp[(3) - (3)].number.yyint); }
     break;
 
   case 59:
 
 /* Line 1806 of yacc.c  */
-#line 289 "esparser.y"
+#line 286 "esparser.y"
     { (yyval.number.yyint) = (yyvsp[(1) - (3)].number.yyint) << (yyvsp[(3) - (3)].number.yyint); }
     break;
 
   case 60:
 
 /* Line 1806 of yacc.c  */
-#line 290 "esparser.y"
+#line 287 "esparser.y"
     { (yyval.number.yyint) = (yyvsp[(1) - (3)].number.yyint) >> (yyvsp[(3) - (3)].number.yyint); }
     break;
 
   case 62:
 
 /* Line 1806 of yacc.c  */
-#line 295 "esparser.y"
+#line 292 "esparser.y"
     { (yyval.number.yyint) = (yyvsp[(1) - (3)].number.yyint) < (yyvsp[(3) - (3)].number.yyint); }
     break;
 
   case 63:
 
 /* Line 1806 of yacc.c  */
-#line 296 "esparser.y"
+#line 293 "esparser.y"
     { (yyval.number.yyint) = (yyvsp[(1) - (3)].number.yyint) <= (yyvsp[(3) - (3)].number.yyint); }
     break;
 
   case 64:
 
 /* Line 1806 of yacc.c  */
-#line 297 "esparser.y"
+#line 294 "esparser.y"
     { (yyval.number.yyint) = (yyvsp[(1) - (3)].number.yyint) > (yyvsp[(3) - (3)].number.yyint); }
     break;
 
   case 65:
 
 /* Line 1806 of yacc.c  */
-#line 298 "esparser.y"
+#line 295 "esparser.y"
     { (yyval.number.yyint) = (yyvsp[(1) - (3)].number.yyint) >= (yyvsp[(3) - (3)].number.yyint); }
     break;
 
   case 67:
 
 /* Line 1806 of yacc.c  */
-#line 303 "esparser.y"
+#line 300 "esparser.y"
     { (yyval.number.yyint) = (yyvsp[(1) - (3)].number.yyint) == (yyvsp[(3) - (3)].number.yyint); }
     break;
 
   case 68:
 
 /* Line 1806 of yacc.c  */
-#line 304 "esparser.y"
+#line 301 "esparser.y"
     { (yyval.number.yyint) = (yyvsp[(1) - (3)].number.yyint) != (yyvsp[(3) - (3)].number.yyint); }
     break;
 
   case 70:
 
 /* Line 1806 of yacc.c  */
-#line 309 "esparser.y"
+#line 306 "esparser.y"
     { (yyval.number.yyint) = (yyvsp[(1) - (3)].number.yyint) | (yyvsp[(3) - (3)].number.yyint); }
     break;
 
   case 72:
 
 /* Line 1806 of yacc.c  */
-#line 314 "esparser.y"
+#line 311 "esparser.y"
     { (yyval.number.yyint) = (yyvsp[(1) - (3)].number.yyint) ^ (yyvsp[(3) - (3)].number.yyint); }
     break;
 
   case 74:
 
 /* Line 1806 of yacc.c  */
-#line 319 "esparser.y"
+#line 316 "esparser.y"
     { (yyval.number.yyint) = (yyvsp[(1) - (3)].number.yyint) & (yyvsp[(3) - (3)].number.yyint); }
     break;
 
   case 76:
 
 /* Line 1806 of yacc.c  */
-#line 324 "esparser.y"
+#line 321 "esparser.y"
     { (yyval.number.yyint) = (yyvsp[(1) - (3)].number.yyint) || (yyvsp[(3) - (3)].number.yyint); }
     break;
 
   case 78:
 
 /* Line 1806 of yacc.c  */
-#line 329 "esparser.y"
+#line 326 "esparser.y"
     { (yyval.number.yyint) = (yyvsp[(1) - (3)].number.yyint) && (yyvsp[(3) - (3)].number.yyint); }
     break;
 
   case 80:
 
 /* Line 1806 of yacc.c  */
-#line 334 "esparser.y"
+#line 331 "esparser.y"
     { (yyval.number.yyint) = (yyvsp[(1) - (5)].number.yyint) ? (yyvsp[(3) - (5)].number.yyint) : (yyvsp[(5) - (5)].number.yyint); }
     break;
 
   case 82:
 
 /* Line 1806 of yacc.c  */
-#line 339 "esparser.y"
+#line 336 "esparser.y"
     { (yyval.number.yyint) = (yyvsp[(3) - (3)].number.yyint);printf( "exprval=%lld\n", (yyval.number.yyint)); }
     break;
 
   case 83:
 
 /* Line 1806 of yacc.c  */
-#line 340 "esparser.y"
+#line 337 "esparser.y"
     {(yyval.number.yyint) = (yyvsp[(1) - (3)].number.yyint) + (yyvsp[(3) - (3)].number.yyint);(yyvsp[(1) - (3)].number.yyint) = (yyval.number.yyint); }
     break;
 
   case 84:
 
 /* Line 1806 of yacc.c  */
-#line 341 "esparser.y"
+#line 338 "esparser.y"
     { (yyval.number.yyint) = (yyvsp[(1) - (3)].number.yyint) - (yyvsp[(3) - (3)].number.yyint);(yyvsp[(1) - (3)].number.yyint) = (yyval.number.yyint);}
     break;
 
   case 85:
 
 /* Line 1806 of yacc.c  */
-#line 342 "esparser.y"
+#line 339 "esparser.y"
     { (yyval.number.yyint) = (yyvsp[(1) - (3)].number.yyint) * (yyvsp[(3) - (3)].number.yyint);(yyvsp[(1) - (3)].number.yyint) = (yyval.number.yyint); }
     break;
 
   case 86:
 
 /* Line 1806 of yacc.c  */
-#line 343 "esparser.y"
+#line 340 "esparser.y"
     { (yyval.number.yyint) = (yyvsp[(1) - (3)].number.yyint) / (yyvsp[(3) - (3)].number.yyint);(yyvsp[(1) - (3)].number.yyint) = (yyval.number.yyint); }
     break;
 
   case 87:
 
 /* Line 1806 of yacc.c  */
-#line 344 "esparser.y"
+#line 341 "esparser.y"
     { (yyval.number.yyint) = (yyvsp[(1) - (3)].number.yyint) % (yyvsp[(3) - (3)].number.yyint);(yyvsp[(1) - (3)].number.yyint) = (yyval.number.yyint); }
     break;
 
   case 88:
 
 /* Line 1806 of yacc.c  */
-#line 345 "esparser.y"
+#line 342 "esparser.y"
     { (yyval.number.yyint) = (yyvsp[(1) - (3)].number.yyint) << (yyvsp[(3) - (3)].number.yyint);(yyvsp[(1) - (3)].number.yyint) = (yyval.number.yyint); }
     break;
 
   case 89:
 
 /* Line 1806 of yacc.c  */
-#line 346 "esparser.y"
+#line 343 "esparser.y"
     { (yyval.number.yyint) = (yyvsp[(1) - (3)].number.yyint) >> (yyvsp[(3) - (3)].number.yyint);(yyvsp[(1) - (3)].number.yyint) = (yyval.number.yyint); }
     break;
 
   case 90:
 
 /* Line 1806 of yacc.c  */
-#line 347 "esparser.y"
+#line 344 "esparser.y"
     { (yyval.number.yyint) = (yyvsp[(1) - (3)].number.yyint) & (yyvsp[(3) - (3)].number.yyint);(yyvsp[(1) - (3)].number.yyint) = (yyval.number.yyint); }
     break;
 
   case 91:
 
 /* Line 1806 of yacc.c  */
-#line 348 "esparser.y"
+#line 345 "esparser.y"
     { (yyval.number.yyint) = (yyvsp[(1) - (3)].number.yyint) | (yyvsp[(3) - (3)].number.yyint);(yyvsp[(1) - (3)].number.yyint) = (yyval.number.yyint); }
     break;
 
   case 92:
 
 /* Line 1806 of yacc.c  */
-#line 349 "esparser.y"
+#line 346 "esparser.y"
     { (yyval.number.yyint) = (yyvsp[(1) - (3)].number.yyint) ^ (yyvsp[(3) - (3)].number.yyint);(yyvsp[(1) - (3)].number.yyint) = (yyval.number.yyint); }
     break;
 
   case 94:
 
 /* Line 1806 of yacc.c  */
-#line 354 "esparser.y"
+#line 351 "esparser.y"
     { (yyval.number.yyint) = (yyvsp[(3) - (3)].number.yyint); }
     break;
 
 
 
 /* Line 1806 of yacc.c  */
-#line 2098 "esparser.tab.c"
+#line 2095 "esparser.tab.c"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2325,7 +2322,7 @@ yyreturn:
 
 
 /* Line 2067 of yacc.c  */
-#line 357 "esparser.y"
+#line 354 "esparser.y"
 
 
 void insert_symbol(char *s){
@@ -2335,7 +2332,7 @@ void insert_symbol(char *s){
 		st = symTable_getSymbol(curr,s, curr->scope_type);
 		fprintf(stderr, "Error: %s previously defined around %s:%d\n", s, st->filename, st->linenumber);
 	}
-symTable_print(curr);
+//symTable_print(curr);
 //fprintf(stderr, "sym val: %s with %lld\n", s,st->value);
 }
 
