@@ -18,7 +18,7 @@ http://www.mactech.com/articles/mactech/Vol.16/16.07/UsingFlexandBison/index.htm
 #include "sym_table.h"
 
 #define YYDEBUG 1
-//int yydebug = 10;
+int yydebug = 0;
 
 extern int yylex();
 extern int yyparse();
@@ -140,8 +140,21 @@ declaration_list
 
 declaration
         : INT identifier_list ';'
+	| declaration_specifiers initialized_declarator_list ';'
 	;
 
+declaration_specifiers
+	: '+++'
+	;
+
+function_specifier
+	: '+++'
+	;
+
+initialized_declarator_list
+	: '+++'
+	;
+	
 initializer
         : assignment_expr
         | '{' initializer_list '}'
@@ -182,8 +195,10 @@ primary_expr
         : IDENT {
 		char *ident = yylval.yystring;
 		ident[strlen(yylval.yystring)] = '\0';
-                struct symbol *s = symTable_getSymbol(curr, $1);
-		fprintf(stderr, "sym: %d\n", (long long)s);
+		fprintf(stderr, "ident: %s\n", ident);
+                struct symbol *s = symTable_getSymbol(curr, $1, curr->scope_type);
+		//symTable_print(curr);
+		//fprintf(stderr, "sym: %d\n", (long long)s);
 		if (s != NULL) $$ = (long long)s;
                 else {
                         $$ = 0;
@@ -344,11 +359,12 @@ expr
 void insert_symbol(char *s){
 
 	struct symbol *st = sym_new(filename, lineno);
-	if(symTable_push(curr, s, st) != TRUE){
-		st = symTable_getSymbol(curr,s);
+	if(symTable_push(curr, s, st, curr->scope_type) != TRUE){
+		st = symTable_getSymbol(curr,s, curr->scope_type);
 		fprintf(stderr, "Error: %s previously defined around %s:%d\n", s, st->filename, st->linenumber);
 	}
-fprintf(stderr, "sym val: %lld\n"st->value);
+symTable_print(curr);
+//fprintf(stderr, "sym val: %s with %lld\n", s,st->value);
 }
 
 void yyerror(const char *s){

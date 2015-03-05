@@ -57,7 +57,7 @@ int hashTable_insert(struct hashTable *table, char *key, void *pv){
 		i %= table->capacity;
 	}
 	if((table->data[i].isOccupied == FALSE) || (table->data[i].isDeleted == TRUE)){
-		table->data[i].key = key;
+		table->data[i].key = strdup(key);
 		table->data[i].isOccupied = TRUE;
 		table->data[i].isDeleted = FALSE;
 		table->data[i].pv = pv;
@@ -69,7 +69,6 @@ int hashTable_insert(struct hashTable *table, char *key, void *pv){
 }
 
 int hashTable_contains(struct hashTable *table, char *key){
-
 	int i = hashTable_findPos(table, key);
 	if (i == -1)
 		return FALSE;
@@ -128,7 +127,7 @@ int hashTable_findPos(struct hashTable *table, char *key){
 
 	int i = hashTable_hash(table, key) % table->capacity;
 	while(table->data[i].isOccupied == TRUE){
-		if(table->data[i].key == key && table->data[i].isDeleted == FALSE)
+		if(strcmp(key, table->data[i].key) == 0 && table->data[i].isDeleted == FALSE)
 			return i;
 		i++;
 	}
@@ -154,7 +153,7 @@ static unsigned int hashTable_getPrime(int size){
 
 int hashTable_print(struct hashTable *table){
 
-	printf("\n----- start of table -----");
+	printf("\n----- start of table -----\n");
 
 	int i = 0;
 	for (i = 0; i < table->capacity; i++){
