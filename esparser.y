@@ -65,23 +65,23 @@ struct sym_table *curr;
 %token <nil> STRUCT SWITCH TYPEDEF TYPEDEF_NAME UNION UNSIGNED
 %token <nil> VOID VOLATILE WHILE _BOOL _COMPLEX _IMAGINARY
 
-%type <number.yyint> constant_expr primary_expr postfix_expr 
-%type <number.yyint> function_call expression_list cast_expr 
-%type <number.yyint> unary_expr multiplicative_expr additive_expr 
-%type <number.yyint> shift_expr relational_expr equality_expr
-%type <number.yyint>  bit_or_expr bit_xor_expr bit_and_expr 
-%type <number.yyint> logical_or_expr logical_and_expr conditional_expr 
-%type <number.yyint> assignment_expr expr
+%type <number.yyint> constant_expression primary_expression postfix_expression 
+%type <number.yyint> function_call expression_list cast_expression 
+%type <number.yyint> unary_expression multiplicative_expression additive_expression 
+%type <number.yyint> shift_expression relational_expression equality_expression
+%type <number.yyint>  bit_or_expression bit_xor_expression bit_and_expression 
+%type <number.yyint> logical_or_expression logical_and_expression conditional_expression 
+%type <number.yyint> assignment_expression expression
 %type <nil> compound_statement
+%type <nil> declaration_specifiers initialized_declarator_list storage_class_specifier
+%type <nil> typedef_definition direct_declarator pointer_declarator pointer
+%type <nil> statement for_statement null_statement
 
 %start translation_unit
 
 %%
 
-
-
-
-
+/* Declarations: Chapter 4 of H&S */
 
 declaration
         : INT identifier_list ';'
@@ -89,13 +89,125 @@ declaration
 	;
 
 
+declaration_specifiers
+        : storage_class_specifier
+        | storage_class_specifier declaration_specifiers { $$ = ast_push_back($1, $2, LEFT); }
+        | typedef_definition
+        | typedef_definition declaration_specifiers { $$ = ast_push_back($2, $1, LEFT); }
+        | type_specifier
+        | type_specifier declaration_specifiers { $$ = ast_push_back($2, $1, LEFT); }
+        | type_qualifier
+        | type_qualifier declaration_specifiers { $$ = $2; }
+        ;
 
 initialized_declarator_list
-	: '+++'
-	;
+        : initialized_declarator { $$ = $1; }
+        | initialized_declarator_list ',' initialized_declarator { $$ = ast_push_back($1,$3,NEXT); }
+        ;
+
+initialized_declarator
+        : declarator
+        | declarator '=' initializer { $$ = $1; }
+        ;
+
+storage_class_specifier
+        : AUTO { $$ = ast_newnode(AST_STORAGE); $$->attributes.storage_class = STORE_AUTO; }
+        | EXTERN { $$ = ast_newnode(AST_STORAGE); $$->attributes.storage_class = STORE_EXTERN; }
+        | STATIC { $$ = ast_newnode(AST_STORAGE); $$->attributes.storage_class = STORE_STATIC; }
+        ;
 	
+typedef_definition
+        : TYPEDEF { $$ = ast_newnode(AST_TYPEDEF);}
+        ;
+
+type_specifier
+        : enumeration_type_specifier
+        | floating_point_specifier
+        | integer_type_specifier
+        | structure_type_specifier
+        | typedef_name
+        | union_type_specifier
+        | void_type_specifier
+        ;
+
+type_qualifier
+        : CONST { $$ = NULL;}
+        | VOLATILE { $$ = NULL; }
+ 	;
+
+declarator
+        : pointer_declarator
+        | direct_declarator
+        ;
+
+direct_declarator
+        : simple_declarator
+        | '(' declarator ')' {$$ = $2;} 
+        | function_declarator 
+        | array_declarator
+        ;
+
+simple_declarator
+        : IDENT {
+
+	}
+	;
+
+pointer_declarator
+        : pointer direct_declarator {   $$ = ast_push_back($1,$2,LEFT);} 
+        ;
+
+pointer
+        : '*' { $$ = ast_newnode(AST_PTR); }
+        | '*' type_qualifier_list { $$ = ast_newnode(AST_PTR); }
+        | '*' type_qualifier_list pointer { $$ = ast_newnode(AST_PTR); $$->left = $3; }
+        | '*' pointer { $$ = ast_newnode(AST_PTR); $$->left = $2; }
+        ;
+
+type_qualifier_list
+        : type_qualifier
+        | type_qualifier_list type_qualifier
+        ;
+
+
+array_declarator
+        : direct_declarator '[' ']'    {   } 
+        | direct_declarator '[' constant_expressionession ']'     {   }
+        ;
+
+constant_expression
+        : conditional_expression
+        ;
+
+function_declarator
+        : direct_declarator '(' parameter_type_list ')' { fprintf(stderr, "Error: function prototypes not supported at: %s: %d\n",filename, lineno); }
+        | direct_declarator '(' ')' { }
+        | direct_declarator '(' identifier_list ')' { fprintf(stderr, "Error: function arguments not supported at: %s: %d\n",filename, lineno); }
+        ;
+
+parameter_type_list
+        : parameter_list
+        | parameter_list ',' ELLIPSIS
+        ;
+
+parameter_list
+        : parameter_declaration
+        | parameter_list ',' parameter_declaration
+        ;
+
+parameter_declaration
+        : declaration_specifiers declarator
+        | declaration_specifiers
+        | declaration_specifiers abstract_declarator
+        ;
+
+identifier_list
+        : IDENT { insert_symbol($1); }
+        | identifier_list ',' IDENT { insert_symbol($3); }
+        ;
+
 initializer
-        : assignment_expr
+        : assignment_expression
         | '{' initializer_list '}'
         | '{' initializer_list ',' '}'
         ;
@@ -117,18 +229,16 @@ designator_list
         ;
 
 designator
-        : '[' constant_expr ']'
+        : '[' constant_expression ']'
         | '.' IDENT
         ;
 
+/* Types: Chapter 5 of H&S */
 
 
-constant_expr
-        : conditional_expr
-        ;
 
 /* Expressions: Chapter 7 of H&S */
-primary_expr
+primary_expression
         : IDENT {
 		char *ident = yylval.yystring;
 		ident[strlen(yylval.yystring)] = '\0';
@@ -149,148 +259,149 @@ primary_expr
                         printf("exprval=%lld\n",$$);
                 }
         }
-        | '(' expr ')' { $$ = (long long)$2; }
+        | '(' expression ')' { $$ = (long long)$2; }
         ;
 
-postfix_expr
-	: primary_expr
-	| postfix_expr '[' expr ']' {
+postfix_expression
+	: primary_expression
+	| postfix_expression '[' expression ']' {
                 fprintf(stderr, "Error: arrays not supported at: %s: %d\n",filename, lineno); 
                 $$ = 0;
         }
-        | postfix_expr '.' IDENT {
+        | postfix_expression '.' IDENT {
 		fprintf(stderr, "Error: direct component-selection not supported at: %s: %d\n",filename, lineno); 
                 $$ = 0;
         }
-        | postfix_expr INDSEL IDENT {
+        | postfix_expression INDSEL IDENT {
 f		printf(stderr, "Error: indirect component-selection not supported at: %s: %d\n",filename, lineno); 
                 $$ = 0;
         }
 	| function_call	
-        | postfix_expr PLUSPLUS { $$ = $1++; }
-        | postfix_expr MINUSMINUS { $$ = $1--; }
+        | postfix_expression PLUSPLUS { $$ = $1++; }
+        | postfix_expression MINUSMINUS { $$ = $1--; }
         ;
 
 function_call
-	: postfix_expr '(' ')'
-        | postfix_expr '(' expression_list ')'
+	: postfix_expression '(' ')'
+        | postfix_expression '(' expression_list ')'
 	;
 
 expression_list
-        : assignment_expr
-        | expression_list ',' assignment_expr
+        : assignment_expression
+        | expression_list ',' assignment_expression
         ;
 
-cast_expr
-        : unary_expr
-        | '(' INT ')' cast_expr {$$ = (int)$4; } 
+cast_expression
+        : unary_expression
+        | '(' INT ')' cast_expression {$$ = (int)$4; } 
         ;
 
-unary_expr
-        : postfix_expr
-        | SIZEOF '(' INT ')' { $$ = sizeof(long long); }
-        | '-' cast_expr { $$ = -$2; }
-        | '+' cast_expr { $$ = $2;  printf("exprval=%lld\n",$$); }
-        | '!' cast_expr { $$ = !$2; }
-        | '~' cast_expr { $$ = ~$2; }
-        | '&' cast_expr { $$ = (long long) &$2; }
-        | '*' cast_expr { $$ = $2; }
-        | PLUSPLUS unary_expr { $$ = ++$2; }
-        | MINUSMINUS unary_expr { $$ = --$2; }
+unary_expression
+        : postfix_expression
+        | SIZEOF '(' type_name ')' { $$ = sizeof(long long); }
+	| SIZEOF '(' unary_expression ')' {  }
+        | '-' cast_expression { $$ = -$2; }
+        | '+' cast_expression { $$ = $2;  printf("exprval=%lld\n",$$); }
+        | '!' cast_expression { $$ = !$2; }
+        | '~' cast_expression { $$ = ~$2; }
+        | '&' cast_expression { $$ = (long long) &$2; }
+        | '*' cast_expression { $$ = $2; }
+        | PLUSPLUS unary_expression { $$ = ++$2; }
+        | MINUSMINUS unary_expression { $$ = --$2; }
         ;
 
-multiplicative_expr
-        : cast_expr
-        | multiplicative_expr '*' cast_expr { $$ = $1 * $3; }
-        | multiplicative_expr '/' cast_expr {
+multiplicative_expression
+        : cast_expression
+        | multiplicative_expression '*' cast_expression { $$ = $1 * $3; }
+        | multiplicative_expression '/' cast_expression {
 		if ($3 != 0) $$ = $1 / $3;
 		else {
 		        fprintf(stderr, "Parse Error: divide by 0\n");
 		        $$ = 0;
 		}
         }
-        | multiplicative_expr '%' cast_expr { $$ = $1 % $3; }
+        | multiplicative_expression '%' cast_expression { $$ = $1 % $3; }
         ;
 
-additive_expr
-        : multiplicative_expr
-        | additive_expr '+' multiplicative_expr { $$ = $1 + $3; }
-        | additive_expr '-' multiplicative_expr { $$ = $1 - $3; }
+additive_expression
+        : multiplicative_expression
+        | additive_expression '+' multiplicative_expression { $$ = $1 + $3; }
+        | additive_expression '-' multiplicative_expression { $$ = $1 - $3; }
         ;
 
-shift_expr
-        : additive_expr
-        | shift_expr SHL additive_expr { $$ = $1 << $3; }
-        | shift_expr SHR additive_expr { $$ = $1 >> $3; }
+shift_expression
+        : additive_expression
+        | shift_expression SHL additive_expression { $$ = $1 << $3; }
+        | shift_expression SHR additive_expression { $$ = $1 >> $3; }
         ;
 
-relational_expr
-        : shift_expr
-        | relational_expr '<' shift_expr { $$ = $1 < $3; }
-        | relational_expr LTEQ shift_expr { $$ = $1 <= $3; }
-        | relational_expr '>' shift_expr { $$ = $1 > $3; }
-        | relational_expr GTEQ shift_expr { $$ = $1 >= $3; }
+relational_expression
+        : shift_expression
+        | relational_expression '<' shift_expression { $$ = $1 < $3; }
+        | relational_expression LTEQ shift_expression { $$ = $1 <= $3; }
+        | relational_expression '>' shift_expression { $$ = $1 > $3; }
+        | relational_expression GTEQ shift_expression { $$ = $1 >= $3; }
         ;
 
-equality_expr
-        : relational_expr
-        | equality_expr EQEQ relational_expr { $$ = $1 == $3; }
-        | equality_expr NOTEQ relational_expr { $$ = $1 != $3; }
+equality_expression
+        : relational_expression
+        | equality_expression EQEQ relational_expression { $$ = $1 == $3; }
+        | equality_expression NOTEQ relational_expression { $$ = $1 != $3; }
         ;
 
-bit_or_expr
-        : bit_xor_expr
-        | bit_or_expr '|' bit_xor_expr { $$ = $1 | $3; }
+bit_or_expression
+        : bit_xor_expression
+        | bit_or_expression '|' bit_xor_expression { $$ = $1 | $3; }
         ;
 
-bit_xor_expr
-        : bit_and_expr
-        | bit_xor_expr '^' bit_and_expr { $$ = $1 ^ $3; }
+bit_xor_expression
+        : bit_and_expression
+        | bit_xor_expression '^' bit_and_expression { $$ = $1 ^ $3; }
         ;
 
-bit_and_expr
-        : equality_expr
-        | bit_and_expr '&' equality_expr { $$ = $1 & $3; }
+bit_and_expression
+        : equality_expression
+        | bit_and_expression '&' equality_expression { $$ = $1 & $3; }
         ;
 
-logical_or_expr
-        : logical_and_expr
-        | logical_or_expr LOGOR logical_and_expr { $$ = $1 || $3; }
+logical_or_expression
+        : logical_and_expression
+        | logical_or_expression LOGOR logical_and_expression { $$ = $1 || $3; }
         ;
 
-logical_and_expr
-        : bit_or_expr
-        | logical_and_expr LOGAND bit_or_expr { $$ = $1 && $3; }
+logical_and_expression
+        : bit_or_expression
+        | logical_and_expression LOGAND bit_or_expression { $$ = $1 && $3; }
         ;
 
-conditional_expr
-        : logical_or_expr
-        | logical_or_expr '?' expr ':' conditional_expr { $$ = $1 ? $3 : $5; }
+conditional_expression
+        : logical_or_expression
+        | logical_or_expression '?' expression ':' conditional_expression { $$ = $1 ? $3 : $5; }
         ;
 
-assignment_expr
-        : conditional_expr
-        | unary_expr '=' assignment_expr { $$ = $3;printf( "exprval=%lld\n", $$); }
-        | unary_expr PLUSEQ assignment_expr {$$ = $1 + $3;$1 = $$; }
-        | unary_expr MINUSEQ assignment_expr { $$ = $1 - $3;$1 = $$;}
-	| unary_expr TIMESEQ assignment_expr { $$ = $1 * $3;$1 = $$; }
-        | unary_expr DIVEQ assignment_expr { $$ = $1 / $3;$1 = $$; }
-        | unary_expr MODEQ assignment_expr { $$ = $1 % $3;$1 = $$; }
-        | unary_expr SHLEQ assignment_expr { $$ = $1 << $3;$1 = $$; }
-        | unary_expr SHREQ assignment_expr { $$ = $1 >> $3;$1 = $$; }
-        | unary_expr ANDEQ assignment_expr { $$ = $1 & $3;$1 = $$; }
-        | unary_expr OREQ assignment_expr { $$ = $1 | $3;$1 = $$; }
-        | unary_expr XOREQ assignment_expr { $$ = $1 ^ $3;$1 = $$; }
+assignment_expression
+        : conditional_expression
+        | unary_expression '=' assignment_expression { $$ = $3;printf( "exprval=%lld\n", $$); }
+        | unary_expression PLUSEQ assignment_expression {$$ = $1 + $3;$1 = $$; }
+        | unary_expression MINUSEQ assignment_expression { $$ = $1 - $3;$1 = $$;}
+	| unary_expression TIMESEQ assignment_expression { $$ = $1 * $3;$1 = $$; }
+        | unary_expression DIVEQ assignment_expression { $$ = $1 / $3;$1 = $$; }
+        | unary_expression MODEQ assignment_expression { $$ = $1 % $3;$1 = $$; }
+        | unary_expression SHLEQ assignment_expression { $$ = $1 << $3;$1 = $$; }
+        | unary_expression SHREQ assignment_expression { $$ = $1 >> $3;$1 = $$; }
+        | unary_expression ANDEQ assignment_expression { $$ = $1 & $3;$1 = $$; }
+        | unary_expression OREQ assignment_expression { $$ = $1 | $3;$1 = $$; }
+        | unary_expression XOREQ assignment_expression { $$ = $1 ^ $3;$1 = $$; }
         ;
 
 expr
-	: assignment_expr
-	| expr ',' assignment_expr { $$ = $3; }
+	: assignment_expression
+	| expression ',' assignment_expression { $$ = $3; }
         ;
 
 /* Statements: Chapter 8 of H&S */
 statement
-        : expression_statement 
+        : expression ';' 
         | labeled_statement { $$ = NULL; }
         | compound_statement
         | conditional_statement 
@@ -312,10 +423,6 @@ iterative_statement
         : do_statement
         | while_statement
         | for_statement
-        ;
-
-statement
-        : expr ';' 
         ;
 
 labeled_statement
@@ -387,10 +494,10 @@ while_statement
         ;
 
 for_statement
-        : FOR for_expressions statement { $$ = $2; $$->body = $3; }
+        : FOR for_expressionessions statement { $$ = $2; $$->body = $3; }
         ;
 
-for_expressions
+for_expressionessions
 	:
 	;
 
@@ -401,7 +508,7 @@ switch_statement
         ;
 
 case_label
-        : CASE constant_expression
+        : CASE constant_expressionession
         ;
 
 default_label
@@ -460,34 +567,6 @@ declaration_list
         : declaration
         | declaration_list declaration
         ;
-
-function_declarator
-        : direct_declarator '(' parameter_type_list ')' { fprintf(stderr, "Error: function prototypes not supported at: %s: %d\n",filename, lineno); }
-        | direct_declarator '(' ')' { }
-        | direct_declarator '(' identifier_list ')' { fprintf(stderr, "Error: function arguments not supported at: %s: %d\n",filename, lineno); }
-        ;
-
-parameter_type_list
-        : parameter_list
-        | parameter_list ',' ELLIPSIS
-        ;
-
-parameter_list
-        : parameter_declaration
-        | parameter_list ',' parameter_declaration
-        ;
-
-parameter_declaration
-        : declaration_specifiers declarator
-        | declaration_specifiers
-        | declaration_specifiers abstract_declarator
-        ;
-
-identifier_list
-        : IDENT { insert_symbol($1); }
-        | identifier_list ',' IDENT { insert_symbol($3); }
-        ;
-
 
 %%
 
