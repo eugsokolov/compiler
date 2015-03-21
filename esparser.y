@@ -84,8 +84,9 @@ struct sym_table *curr;
 /* Declarations: Chapter 4 of H&S */
 
 declaration
-        : INT identifier_list ';'
-	| declaration_specifiers initialized_declarator_list ';'
+        : INT identifier_list ';' {
+
+	}
 	;
 
 
@@ -98,16 +99,6 @@ declaration_specifiers
         | type_specifier declaration_specifiers { $$ = ast_push_back($2, $1, LEFT); }
         | type_qualifier
         | type_qualifier declaration_specifiers { $$ = $2; }
-        ;
-
-initialized_declarator_list
-        : initialized_declarator { $$ = $1; }
-        | initialized_declarator_list ',' initialized_declarator { $$ = ast_push_back($1,$3,NEXT); }
-        ;
-
-initialized_declarator
-        : declarator
-        | declarator '=' initializer { $$ = $1; }
         ;
 
 storage_class_specifier
@@ -133,6 +124,7 @@ type_specifier
 type_qualifier
         : CONST { $$ = NULL;}
         | VOLATILE { $$ = NULL; }
+        | RESTRICT { $$ = NULL; }
  	;
 
 declarator
