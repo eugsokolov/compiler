@@ -10,6 +10,7 @@
 #include <math.h>
 #include "esparser.tab.h"
 #include "sym_table.h"
+#include "ast.h"
 
 #define YYDEBUG 1
 int yydebug = 0;
@@ -49,6 +50,7 @@ struct sym_table *curr;
 		long double yydouble;
 	}number;
 
+	struct ast_node *node;
 	void *nil;
 }
 
@@ -65,17 +67,26 @@ struct sym_table *curr;
 %token <nil> STRUCT SWITCH TYPEDEF TYPEDEF_NAME UNION UNSIGNED
 %token <nil> VOID VOLATILE WHILE _BOOL _COMPLEX _IMAGINARY
 
-%type <number.yyint> constant_expression primary_expression postfix_expression 
-%type <number.yyint> function_call expression_list cast_expression 
-%type <number.yyint> unary_expression multiplicative_expression additive_expression 
-%type <number.yyint> shift_expression relational_expression equality_expression
-%type <number.yyint>  bit_or_expression bit_xor_expression bit_and_expression 
-%type <number.yyint> logical_or_expression logical_and_expression conditional_expression 
-%type <number.yyint> assignment_expression expression
-%type <nil> compound_statement
-%type <nil> declaration_specifiers initialized_declarator_list storage_class_specifier
-%type <nil> typedef_definition direct_declarator pointer_declarator pointer
-%type <nil> statement for_statement null_statement
+%type <node> constant_expression primary_expression postfix_expression 
+%type <node> function_call expression_list cast_expression 
+%type <node> unary_expression multiplicative_expression additive_expression 
+%type <node> shift_expression relational_expression equality_expression
+%type <node> bit_or_expression bit_xor_expression bit_and_expression 
+%type <node> logical_or_expression logical_and_expression conditional_expression 
+%type <node> assignment_expression expression statement
+%type <node> compound_statement
+%type <node> conditional_statement iterative_statement switch_statement break_statement
+%type <node> if_statement if_else_statement while_statement do_statement
+%type <node> continue_statement return_statement goto_statement null_statement
+%type <node> declaration_specifier storage_class_specifier
+%type <node> typedef_definition function_declarator array_declarator
+%type <node> direct_declarator simple_declarator pointer_declarator pointer
+%type <node>  for_statement type_specifier declarator
+%type <node> abstract_declarator enumeration_type_specifier floating_point_specifier
+%type <node> type_qualifier integer_type_specifier character_type_specifier 
+%type <node> for_expression bool_type_specifier structure_type_specifier
+%type <node> union_type_specifier typedef_name initial_clause void_type_specifier
+%type <node> direct_abstract_declarator declaration
 
 %start translation_unit
 
@@ -90,15 +101,15 @@ declaration
 	;
 
 
-declaration_specifiers
+declaration_specifier
         : storage_class_specifier
-        | storage_class_specifier declaration_specifiers { $$ = ast_push_back($1, $2, LEFT); }
+        | storage_class_specifier declaration_specifier { $$ = ast_push_back($1, $2, LEFT); }
         | typedef_definition
-        | typedef_definition declaration_specifiers { $$ = ast_push_back($2, $1, LEFT); }
+        | typedef_definition declaration_specifier { $$ = ast_push_back($2, $1, LEFT); }
         | type_specifier
-        | type_specifier declaration_specifiers { $$ = ast_push_back($2, $1, LEFT); }
+        | type_specifier declaration_specifier { $$ = ast_push_back($2, $1, LEFT); }
         | type_qualifier
-        | type_qualifier declaration_specifiers { $$ = $2; }
+        | type_qualifier declaration_specifier { $$ = $2; }
         ;
 
 storage_class_specifier
@@ -164,7 +175,7 @@ type_qualifier_list
 
 array_declarator
         : direct_declarator '[' ']'    {   } 
-        | direct_declarator '[' constant_expressionession ']'     {   }
+        | direct_declarator '[' constant_expression ']'     {   }
         ;
 
 constant_expression
@@ -188,9 +199,9 @@ parameter_list
         ;
 
 parameter_declaration
-        : declaration_specifiers declarator
-        | declaration_specifiers
-        | declaration_specifiers abstract_declarator
+        : declaration_specifier declarator
+        | declaration_specifier
+        | declaration_specifier abstract_declarator
         ;
 
 identifier_list
@@ -227,7 +238,238 @@ designator
 
 /* Types: Chapter 5 of H&S */
 
+integer_type_specifier
+	: signed_type_specifier { $$ = ast_newnode(AST_SCALAR);
+		$$->attributes.num_signed = SIZE_SIGNED;
+		$$->attributes.scalar_type = SCALAR_INT; }
+	| unsigned_type_specifier { $$ = ast_newnode(AST_SCALAR);
+		$$->attributes.num_signed = SIZE_UNSIGNED;
+		$$->attributes.scalar_type = SCALAR_INT; }
+	| character_type_specifier
+	| bool_type_specifier { $$ = ast_newnode(AST_SCALAR);
+	$$->attributes.num_signed = SIZE_SIGNED;
+	$$->attributes.scalar_type = SCALAR_INT; }
+;
 
+unsigned_type_specifier
+	: UNSIGNED SHORT
+	| UNSIGNED SHORT INT
+	| UNSIGNED
+	| UNSIGNED INT
+	| UNSIGNED LONG
+	| UNSIGNED LONG INT
+	| UNSIGNED LONG LONG
+	| UNSIGNED LONG LONG INT
+	;
+
+signed_type_specifier
+	: SHORT
+	| SHORT INT
+	| SIGNED SHORT
+	| SIGNED SHORT INT
+	| INT
+	| SIGNED INT
+	| SIGNED
+	| LONG
+	| LONG INT
+	| SIGNED LONG
+	| SIGNED LONG INT
+	| LONG LONG
+	| LONG LONG INT
+	| SIGNED LONG LONG
+	| SIGNED LONG LONG INT
+	;
+
+character_type_specifier
+	: CHAR { $$ = ast_newnode(AST_SCALAR);
+		$$->attributes.num_signed = SIZE_SIGNED;
+		$$->attributes.scalar_type = SCALAR_CHAR; }
+	| SIGNED CHAR { $$ = ast_newnode(AST_SCALAR);
+		$$->attributes.num_signed = SIZE_SIGNED;
+		$$->attributes.scalar_type = SCALAR_CHAR; }
+	| UNSIGNED CHAR { $$ = ast_newnode(AST_SCALAR);
+		$$->attributes.num_signed = SIZE_UNSIGNED;
+		$$->attributes.scalar_type = SCALAR_CHAR; }
+	;
+
+floating_point_specifier
+	: FLOAT { fprintf(stderr, "Warning: This compiler doesn't support floating point types - %s: %d\n",
+		filename, line_number);$$ = NULL; }
+	| DOUBLE { fprintf(stderr, "Warning: This compiler doesn't support floating point types - %s: %d\n",
+		filename, line_number);$$ = NULL; }
+	| LONG DOUBLE { fprintf(stderr, "Warning: This compiler doesn't support floating point types - %s: %d\n",
+		filename, line_number);$$ = NULL; }
+	| complex_type_specifier { fprintf(stderr, "Warning: This compiler doesn't support floating point types - %s: %d\n",
+		filename, line_number);$$ = NULL; }
+	;
+
+complex_type_specifier
+	: FLOAT _COMPLEX
+	| DOUBLE _COMPLEX
+	| LONG DOUBLE _COMPLEX
+	;
+
+void_type_specifier
+	: VOID { $$=NULL; }
+	;
+
+bool_type_specifier
+	: _BOOL { $$=NULL; }
+	;
+
+enumeration_type_specifier
+	: enumeration_type_definition { fprintf(stderr, "Warning: This compiler doesn't support enum types - %s: %d\n",
+		filename, line_number);$$ = NULL; }
+	| enumeration_type_reference { fprintf(stderr, "Warning: This compiler doesn't support enum types - %s: %d\n",
+		filename, line_number);$$ = NULL; }
+	;
+
+enumeration_type_definition
+	: ENUM '{' enumeration_definition_list '}'
+	| ENUM enumeration_tag '{' enumeration_definition_list '}'
+	| ENUM '{' enumeration_definition_list ',' '}'
+	| ENUM enumeration_tag '{' enumeration_definition_list ',' '}'
+	;
+enumeration_type_reference
+	: ENUM enumeration_tag
+	;
+
+enumeration_tag
+	: IDENT
+;
+
+enumeration_definition_list
+	: enumeration_constant_definition
+	| enumeration_definition_list ',' enumeration_constant_definition
+	;
+
+enumeration_constant_definition
+	: enumeration_constant
+	| enumeration_constant '=' expression
+	;
+
+enumeration_constant
+	: IDENT
+	;
+
+structure_type_specifier
+	: structure_type_definition { fprintf(stderr, "Warning: This compiler doesn't support struct types - %s: %d\n",
+		filename, line_number);$$ = NULL; }
+	| structure_type_reference { fprintf(stderr, "Warning: This compiler doesn't support struct types - %s: %d\n",
+		filename, line_number);$$ = NULL; }
+	;
+
+structure_type_definition
+	: STRUCT '{' field_list '}'
+	| STRUCT structure_tag '{' field_list '}'
+	;
+
+structure_type_reference
+	: STRUCT structure_tag
+	;
+
+structure_tag
+	: IDENT
+	;
+
+field_list
+	: component_declaration
+	| field_list component_declaration
+	;
+	
+component_declaration
+	: type_specifier component_declaration_list ';'
+	;
+
+component_declaration_list
+	: component_declarator
+	| component_declaration_list ',' component_declarator
+	;
+
+component_declarator
+	: simple_component
+	| bit_field
+	;
+
+simple_component
+	: declarator
+	;
+	
+bit_field
+	: ':' width
+	| declarator ':' width
+	;
+
+width
+	: constant_expression
+	;
+
+union_type_specifier
+	: union_type_definition { fprintf(stderr, "Warning: This compiler doesn't support union types - %s: %d\n",
+		filename, line_number);$$ = NULL; }
+	| union_type_reference { fprintf(stderr, "Warning: This compiler doesn't support union types - %s: %d\n",
+		filename, line_number);$$ = NULL; }
+	;
+
+union_type_definition
+	: UNION '{' field_list '}'
+	| UNION union_tag '{' field_list '}'
+	;
+
+union_type_reference
+	: UNION union_tag
+	;
+
+union_tag
+	: IDENT
+	;
+
+typedef_name
+	: TYPEDEF_NAME {
+		struct ast_node *t;
+		t = get_ident(current_scope, yylval.yystring, NAMESPACE_OTHER);
+		if (t->left != NULL && t->left->type == AST_TYPEDEF && t->left->left != NULL){
+		$$ = t->left->left;
+		} else {
+		fprintf(stderr, "Error: Problem with typedef - %s: %d\n", filename, line_number);
+		$$ = NULL;
+		}
+	}
+	;
+
+type_name
+	: declaration_specifier
+	| declaration_specifier abstract_declarator
+	;
+
+abstract_declarator
+	: pointer
+	| direct_abstract_declarator
+	| pointer direct_abstract_declarator
+	;
+
+pointer
+	: '*' { $$ = ast_newnode(AST_PTR); }
+	| '*' type_qualifier_list { $$ = ast_newnode(AST_PTR); }
+	| '*' type_qualifier_list pointer { $$ = ast_newnode(AST_PTR); $$->left = $3; }
+	| '*' pointer { $$ = ast_newnode(AST_PTR); $$->left = $2; }
+	;
+
+direct_abstract_declarator
+	: '(' abstract_declarator ')'
+	| '[' ']'
+	| direct_abstract_declarator '[' ']'
+	| direct_abstract_declarator '[' constant_expression ']'
+	| '[' constant_expression ']'
+	| '[' expression ']'
+	| direct_abstract_declarator '[' expression ']'
+	| '[' '*' ']'
+	| direct_abstract_declarator '[' '*' ']'
+	| '(' ')'
+	| direct_abstract_declarator '(' ')'
+	| direct_abstract_declarator '(' parameter_type_list ')'
+	| '(' parameter_type_list ')'
+	;
 
 /* Expressions: Chapter 7 of H&S */
 primary_expression
@@ -386,7 +628,7 @@ assignment_expression
         | unary_expression XOREQ assignment_expression { $$ = $1 ^ $3;$1 = $$; }
         ;
 
-expr
+expression
 	: assignment_expression
 	| expression ',' assignment_expression { $$ = $3; }
         ;
@@ -486,11 +728,22 @@ while_statement
         ;
 
 for_statement
-        : FOR for_expressionessions statement { $$ = $2; $$->body = $3; }
+        : FOR for_expression statement { $$ = $2; $$->body = $3; }
         ;
 
-for_expressionessions
-	:
+for_expression
+	: '(' ';' ';' ')' { $$ = ast_newnode(AST_FOR); }
+	| '(' initial_clause ';' ';' ')' { $$ = ast_newnode(AST_FOR); $$->left = $2; }
+	| '(' ';' expression ';' ')' { $$ = ast_newnode(AST_FOR); $$->cond = $3; }
+	| '(' ';' ';' expression ')' { $$ = ast_newnode(AST_FOR); $$->right = $4; }
+	| '(' initial_clause ';' expression ';' ')' { $$ = ast_newnode(AST_FOR); $$->left = $2; $$->cond = $4; }
+	| '(' ';' expression ';' expression ')' { $$ = ast_newnode(AST_FOR); $$->cond = $3; $$->right = $5; }
+	| '(' initial_clause ';' expression ';' expression ')' { $$ = ast_newnode(AST_FOR); $$->left = $2; $$->cond = $4; $$->right = $6; }
+;
+
+initial_clause
+	: expression
+	| declaration
 	;
 
 switch_statement
@@ -500,7 +753,7 @@ switch_statement
         ;
 
 case_label
-        : CASE constant_expressionession
+        : CASE constant_expression
         ;
 
 default_label

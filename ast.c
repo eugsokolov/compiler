@@ -59,7 +59,7 @@ struct ast_node *ast_pushback(struct ast_node *root, struct ast_node *newnode, i
 		while (root->next != NULL)
 			root = root->next;
 	
-		root->next = new_node;
+		root->next = newnode;
 		return tmp;
 	}
 	else if(par == LEFT){
@@ -68,7 +68,7 @@ struct ast_node *ast_pushback(struct ast_node *root, struct ast_node *newnode, i
 		while (root->left != NULL)
 			root = root->left;
 	
-		root->left = new_node;
+		root->left = newnode;
 		return tmp;
 	}
 	
