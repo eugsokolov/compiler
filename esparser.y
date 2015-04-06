@@ -11,6 +11,8 @@
 #include "esparser.tab.h"
 #include "sym_table.h"
 #include "ast.h"
+#include "quads.h"
+#include "def.h"
 
 #define YYDEBUG 1
 int yydebug = 0;
@@ -34,18 +36,8 @@ struct sym_table *curr;
 	char *yystring;
 
 	struct number{
-		enum number_type{
-			TYPE_INT,
-			TYPE_LONG,
-			TYPE_LONGLONG,
-			TYPE_FLOAT,
-			TYPE_DOUBLE,
-			TYPE_LONGDOUBLE
-		} num_type;
-		enum sign_type{
-			TYPE_UNSIGNED,
-			TYPE_SIGNED
-		} num_sign;
+		enum number_type num_type;
+		enum sign_type num_sign;
 		long long yyint;
 		long double yydouble;
 	}number;
@@ -96,7 +88,31 @@ struct sym_table *curr;
 
 declaration
         : INT identifier_list ';' {
-
+		int i;
+                struct ast_node *head = $2;
+                while ($2 != NULL){
+                    struct ast_node *var_type = $1;
+                    while (var_type != NULL && var_type->type == AST_STORAGE){
+                        var_type = var_type->left;
+                    }
+                    var_type = ast_push_back(var_type, $2,LEFT);
+                    $$ = ast_reverse_tree(var_type, LEFT);
+                    if ($1->type == AST_STORAGE){
+                        struct ast_node *tmp = $$->left;
+                        struct ast_node *this = $1;
+                        while (this->left != NULL && this->left->type == AST_STORAGE){
+                            this = this->left;
+                        }
+                        this->left = tmp;
+                        $$->left = $1;
+                    }
+                    if (print_declarations){
+                        ast_print_tree($$);
+                    }
+                    $2 = $2->next;
+                }
+                $$ = head;
+                $$ = NULL;
 	}
 	;
 

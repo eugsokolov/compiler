@@ -6,11 +6,9 @@
 
 //#include "tokens-manual.h"
 //#include "yylval.h"
-#include "esparser.tab.h"
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include "sym_table.h"
+#include "def.h"
+#include "ast.h"
+#include "parser.tab.h"
 
 YYSTYPE yylval;
 

@@ -7,6 +7,7 @@ LEXICAL ANALYSIS: YYLVAL definition
 #ifndef _YYLVAL_H
 #define _YYLVAL_H
 
+/*
 enum number_type{
 	TYPE_INT,
 	TYPE_LONG,
@@ -36,4 +37,36 @@ typedef union{
 } YYSTYPE;
 #define MAX_STRING_LENGTH 4096
 extern YYSTYPE yylval;
-endif
+
+*/
+
+typedef struct{
+        char yychar;
+        char *yystring;
+        int yystring_size;
+
+        struct number{
+                enum number_type{
+                        TYPE_INT,
+                        TYPE_LONG,
+                        TYPE_LONGLONG,
+                        TYPE_FLOAT,
+                        TYPE_DOUBLE,
+                        TYPE_LONGDOUBLE,
+                } num_type;
+                enum sign_type{
+                        TYPE_UNSIGNED,
+                        TYPE_SIGNED
+                } num_sign;
+                long long yyint;
+                long double yydouble;
+        }number;
+
+        struct ast_node *node;
+        struct ast_node_list *node_list;
+        void *nil;
+
+} YYSTYPE;
+extern YYSTYPE yylval;
+
+#endif

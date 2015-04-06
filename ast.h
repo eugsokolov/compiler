@@ -9,15 +9,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#include "hash.h"
-#include "esparser.tab.h"
-
-#define LEFT 1
-#define RIGHT 2
-#define NEXT 3
+#include "def.h"
+#include "parser.tab.h"
 
 enum ast_type{
-	
 	AST_VAR=0,
 	AST_PTR,
 	AST_ARRAY,
@@ -42,46 +37,44 @@ enum ast_type{
 	AST_TMP
 };
 
-enum storage_class {
-	STORE_AUTO,
-	STORE_EXTERN,
-	STORE_REGISTER,
-	STORE_STATIC
-};
-
-enum scalar_type{
-	
-	SCALAR_INT,
-	SCALAR_CHAR,
-	SCALAR_DOUBLE
-};
-
-struct ast_node{
-
+struct ast_node {
 	enum ast_type type;
-	int scope;
 	struct ast_node *left;
 	struct ast_node *right;
 	struct ast_node *next;
 	struct ast_node *cond;
 	struct ast_node *body;
 	struct ast_node *other;
-	
-	char filename[256];
-	char ident[256];
-	int op;
-	int num_signed;	
-	enum storage_class storage_class;
-	enum scalar_type scalar_type;
-
+	int scope_type;
+	struct attr {
+	        int num;
+	        int op;
+	        char identifier[36];
+	        char str[MAX_STRING_LENGTH];
+	        struct ast_node *params;
+	        int size;
+	        enum sign_type num_signed;
+	        enum scalar_type scalar_type;
+	        enum storage_class storage_class;
+	        int ln_effective;
+	        char file_name[256];
+	} attributes;
 };
 
-struct ast_node * ast_new(int type);
+struct ast_node * ast_newnode(int type);
 
-struct ast_node * ast_reversetree(struct ast_node *root, int par);
+struct ast_node * ast_reverse_tree(struct ast_node *root, int which);
 
-struct ast_node * ast_pushback(struct ast_node *root, struct ast_node *newnode, int par);
+struct ast_node * ast_pushback(struct ast_node *root, struct ast_node *new_node, int which);
 
-void ast_print(struct ast_node *root);
+int ast_list_size(struct ast_node *root, int which);
+
+void ast_print_syntax_error(char *file_name, int line_number);
+
+void ast_dump(struct ast_node *root, char *fn_name);
+
+void ast_print_node(struct ast_node *root, int tabs);
+
+void ast_print_tree(struct ast_node *root);
 
 #endif

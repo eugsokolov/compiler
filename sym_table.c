@@ -2,24 +2,25 @@
 // Compilers ECE466
 // symboltable.c
 
+#include "def.h"
 #include "sym_table.h"
 
 struct sym_table * symTable_new(int st, int line_begin, char *filename, struct sym_table *prev){
 
-	struct sym_table *table;
-	if((table = malloc(sizeof(struct sym_table))) == NULL){
+	struct sym_table *symtable;
+	if((symtable = malloc(sizeof(struct sym_table))) == NULL){
 		fprintf(stderr, "Error: malloc: %s\n", strerror(errno));
 		return NULL;
 	}
 
-	table->scope_type = st;
-	table->line_begin = line_begin;
-	table->filename = strdup(filename);
-	table->prev = prev;
+	symtable->scope_type = st;
+	symtable->line_begin = line_begin;
+	symtable->filename = strdup(filename);
+	symtable->prev = prev;
 	int i=0;
 	for(i=0; i<4;i++)
-		table->symbols[i] = hashTable_new(50);
-	return table;
+		symtable->symbols[i] = hashTable_new(150);
+	return symtable;
 }
 
 struct symbol * sym_new(char *filename, int linenumber){
@@ -56,7 +57,7 @@ int symTable_push(struct sym_table *table, char *ident, void *ptr, int scope){
 	return FALSE;
 }
 
-struct symbol * symTable_getSymbol(struct sym_table *table, char *symbol, int scope){
+void * symTable_getSymbol(struct sym_table *table, char *symbol, int scope){
 
 	struct sym_table *st = table;
 	void *ptr = NULL;

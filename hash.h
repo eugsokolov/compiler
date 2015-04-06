@@ -10,10 +10,6 @@
 #include <string.h>
 #include <errno.h>
 
-#define TRUE 1
-#define FALSE 0
-#define HASH_PRIME 101
-
 struct hashItem{
 	char *key;
 	int isOccupied;

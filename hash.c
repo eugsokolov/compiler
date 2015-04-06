@@ -2,6 +2,7 @@
 // Compilers ECE466
 // hash.c
 
+#include "def.h"
 #include "hash.h"
 
 struct hashTable * hashTable_new(int size){
