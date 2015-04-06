@@ -50,7 +50,7 @@ enum storage_class {
         STORE_AUTO,
         STORE_EXTERN,
         STORE_REGISTER,
-        STORE_STATIC
+        STORE_STATIC,
 	STORE_TYPEDEF
 };
 
