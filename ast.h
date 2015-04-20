@@ -14,27 +14,23 @@
 
 enum ast_type{
 	AST_VAR=0,
-	AST_PTR,
-	AST_ARRAY,
 	AST_FN,
-	AST_TYPEDEF,
 	AST_STORAGE,
 	AST_SCALAR,
-	AST_STRUCT,
-	AST_UNION,
 	AST_NUM,
 	AST_STR,
 	AST_CHAR,
+	AST_PTR,
+	AST_ARY,
 	AST_BINOP,
 	AST_UNOP,
 	AST_ASSGN,
 	AST_FNCALL,
-	AST_FOR,
 	AST_IF,
-	AST_WHILE,
 	AST_DO,
-	AST_SWITCH,
-	AST_TMP
+	AST_WHILE,
+	AST_FOR,
+	AST_SWITCH
 };
 
 struct ast_node {
@@ -46,7 +42,7 @@ struct ast_node {
 	struct ast_node *body;
 	struct ast_node *other;
 	int scope_type;
-	struct attr {
+	struct attributes {
 	        int num;
 	        int op;
 	        char identifier[36];
@@ -68,8 +64,6 @@ struct ast_node * ast_reverse_tree(struct ast_node *root, int which);
 struct ast_node * ast_pushback(struct ast_node *root, struct ast_node *new_node, int which);
 
 int ast_list_size(struct ast_node *root, int which);
-
-void ast_print_syntax_error(char *file_name, int line_number);
 
 void ast_dump(struct ast_node *root, char *fn_name);
 
