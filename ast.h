@@ -45,25 +45,25 @@ struct ast_node {
 	struct attributes {
 	        int num;
 	        int op;
-	        char identifier[36];
+	        int size;
+	        int linestart;
+	        char filename[128];
+	        char identifier[128];
 	        char str[MAX_STRING_LENGTH];
 	        struct ast_node *params;
-	        int size;
 	        enum sign_type num_signed;
 	        enum scalar_type scalar_type;
 	        enum storage_class storage_class;
-	        int ln_effective;
-	        char file_name[256];
 	} attributes;
 };
 
 struct ast_node * ast_newnode(int type);
 
-struct ast_node * ast_reverse_tree(struct ast_node *root, int which);
+struct ast_node * ast_reverse_tree(struct ast_node *root, int dir);
 
-struct ast_node * ast_pushback(struct ast_node *root, struct ast_node *new_node, int which);
+struct ast_node * ast_pushback(struct ast_node *root, struct ast_node *new_node, int dir);
 
-int ast_list_size(struct ast_node *root, int which);
+int ast_list_size(struct ast_node *root, int dir);
 
 void ast_dump(struct ast_node *root, char *fn_name);
 

@@ -12,7 +12,7 @@
 extern int yylex();
 extern int yyleng;
 extern int lineno;
-extern char filename[256];
+extern char filename[128];
 extern FILE *yyin;
 int yyerror(const char *p) {fprintf(stderr, "ERROR: unrecognized syntax: %s\n", p);}
 void error_msg(char *s, int lineno, char* filename){fprintf(stderr, "Warning: this compiler does not support %s types @:%s: %d\n",s,filename, lineno);}
@@ -54,26 +54,37 @@ struct sym_table *curr_scope;
 %token <yystring> STRUCT SWITCH TYPEDEF TYPEDEF_NAME UNION UNSIGNED
 %token <yystring> VOID VOLATILE WHILE _BOOL _COMPLEX _IMAGINARY
 
-%type<node> declaration declaration_specifiers simple_declarator integer_type_specifier
-%type<node> pointer_declarator pointer direct_declarator primary_expression array_declarator
-%type<node> bitwise_negation_expression bitwise_or_expression bitwise_xor_expression bitwise_and_expression equality_expression relational_expression
-%type<node> shift_expression indirection_expression unary_plus_expression unary_minus_expression postdecrement_expression postincrement_expression
-%type<node> preincrement_expression predecrement_expression address_expression constant_expression cast_expression function_declarator
-%type<node> character_type_specifier storage_class_specifier type_specifier type_qualifier function_specifier declarator
-%type<node> expression parenthesized_expression enumeration_type_specifier floating_point_specifier type_name union_type_specifier void_type_specifier 
-%type<node> initialized_declarator structure_type_specifier typedef_name bool_type_specifier typedef_definition
-%type<node> expression_statement null_statement unary_expression assignment_expression statement postfix_expression subscript_expression
-%type<node> initialized_declarator_list function_call sizeof_expression component_selection_expression
+%type <node> declaration declaration_specifiers storage_class_specifier
+%type <node> initialized_declarator_list initialized_declarator type_specifier type_qualifier
+%type <node> declarator direct_declarator simple_declarator
+%type <node> pointer_declarator pointer array_declarator constant_expression
 
-%type<node> if_statement if_else_statement do_statement while_statement for_expression for_statement 
-%type<node> switch_statement initial_clause
+%type <node> integer_type_specifier character_type_specifier floating_point_specifier
+%type <node> enumeration_type_specifier union_type_specifier structure_type_specifier 
+%type <node> void_type_specifier bool_type_specifier
+%type <node> type_name typedef_name typedef_definition
 
-%type<node> conditional_expression declaration_or_statement_list declaration_or_statement function_definition
-%type <node> logical_and_expression logical_or_expression additive_expression multiplicative_expression logical_negation_expression
-%type<node> expression_list compound_statement iterative_statement conditional_statement
+%type <node> primary_expression parenthesized_expression postfix_expression subscript_expression
+%type <node> component_selection_expression indirection_expression
+%type <node> expression_list postincrement_expression postdecrement_expression cast_expression 
+%type <node> unary_expression sizeof_expression unary_minus_expression unary_plus_expression 
+%type <node> logical_negation_expression bitwise_negation_expression 
+%type <node> address_expression preincrement_expression predecrement_expression 
+%type <node> multiplicative_expression additive_expression shift_expression 
+%type <node> relational_expression equality_expression 
+%type <node> bitwise_or_expression bitwise_xor_expression bitwise_and_expression
+%type <node> logical_or_expression logical_and_expression conditional_expression
+%type <node> assignment_expression expression
+%type <number.yyint> assignment_operator
 
+%type <node> statement conditional_statement iterative_statement expression_statement 
+%type <node> compound_statement declaration_or_statement_list declaration_or_statement 
+%type <node> if_statement if_else_statement while_statement do_statement  
+%type <node> for_statement for_expression 
+%type <node> initial_clause switch_statement null_statement 
 
-%type<number.yyint> assignment_operator
+%type <node> translation_unit top_level_declaration
+%type <node> function_declarator function_definition function_call function_specifier
 
 %start translation_unit
 
@@ -84,23 +95,22 @@ declaration
         : declaration_specifiers initialized_declarator_list ';' {
 		int i;
 		struct ast_node *head = $2;
-		while ($2 != NULL){
-			struct ast_node *var_type = $1;
-			while (var_type != NULL && var_type->type == AST_STORAGE){
-				var_type = var_type->left;
-			}
-			var_type = ast_push_back(var_type, $2,LEFT);
-               		$$ = ast_reverse_tree(var_type, LEFT);
-			if ($1->type == AST_STORAGE){
+		while($2 != NULL){
+			struct ast_node *var = $1;
+			while((var != NULL) && (var->type == AST_STORAGE))
+				var = var->left;
+			var = ast_push_back(var, $2,LEFT);
+               		$$ = ast_reverse_tree(var, LEFT);
+			if($1->type == AST_STORAGE){
 				struct ast_node *tmp = $$->left;
-				struct ast_node *this = $1;
-				while (this->left != NULL && this->left->type == AST_STORAGE)
-					this = this->left;
+				struct ast_node *tmp2 = $1;
+				while((tmp2->left != NULL) && (tmp2->left->type == AST_STORAGE))
+					tmp2 = tmp2->left;
 			
-			this->left = tmp;
+			tmp2->left = tmp;
 			$$->left = $1;
 		    	}
-		   	ast_print_tree($$);
+//ast_print_tree($$);
 		    	$2 = $2->next;
 		}
 		$$ = head;
@@ -168,10 +178,11 @@ simple_declarator
 		$$ = ast_newnode(AST_VAR);
 		$$->scope_type = curr_scope->scope_type;
 		strcpy($$->attributes.identifier, yylval.yystring);
-		$$->attributes.ln_effective = lineno;
-		strcpy($$->attributes.file_name, filename);
+		$$->attributes.linestart = lineno;
+		strcpy($$->attributes.filename, filename);
+		
 		ret = symTable_push(curr_scope, yylval.yystring, $$, NAMESPACE_OTHER);
-		if (!ret)
+		if(!ret)
 			fprintf(stderr, "Error: redeclaration of identifer: %s @ %s:%d\n", yylval.yystring, filename, lineno);
 		
 	}
@@ -200,7 +211,7 @@ array_declarator
 		$$->attributes.size = -1;  
 	} 
         | direct_declarator '[' constant_expression ']'  { 
-		if ($3->type != AST_NUM) {
+		if($3->type != AST_NUM) {
 			error_msg("non integer array declaration",lineno,filename);
 			$$ = NULL;
 		}
@@ -221,7 +232,7 @@ function_declarator
         | direct_declarator '(' ')' { 
 		$$ = ast_newnode(AST_FN); 
 		ast_push_back($$,$1,LEFT); 
-		}
+	}
         | direct_declarator '(' identifier_list ')' { error_msg("function argument",lineno,filename);}
         ;
 
@@ -506,17 +517,17 @@ primary_expression
         | NUMBER { 
 		$$ = ast_newnode(AST_NUM); 
 		$$->attributes.num = yylval.number.yyint; 
-		$$->attributes.ln_effective = lineno;
+		$$->attributes.linestart = lineno;
 	}
         | CHARLIT { 
 		$$ = ast_newnode(AST_CHAR); 
-		$$->attributes.num = (int)(yylval.yychar); 
-		$$->attributes.ln_effective = lineno;
+		$$->attributes.num =(int)(yylval.yychar); 
+		$$->attributes.linestart = lineno;
 	}
         | STRING { 
 		$$ = ast_newnode(AST_STR); 
 		strcpy($$->attributes.str, yylval.yystring); 
-		$$->attributes.ln_effective = lineno;
+		$$->attributes.linestart = lineno;
 	}
         | parenthesized_expression
         ;
@@ -744,14 +755,14 @@ assignment_expression
         | unary_expression assignment_operator assignment_expression {
 		$$ = ast_newnode(AST_ASSGN);
 		$$->left = $1;
-		if ($2 == '=')
+		if($2 == '=')
 			$$->right = $3;
 		else {
 			struct ast_node *right;
 			right = ast_newnode(AST_BINOP);
 			right->left = $1;
 			right->right = $3;
-			switch ($2){
+			switch($2){
 			case TIMESEQ:
 				right->attributes.op = '*';
 				break;
@@ -870,7 +881,7 @@ if_statement
 		$$->cond = $3;
 		$$->body = $5;
 		$$->body = NULL;
-            }
+	}
         ;
 
 if_else_statement
@@ -973,26 +984,26 @@ function_definition
         : function_specifier '{' { curr_scope = symTable_new(FUNCTION_SCOPE, lineno, filename, curr_scope); } 
         	declaration_or_statement_list '}'  { 
 		curr_scope = symTable_pop(curr_scope);
-//ast_dump($4, $1->attributes.identifier);
-//quads($1, $4);
+ast_dump($4, $1->attributes.identifier);
+//quads();
 	}
         ;
 
 function_specifier
 	: declarator { $$ = ast_reverse_tree($1, LEFT); }
         | declaration_specifiers declarator  { 
-		struct ast_node *var_type = $1;
-		while (var_type->type == AST_STORAGE){
-			var_type = var_type->left;
+		struct ast_node *var = $1;
+		while(var->type == AST_STORAGE){
+			var = var->left;
 		}
-		ast_push_back(var_type, $2,LEFT);
-		$$ = ast_reverse_tree(var_type, LEFT);
-		if ($1->type == AST_STORAGE){
+		ast_push_back(var, $2,LEFT);
+		$$ = ast_reverse_tree(var, LEFT);
+		if($1->type == AST_STORAGE){
 			struct ast_node *tmp = $$->left;
-			struct ast_node *this = $1;
-			while (this->left->type == AST_STORAGE)
-				this = this->left;
-			this->left = tmp;
+			struct ast_node *tmp2 = $1;
+			while(tmp2->left->type == AST_STORAGE)
+				tmp2 = tmp2->left;
+			tmp2->left = tmp;
 			$$->left = $1;
 		}
 }
@@ -1013,17 +1024,26 @@ declaration_list
 
 %%
 
+void insert_symbol(char *s){
 
+	struct symbol *st = sym_new(filename, lineno);
+	if(symTable_push(curr_scope, s, st, curr_scope->scope_type) != TRUE){
+		st = symTable_getSymbol(curr_scope,s, curr_scope->scope_type);
+		fprintf(stderr, "Error: %s previously defined around %s:%d\n", s, st->filename, st->linenumber);
+	}
+//symTable_print(curr);
+//fprintf(stderr, "sym val: %s with %lld\n", s,st->value);
+}
 
 int main(int argc, char** argv){
 	char *infile;
 
-	if (argc == 2){
+	if(argc == 2){
         	infile = argv[1];
         	yyin = fopen(infile, "r");
 	} 
-	else {
-        	strcpy(filename, "<stdin>");
+	else{
+        	strcpy(filename,"<stdin>");
         	lineno=1;
         	infile = "<stdin>";
         	yyin = stdin;
