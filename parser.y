@@ -14,7 +14,7 @@ extern int yyleng;
 extern int lineno;
 extern char filename[128];
 extern FILE *yyin;
-int yyerror(const char *p) {fprintf(stderr, "ERROR: unrecognized syntax: %s\n", p);}
+int yyerror(const char *p) {fprintf(stderr, "ERROR: unrecognized syntax: %s on or around @%s:%d\n", p, filename,lineno);}
 void error_msg(char *s, int lineno, char* filename){fprintf(stderr, "Warning: this compiler does not support %s types @:%s: %d\n",s,filename, lineno);}
 
 int yydebug=0;
@@ -110,7 +110,6 @@ declaration
 			tmp2->left = tmp;
 			$$->left = $1;
 		    	}
-//ast_print_tree($$);
 		    	$2 = $2->next;
 		}
 		$$ = head;
@@ -755,6 +754,8 @@ assignment_expression
         | unary_expression assignment_operator assignment_expression {
 		$$ = ast_newnode(AST_ASSGN);
 		$$->left = $1;
+fprintf(stderr,"%s\n",$1);
+fprintf(stderr,"%s\n",$$->left);
 		if($2 == '=')
 			$$->right = $3;
 		else {
@@ -797,6 +798,7 @@ assignment_expression
 			}
 		$$->right = right;
 		}
+fprintf(stderr, "ASS\n");
 	}
         ;
 
@@ -889,24 +891,16 @@ if_else_statement
 		$$ = ast_newnode(AST_IF);
 		$$->cond = $3;
 		$$->body = $5;
-		$$->other = $7;
+		$$->next = $7;
         }
         ;
 
 while_statement
-        : WHILE '(' expression ')' statement {
-		$$ = ast_newnode(AST_WHILE);
-		$$->cond = $3;
-		$$->body = $5;
-	}
+        : WHILE '(' expression ')' statement { $$ = ast_newnode(AST_WHILE); $$->cond = $3; $$->body = $5; }
         ;
 
 do_statement
-        : DO statement WHILE '(' expression ')' ';' {
-		$$ = ast_newnode(AST_DO);
-		$$->cond = $5;
-		$$->body = $2;
-	}
+        : DO statement WHILE '(' expression ')' ';' { $$ = ast_newnode(AST_DO); $$->cond = $5; $$->body = $2; }
         ;
 
 for_statement
@@ -914,12 +908,7 @@ for_statement
         ;
 
 for_expression
-        : '(' ';' ';' ')' { $$ = ast_newnode(AST_FOR); }
-        | '(' initial_clause ';' ';' ')' { $$ = ast_newnode(AST_FOR); $$->left = $2; }
-        | '(' ';' expression ';' ')' { $$ = ast_newnode(AST_FOR); $$->cond = $3; }
-        | '(' ';' ';' expression ')' { $$ = ast_newnode(AST_FOR); $$->right = $4; }
-        | '(' initial_clause ';' expression ';' ')' { $$ = ast_newnode(AST_FOR); $$->left = $2; $$->cond = $4; }
-        | '(' ';' expression ';' expression ')' { $$ = ast_newnode(AST_FOR); $$->cond = $3; $$->right = $5; }
+        : '(' ';' ';' ')' { $$ = ast_newnode(AST_FOR); $$->left = NULL; $$->cond = NULL; $$->right = NULL; }
         | '(' initial_clause ';' expression ';' expression ')' { $$ = ast_newnode(AST_FOR); $$->left = $2; $$->cond = $4; $$->right = $6; }
         ;
 
@@ -929,11 +918,7 @@ initial_clause
 	;
 
 switch_statement
-        : SWITCH '(' expression ')' statement {
-		$$ = ast_newnode(AST_SWITCH);
-		$$->cond = $3;
-		$$->body = $5;
-        }
+        : SWITCH '(' expression ')' statement { $$ = ast_newnode(AST_SWITCH);$$->cond = $3;$$->body = $5; }
         ;
 
 case_label

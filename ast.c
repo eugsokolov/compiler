@@ -87,51 +87,48 @@ void ast_dump(struct ast_node *root, char *fn_name){
 	else
 		printf("\nAST DUMP for function NULL\n");
 
-	printf("\n----LIST------\n");
+	printf("\n---------------------LIST----------------------\n");
 	
 	while(root != NULL){
-		ast_print_node(root, 2);
+		ast_print_node(root);
 		root = root->next;
+		printf("\n");
 	}
 	
-	printf("\n----------\n");
+	printf("\n-----------------------------------------------\n");
 	exit(0);
 }
 
-void ast_print_node(struct ast_node *root, int tabs){
-	int size = 0;
-	int i = 0;
-	char tab_string[20];
+void ast_print_node(struct ast_node *root){
+	int i=0,size=0;
 	struct ast_node *tmp;
-	for(i=0; i<tabs; i++)
-		tab_string[i] = '\t';
 	
-	tab_string[i] = '\0';
+printf("node type:%d\n", root->type);
 
 	switch(root->type){
 	case AST_VAR:
-		printf("%sVAR=%s @%s:%d\n", tab_string, root->attributes.identifier, root->attributes.filename, root->attributes.linestart);
+		printf("\tVAR=%s defined@%s:%d\n", root->attributes.identifier, root->attributes.filename, root->attributes.linestart);
 		break;
 	case AST_NUM:
-		printf("%sCONST type=int=%d\n", tab_string, root->attributes.num);
+		printf("\tCONST type:int=%d\n", root->attributes.num);
 		break;
 	case AST_STR:
-		printf("%sCONST type=char * :%s\n", tab_string, root->attributes.str);
+		printf("\tCONST type:char * :%s\n", root->attributes.str);
 		for(i=0; i<strlen(root->attributes.str); i++)
 			printf("%c", root->attributes.str[i]);
 		printf("\n");
 		break;
 	case AST_CHAR:
-		printf("%sCONST type=char :%c\n", tab_string,(char)root->attributes.num);
+		printf("\tCONST type=char :%c\n", (char)root->attributes.num);
 		break;
 	case AST_ASSGN:
-		printf("%sASSIGNMENT\n", tab_string);
-		ast_print_node(root->left, tabs+1);
-		ast_print_node(root->right, tabs+1);
-fprintf(stderr,"2");
+		printf("\tASSIGNMENT\n");
+		ast_print_node(root->left);
+		printf("EQUALS\n");
+		ast_print_node(root->right);
 		break;
 	case AST_SCALAR:
-		printf("%sSCALAR type=%d ", tab_string, root->attributes.num_signed);
+		printf("\tSCALAR type=%d ",root->attributes.num_signed);
 		switch(root->attributes.scalar_type){
 		case SCALAR_INT:
 			printf("int\n");
@@ -144,9 +141,8 @@ fprintf(stderr,"2");
 			break;
 		}
 		break;
-
 	case AST_BINOP:
-        	printf("%sBINOP ", tab_string);
+        	printf("BINOP ");
         	switch (root->attributes.op){
                 case '<':
                 	printf("<\n");
@@ -157,8 +153,9 @@ fprintf(stderr,"2");
 		default:
 			printf("lazy binop\n");
 		}
+		break;
 	case AST_UNOP:
-        	printf("%sUNOP ", tab_string);
+        	printf("UNOP ");
         	switch (root->attributes.op){
                 case PREINC:
         		printf("SIZEOF\n");
@@ -167,95 +164,54 @@ fprintf(stderr,"2");
 			printf("POSTINC\n");
 			break;
 		default:
-			printf("lazy unop\n");
+			printf("%c\n", root->attributes.op);
 		}
-	case AST_ARY:
-		printf("%sArray size=%d\n", tab_string, root->attributes.size);
 		break;
+	case AST_ARY:
+		printf("\tArray size=%d\n", root->attributes.size);
+		break;
+        case AST_FNCALL:
+	        size = ast_list_size(root->right, NEXT);
+	        printf("\tFNCALL, %d arguments\n\t\t",size);
+        	ast_print_node(root->left);
+        	tmp = root->right;
+        	for(i=0; i<size; i++){
+        	        printf("arg#%d= ",i+1);
+        	        ast_print_node(tmp);
+			printf("\n");
+                	tmp = tmp->next;
+           	}
+        	break;
 	case AST_IF:
-		printf("%sIF\n", tab_string);
-		printf("%sCOND:\n", tab_string);
-		ast_print_node(root->cond, tabs+1);
-		printf("%sTHEN:\n", tab_string);
-		ast_print_node(root->body, tabs+1);
+		printf("\tIF\n");
+		printf("\tCOND:\n\t\t");
+			ast_print_node(root->cond);
+		printf("\tTHEN:\n\t\t");
+			ast_print_node(root->body);
 		if(root->other != NULL){
-			printf("%sELSE:\n", tab_string);
-			ast_print_node(root->other, tabs+1);
+			printf("\tELSE:\n\t");
+			ast_print_node(root->next);
 		}
 		break;
 	case AST_WHILE:
-		printf("%sWHILE\n", tab_string);
-		printf("%sCOND:\n", tab_string);
-		ast_print_node(root->cond, tabs+1);
-		printf("%sBODY:\n", tab_string);
-		ast_print_node(root->body, tabs+1);
+		printf("\tWHILE\n");
+		printf("\tCOND:\n\t\t");
+			ast_print_node(root->cond);
+		printf("\tBODY:\n\t\t");
+			ast_print_node(root->body);
 		break;
 	case AST_FOR:
-		printf("%sFOR\n", tab_string);
-		printf("%sINIT:\n", tab_string);
-		ast_print_node(root->left, tabs+1);
-		printf("%sCOND:\n", tab_string);
-		ast_print_node(root->cond, tabs+1);
-		printf("%sBODY:\n", tab_string);
-		ast_print_node(root->body, tabs+1);
-		printf("%sINCR:\n", tab_string);
-		ast_print_node(root->right, tabs+1);
+		printf("\tFOR\n\t");
+		printf("\tINIT:\n\t\t");
+			ast_print_node(root->left);
+		printf("\tCOND:\n\t\t");
+			ast_print_node(root->cond);
+		printf("\tINCR:\n\t\t");
+			ast_print_node(root->right);
+		printf("\tBODY:\n\t\t");
+			ast_print_node(root->body);
 		break;
 	default:
 		fprintf(stderr, "ERROR printing ast node");
 	}
-}
-
-void ast_print_tree(struct ast_node *root){
-	
-	int i=0,j=0;
-	while(root != NULL){
-		for(i=0; i<j;i++)
-		printf("\t");
-
-		switch(root->type){
-		case AST_VAR:
-			printf("Var \'%s\' file: %s:%d scope:(%d)@ %s:%d ", 
-				root->attributes.identifier,
-				curr_scope->filename, 
-				root->attributes.linestart, 
-				root->scope_type,
-				curr_scope->filename,
-				curr_scope->line_begin);
-			
-			printf("\n");
-			break;
-		case AST_SCALAR:
-			printf("Scalar %d\n", root->attributes.num_signed);
-			switch(root->attributes.scalar_type){
-			case SCALAR_INT:
-				printf("INT");
-				break;
-			case SCALAR_CHAR:
-				printf("CHAR");
-				break;
-			case SCALAR_DOUBLE:
-				printf("DOUBLE");
-				break;
-			}
-			if(root->attributes.num_signed == TYPE_UNSIGNED)
-				printf(", UNSIGNED");
-			printf("\n");
-			break;
-		case AST_ARY:
-			printf("Array size: %d\n", root->attributes.size);
-			break;
-		case AST_FN:
-			printf("Function returns: \n");
-			break;
-		case AST_PTR:
-			printf("Pointer to\n");
-			break;
-		
-		default:
-			fprintf(stderr, "ERROR printing ast tree");
-		}
-	j++;
-	root = root->left;
-	}	
 }

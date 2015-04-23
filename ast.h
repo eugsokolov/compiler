@@ -13,24 +13,24 @@
 #include "parser.tab.h"
 
 enum ast_type{
-	AST_VAR=0,
-	AST_FN,
-	AST_STORAGE,
-	AST_SCALAR,
-	AST_NUM,
-	AST_STR,
-	AST_CHAR,
-	AST_PTR,
-	AST_ARY,
-	AST_BINOP,
-	AST_UNOP,
-	AST_ASSGN,
-	AST_FNCALL,
-	AST_IF,
-	AST_DO,
-	AST_WHILE,
-	AST_FOR,
-	AST_SWITCH
+	AST_VAR=0,	
+	AST_FN,		//1
+	AST_STORAGE,	//2
+	AST_SCALAR,	//3
+	AST_NUM,	//4
+	AST_STR,	//5
+	AST_CHAR,	//6
+	AST_PTR,	//7
+	AST_ARY,	//8
+	AST_BINOP,	//9
+	AST_UNOP,	//10
+	AST_ASSGN,	//11
+	AST_FNCALL,	//12
+	AST_IF,		//13
+	AST_DO,		//14
+	AST_WHILE,	//15
+	AST_FOR,	//16
+	AST_SWITCH	//17
 };
 
 struct ast_node {
@@ -67,7 +67,7 @@ int ast_list_size(struct ast_node *root, int dir);
 
 void ast_dump(struct ast_node *root, char *fn_name);
 
-void ast_print_node(struct ast_node *root, int tabs);
+void ast_print_node(struct ast_node *root);
 
 void ast_print_tree(struct ast_node *root);
 
