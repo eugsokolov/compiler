@@ -5,6 +5,8 @@
 #include "def.h"
 #include "sym_table.h"
 
+int debug = 1;
+
 struct sym_table * symTable_new(int st, int line_begin, char *filename, struct sym_table *prev){
 
 	struct sym_table *symtable;
@@ -19,7 +21,7 @@ struct sym_table * symTable_new(int st, int line_begin, char *filename, struct s
 	symtable->prev = prev;
 	int i=0;
 	for(i=0; i<4;i++)
-		symtable->symbols[i] = hashTable_new(150);
+		symtable->symbols[i] = hashTable_new(50);
 	return symtable;
 }
 
@@ -42,29 +44,44 @@ struct sym_table * symTable_pop(struct sym_table *table){
 
 }
 
-int symTable_push(struct sym_table *table, char *ident, void *ptr, int scope){
+int symTable_push(struct sym_table *table, char *ident, void *ptr, int namespace){
+
+	if(debug)
+	fprintf(stderr, "inserting ident:%s into table: %p namespace: %d\n", ident, table, namespace);
 
 	struct sym_table *st = table;
 	while(st != NULL){
-		if(hashTable_contains(st->symbols[scope], ident) == TRUE)
+		if(hashTable_contains(st->symbols[namespace], ident) == TRUE)
 			return FALSE;
 		st = st->prev;
 	}
 
-	if(hashTable_insert(table->symbols[scope], ident, ptr) == TRUE)
+	if(hashTable_insert(table->symbols[namespace], ident, ptr) == TRUE)
 		return TRUE;
 
 	return FALSE;
 }
 
-void * symTable_getSymbol(struct sym_table *table, char *symbol, int scope){
+void * symTable_getSymbol(struct sym_table *table, char *symbol, int namespace){
 
 	struct sym_table *st = table;
 	void *ptr = NULL;
 	int b = FALSE;
+
 	while(st->prev != NULL){
-		if(hashTable_contains(st->symbols[scope], symbol) == TRUE){
-			ptr = hashTable_getPointer(st->symbols[scope], symbol, b);
+printf("\t\t\t\t\t prev:%p", st->prev);
+		
+		if(debug){
+		fprintf(stderr, "getting sym:%s from table: %p namespace: %d\n", symbol, table, namespace);
+		symTable_print(table);		
+		}
+
+		if(hashTable_contains(st->symbols[namespace], symbol) == TRUE){
+			ptr = hashTable_getPointer(st->symbols[namespace], symbol, b);
+		
+			if(debug)
+			fprintf(stderr, "GOT: %p\n", ptr);
+			
 			return ptr;
 		}
 		st = st->prev;
@@ -79,7 +96,7 @@ void symTable_print(struct sym_table *table){
 	
 	int i=0;
 	for(i=0; i<4;i++){
-		printf("HASH TABLE NUMBER: %d\n", i);
+		printf("namespace: %d\n", i);
 		hashTable_print(table->symbols[i]);
 	}
 

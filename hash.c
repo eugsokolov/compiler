@@ -70,11 +70,15 @@ int hashTable_insert(struct hashTable *table, char *key, void *pv){
 }
 
 int hashTable_contains(struct hashTable *table, char *key){
+
+/*	
 	int i = hashTable_findPos(table, key);
 	if (i == -1)
 		return FALSE;
-	
-	return TRUE;
+*/
+	if(hashTable_findPos(table, key) > -1)
+		return TRUE;
+	return FALSE;
 }
 
 void * hashTable_getPointer(struct hashTable *table, char *key, int b){
@@ -154,7 +158,7 @@ static unsigned int hashTable_getPrime(int size){
 
 int hashTable_print(struct hashTable *table){
 
-	printf("\n----- start of table -----\n");
+	printf("-----\n");
 
 	int i = 0;
 	for (i = 0; i < table->capacity; i++){
@@ -163,7 +167,7 @@ int hashTable_print(struct hashTable *table){
         	}
     	}
         
-	printf("----- end of table -----\n");
+	printf("-----\n");
 	
 	return 0;
 }

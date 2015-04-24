@@ -754,8 +754,6 @@ assignment_expression
         | unary_expression assignment_operator assignment_expression {
 		$$ = ast_newnode(AST_ASSGN);
 		$$->left = $1;
-fprintf(stderr,"%p\n",(void *)$1);
-fprintf(stderr,"%p\n",(void *)$$->left);
 		if($2 == '=')
 			$$->right = $3;
 		else {
@@ -798,7 +796,6 @@ fprintf(stderr,"%p\n",(void *)$$->left);
 			}
 		$$->right = right;
 		}
-fprintf(stderr, "ASS\n");
 	}
         ;
 

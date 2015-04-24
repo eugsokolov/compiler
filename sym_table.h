@@ -24,7 +24,6 @@ struct sym_table{
 	int scope_type;	
 	int line_begin;
 	char *filename;
-//	char filename[MAX_STRING_LENGTH];
 	struct sym_table *prev;
 };
 
@@ -34,9 +33,9 @@ struct symbol * sym_new(char *filename, int linenumber);
 
 struct sym_table * symTable_pop(struct sym_table *table);
 
-int push(struct sym_table * symTable_table, char *symbol, void *ptr, int scope);
+int push(struct sym_table * symTable_table, char *symbol, void *ptr, int namespace);
 
-void * symTable_getSymbol(struct sym_table *table, char *symbol, int scope);
+void * symTable_getSymbol(struct sym_table *table, char *symbol, int namespace);
 
 void symTable_print(struct sym_table *table);
 
