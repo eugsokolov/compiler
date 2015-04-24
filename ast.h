@@ -59,7 +59,7 @@ struct ast_node * ast_newnode(int type);
 
 struct ast_node * ast_reverse_tree(struct ast_node *root, int dir);
 
-struct ast_node * ast_pushback(struct ast_node *root, struct ast_node *new_node, int dir);
+struct ast_node * ast_push_back(struct ast_node *root, struct ast_node *new_node, int dir);
 
 int ast_list_size(struct ast_node *root, int dir);
 

@@ -185,7 +185,7 @@ simple_declarator
 		
 		ret = symTable_push(curr_scope, yylval.yystring, $$, NAMESPACE_OTHER);
 		if(!ret)
-			fprintf(stderr, "Error: redeclaration of identifer: %s @ %s:%d\n", yylval.yystring, filename, lineno);
+		fprintf(stderr, "Error: redeclaration of identifer: %s @ %s:%d\n", yylval.yystring, filename, lineno);
 		
 	}
         ;
@@ -760,44 +760,8 @@ assignment_expression
 		if($2 == '=')
 			$$->right = $3;
 		else {
-			struct ast_node *right;
-			right = ast_newnode(AST_BINOP);
-			right->left = $1;
-			right->right = $3;
-			switch($2){
-			case TIMESEQ:
-				right->attributes.op = '*';
-				break;
-			case DIVEQ:
-				right->attributes.op = '/';
-				break;
-			case MODEQ:
-				right->attributes.op = '%';
-				break;
-			case PLUSEQ:
-				right->attributes.op = '+';
-				break;
-			case MINUSEQ:
-				right->attributes.op = '-';
-				break;
-			case SHLEQ:
-				right->attributes.op = SHL;
-				break;
-			case SHREQ:
-				right->attributes.op = SHR;
-				break;
-			case ANDEQ:
-				right->attributes.op = '&';
-				break;
-			case OREQ:
-				right->attributes.op = '|';
-				break;
-			case XOREQ:
-				right->attributes.op = '^';
-				break;
-
-			}
-		$$->right = right;
+			error_msg("various assignment op",lineno,filename);
+			$$->right = $3;
 		}
 	}
         ;
@@ -966,9 +930,12 @@ top_level_declaration
         ;
 
 function_definition
-        : function_specifier '{' { curr_scope = symTable_new(FUNCTION_SCOPE, lineno, filename, curr_scope); } 
-        	declaration_or_statement_list '}'  { 
-		curr_scope = symTable_pop(curr_scope);
+        : function_specifier '{' { 
+	curr_scope = symTable_new(FUNCTION_SCOPE, lineno, filename, curr_scope); 	}
+
+       	declaration_or_statement_list '}'  { 
+
+	curr_scope = symTable_pop(curr_scope);
 
 	if(astdebug)
 	ast_dump($4, $1->attributes.identifier);
