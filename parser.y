@@ -6,8 +6,13 @@
 #include "def.h"
 #include "ast.h"
 #include "hash.h"
-#include "quads.h"
 #include "sym_table.h"
+#include "quads.h"
+
+int yydebug = 0;
+int stdebug = 0;
+int astdebug = 1;
+int qdebug = 1;
 
 extern int yylex();
 extern int yyleng;
@@ -17,7 +22,6 @@ extern FILE *yyin;
 int yyerror(const char *p) {fprintf(stderr, "ERROR: unrecognized syntax: %s on or around @%s:%d\n", p, filename,lineno);}
 void error_msg(char *s, int lineno, char* filename){fprintf(stderr, "Warning: this compiler does not support %s types @:%s: %d\n",s,filename, lineno);}
 
-int yydebug=0;
 struct sym_table *curr_scope;
 %}
 
@@ -55,8 +59,8 @@ struct sym_table *curr_scope;
 %token <yystring> VOID VOLATILE WHILE _BOOL _COMPLEX _IMAGINARY
 
 %type <node> declaration declaration_specifiers storage_class_specifier
-%type <node> initialized_declarator_list initialized_declarator type_specifier type_qualifier
-%type <node> declarator direct_declarator simple_declarator
+%type <node> initialized_declarator_list initialized_declarator type_specifier 
+%type <node> type_qualifier declarator direct_declarator simple_declarator
 %type <node> pointer_declarator pointer array_declarator constant_expression
 
 %type <node> integer_type_specifier character_type_specifier floating_point_specifier
@@ -175,7 +179,6 @@ simple_declarator
         : IDENT {
 		int ret;
 		$$ = ast_newnode(AST_VAR);
-		$$->scope_type = curr_scope->scope_type;
 		strcpy($$->attributes.identifier, yylval.yystring);
 		$$->attributes.linestart = lineno;
 		strcpy($$->attributes.filename, filename);
@@ -207,7 +210,7 @@ array_declarator
         : direct_declarator '[' ']'  {
 		$$ = ast_newnode(AST_ARY);
                	$$->left = $1;
-		$$->attributes.size = -1;  
+		$$->attributes.ary = -1;  
 	} 
         | direct_declarator '[' constant_expression ']'  { 
 		if($3->type != AST_NUM) {
@@ -217,7 +220,7 @@ array_declarator
 		else {
 			$$ = ast_newnode(AST_ARY);
 			$$->left = $1;
-			$$->attributes.size = $3->attributes.num; 
+			$$->attributes.ary = $3->attributes.yynum; 
 		}
 	}
         ;
@@ -515,12 +518,12 @@ primary_expression
 	}
         | NUMBER { 
 		$$ = ast_newnode(AST_NUM); 
-		$$->attributes.num = yylval.number.yyint; 
+		$$->attributes.yynum = yylval.number.yyint; 
 		$$->attributes.linestart = lineno;
 	}
         | CHARLIT { 
 		$$ = ast_newnode(AST_CHAR); 
-		$$->attributes.num =(int)(yylval.yychar); 
+		$$->attributes.yynum =(int)(yylval.yychar); 
 		$$->attributes.linestart = lineno;
 	}
         | STRING { 
@@ -966,8 +969,11 @@ function_definition
         : function_specifier '{' { curr_scope = symTable_new(FUNCTION_SCOPE, lineno, filename, curr_scope); } 
         	declaration_or_statement_list '}'  { 
 		curr_scope = symTable_pop(curr_scope);
-ast_dump($4, $1->attributes.identifier);
-//quads();
+
+	if(astdebug)
+	ast_dump($4, $1->attributes.identifier);
+	//if(qdebug)
+	//quads();
 	}
         ;
 
@@ -1018,20 +1024,25 @@ symTable_print(curr_scope);
 }
 
 int main(int argc, char** argv){
-	char *infile;
 
-	if(argc == 2){
-        	infile = argv[1];
+	char *infile;
+	if(argc > 1){
+        	infile = strdup(argv[1]);
         	yyin = fopen(infile, "r");
 	} 
-	else{
-        	strcpy(filename,"<stdin>");
+	else if(argc == 1){
         	lineno=1;
         	infile = "<stdin>";
         	yyin = stdin;
 	}
+	else{
+		fprintf(stderr, "ERROR: file opening\n");
+		exit(1);
+	}
 	
+        strcpy(filename,infile);
 	curr_scope = symTable_new(FILE_SCOPE, 1, filename, NULL);
+
 	yyparse();
 	return 0;
 }

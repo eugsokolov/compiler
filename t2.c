@@ -1,5 +1,4 @@
 int a;
-
 int f()
 {
         int b, c, z();

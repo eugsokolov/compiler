@@ -10,7 +10,6 @@
 #include <string.h>
 #include <errno.h>
 #include "def.h"
-#include "parser.tab.h"
 
 enum ast_type{
 	AST_VAR=0,	
@@ -40,20 +39,19 @@ struct ast_node {
 	struct ast_node *next;
 	struct ast_node *cond;
 	struct ast_node *body;
-	struct ast_node *other;
-	int scope_type;
 	struct attributes {
-	        int num;
-	        int op;
-	        int size;
-	        int linestart;
 	        char filename[128];
+	        int linestart;
 	        char identifier[128];
 	        char str[MAX_STRING_LENGTH];
-	        struct ast_node *params;
+	        
+		int yynum;
 	        enum sign_type num_signed;
 	        enum scalar_type scalar_type;
 	        enum storage_class storage_class;
+	        
+		int ary;
+		int op;
 	} attributes;
 };
 

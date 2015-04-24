@@ -6,6 +6,7 @@
 #include "sym_table.h"
 #include "parser.tab.h"
 
+extern int astdebug;
 extern struct sym_table *curr_scope;
 	
 struct ast_node *ast_newnode(int type){
@@ -20,9 +21,9 @@ struct ast_node *ast_newnode(int type){
 	node->next=NULL;
 	node->cond=NULL;
 	node->body=NULL;
-	node->other=NULL;
 
-	fprintf(stderr, "NEW NODE: %d\n", type);
+//fprintf(stderr, "NEW NODE: %d\n", type);
+	
 	return node;
 }
 
@@ -87,7 +88,7 @@ void ast_dump(struct ast_node *root, char *fn_name){
 	else
 		printf("\nAST DUMP for function NULL\n");
 
-	printf("\n---------------------LIST----------------------\n");
+	printf("\n---------------------AST-----------------------\n");
 	
 	while(root != NULL){
 		ast_print_node(root);
@@ -103,14 +104,14 @@ void ast_print_node(struct ast_node *root){
 	int i=0,size=0;
 	struct ast_node *tmp;
 	
-printf("node type:%d\n", root->type);
+//printf("node type:%d\n", root->type);
 
 	switch(root->type){
 	case AST_VAR:
 		printf("\tVAR=%s defined@%s:%d\n", root->attributes.identifier, root->attributes.filename, root->attributes.linestart);
 		break;
 	case AST_NUM:
-		printf("\tCONST type:int=%d\n", root->attributes.num);
+		printf("\tCONST type:int=%d\n", root->attributes.yynum);
 		break;
 	case AST_STR:
 		printf("\tCONST type:char * :%s\n", root->attributes.str);
@@ -119,7 +120,7 @@ printf("node type:%d\n", root->type);
 		printf("\n");
 		break;
 	case AST_CHAR:
-		printf("\tCONST type=char :%c\n", (char)root->attributes.num);
+		printf("\tCONST type=char :%c\n", (char)root->attributes.yynum);
 		break;
 	case AST_ASSGN:
 		printf("\tASSIGNMENT\n");
@@ -168,7 +169,7 @@ printf("node type:%d\n", root->type);
 		}
 		break;
 	case AST_ARY:
-		printf("\tArray size=%d\n", root->attributes.size);
+		printf("\tArray size=%d\n", root->attributes.ary);
 		break;
         case AST_FNCALL:
 	        size = ast_list_size(root->right, NEXT);
@@ -188,7 +189,7 @@ printf("node type:%d\n", root->type);
 			ast_print_node(root->cond);
 		printf("\tTHEN:\n\t\t");
 			ast_print_node(root->body);
-		if(root->other != NULL){
+		if(root->next != NULL){
 			printf("\tELSE:\n\t");
 			ast_print_node(root->next);
 		}
@@ -201,8 +202,8 @@ printf("node type:%d\n", root->type);
 			ast_print_node(root->body);
 		break;
 	case AST_FOR:
-		printf("\tFOR\n\t");
-		printf("\tINIT:\n\t\t");
+		printf("\tFOR\n");
+		printf("\tINIT:\n\t");
 			ast_print_node(root->left);
 		printf("\tCOND:\n\t\t");
 			ast_print_node(root->cond);

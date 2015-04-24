@@ -5,7 +5,7 @@
 #include "def.h"
 #include "sym_table.h"
 
-int debug = 1;
+extern int stdebug;
 
 struct sym_table * symTable_new(int st, int line_begin, char *filename, struct sym_table *prev){
 
@@ -46,7 +46,7 @@ struct sym_table * symTable_pop(struct sym_table *table){
 
 int symTable_push(struct sym_table *table, char *ident, void *ptr, int namespace){
 
-	if(debug)
+	if(stdebug)
 	fprintf(stderr, "inserting ident:%s into table: %p namespace: %d\n", ident, table, namespace);
 
 	struct sym_table *st = table;
@@ -67,19 +67,18 @@ void * symTable_getSymbol(struct sym_table *table, char *symbol, int namespace){
 	struct sym_table *st = table;
 	void *ptr = NULL;
 	int b = FALSE;
-
-	while(st->prev != NULL){
-printf("\t\t\t\t\t prev:%p", st->prev);
+	
+	while(st != NULL){
 		
-		if(debug){
-		fprintf(stderr, "getting sym:%s from table: %p namespace: %d\n", symbol, table, namespace);
-		symTable_print(table);		
+		if(stdebug){
+		fprintf(stderr, "getting sym:%s from table: %p namespace: %d\n", symbol, st, namespace);
+		symTable_print(st);		
 		}
 
 		if(hashTable_contains(st->symbols[namespace], symbol) == TRUE){
 			ptr = hashTable_getPointer(st->symbols[namespace], symbol, b);
 		
-			if(debug)
+			if(stdebug)
 			fprintf(stderr, "GOT: %p\n", ptr);
 			
 			return ptr;

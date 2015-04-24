@@ -15,5 +15,5 @@ struct quad{
 	int quad;
 };
 
-
+void * quads();
 #endif
