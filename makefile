@@ -18,4 +18,5 @@ ast.o: ast.c ast.h
 hash.o: hash.c hash.h
 	gcc -c hash.c
 
-clean: rm *.o parser.tab.* lex.yy.* *.output
+clean: 
+	rm *.o parser.tab.* lex.yy.* *.output escc *~

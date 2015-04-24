@@ -754,8 +754,8 @@ assignment_expression
         | unary_expression assignment_operator assignment_expression {
 		$$ = ast_newnode(AST_ASSGN);
 		$$->left = $1;
-fprintf(stderr,"%s\n",$1);
-fprintf(stderr,"%s\n",$$->left);
+fprintf(stderr,"%p\n",(void *)$1);
+fprintf(stderr,"%p\n",(void *)$$->left);
 		if($2 == '=')
 			$$->right = $3;
 		else {
@@ -1016,7 +1016,7 @@ void insert_symbol(char *s){
 		st = symTable_getSymbol(curr_scope,s, curr_scope->scope_type);
 		fprintf(stderr, "Error: %s previously defined around %s:%d\n", s, st->filename, st->linenumber);
 	}
-//symTable_print(curr);
+symTable_print(curr_scope);
 //fprintf(stderr, "sym val: %s with %lld\n", s,st->value);
 }
 

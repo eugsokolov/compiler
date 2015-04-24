@@ -833,6 +833,7 @@ declaration_list
 
 void insert_symbol(char *s){
 
+printf("*********%s***********\n",s);
 	struct symbol *st = sym_new(filename, lineno);
 	if(symTable_push(curr, s, st, curr->scope_type) != TRUE){
 		st = symTable_getSymbol(curr,s, curr->scope_type);
