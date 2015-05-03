@@ -9,11 +9,23 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include "def.h"
+#include "parser.tab.h"
 
 struct quad{
-
-	int quad;
+	int opcode;
+	struct ast_node *target, *left, *right;
+	struct quad *next;
 };
 
-void * quads();
+struct quad_list{
+	int size;
+	struct quad *head, *tail;
+};
+
+
+
+
+
+
 #endif
