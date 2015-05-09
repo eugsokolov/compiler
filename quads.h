@@ -11,6 +11,7 @@
 #include <errno.h>
 #include "def.h"
 #include "parser.tab.h"
+#include "ast.h"
 
 enum quad_opcode{
 	Q_MOV, Q_LOAD, Q_LEA, Q_STORE,
@@ -24,6 +25,15 @@ enum quad_opcode{
 	Q_RETURN
 };
 
+enum quad_arg_type{
+        QA_NONE,
+        QA_INT,
+        QA_TMP_IDENT,
+        QA_IDENT,
+        QA_STRING,
+        QA_BASIC_BLOCK
+};
+
 struct quad{
 	//int opcode;
 	enum quad_opcode q_opcode;
@@ -33,6 +43,12 @@ struct quad{
 
 struct quad_arg{
 
+	enum quad_arg_type type;
+	union{
+		int val;
+		struct basic_block *bb;
+
+	} data;
 
 };
 
@@ -44,8 +60,8 @@ struct quad_list{
 struct basic_block{
 	char *id;
 	struct quad_list *quads;
-//	struct basic_block *left, *right, *next;
-//	int fn_count, bb_count;
+
+
 };
 
 struct basic_block_list{
@@ -57,7 +73,7 @@ struct loop_bb{
 
 };
 
-void new_quads();
+struct quad *new_quad(enum quad_opcode op, struct quad_arg *result, struct quad_arg *s1, struct quad_arg *s2);
 struct quad_list *quads_gen_fn(struct ast_node *ast);
 struct quad_list *quads_gen_statement(struct ast_node *ast);
 struct quad_list *quads_gen_assignment(struct ast_node *ast);
