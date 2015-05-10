@@ -85,7 +85,7 @@ void quads_gen_condexpr(struct ast_node *ast, struct basic_block *true, struct b
 
 struct quad_list *new_quad_list();
 struct quad_list *quad_list_cat(struct quad_list *root, struct quad_list *tail);
-struct quad_list *quad_list_push(struct quad_list *root, struct quad *new_quad);
+struct quad_list *quad_list_push(struct quad_list *list, struct quad *new_quad);
 
 struct basic_block *new_basic_block();
 struct basic_block *basic_block_link(struct basic_block *bb);
