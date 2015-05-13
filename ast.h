@@ -29,7 +29,8 @@ enum ast_type{
 	AST_DO,		//14
 	AST_WHILE,	//15
 	AST_FOR,	//16
-	AST_SWITCH	//17
+	AST_SWITCH,	//17
+	AST_TMP		//18
 };
 
 struct ast_node {
@@ -45,7 +46,7 @@ struct ast_node {
 	        char identifier[128];
 	        char str[MAX_STRING_LENGTH];
 	        
-		int yynum;
+		int num;
 	        enum sign_type num_signed;
 	        enum scalar_type scalar_type;
 	        enum storage_class storage_class;

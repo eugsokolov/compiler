@@ -110,7 +110,7 @@ void ast_print_node(struct ast_node *root){
 		printf("\tVAR=%s defined@%s:%d\n", root->attributes.identifier, root->attributes.filename, root->attributes.linestart);
 		break;
 	case AST_NUM:
-		printf("\tCONST type:int=%d\n", root->attributes.yynum);
+		printf("\tCONST type:int=%d\n", root->attributes.num);
 		break;
 	case AST_STR:
 		printf("\tCONST type:char * :%s\n", root->attributes.str);
@@ -119,7 +119,7 @@ void ast_print_node(struct ast_node *root){
 		printf("\n");
 		break;
 	case AST_CHAR:
-		printf("\tCONST type=char :%c\n", (char)root->attributes.yynum);
+		printf("\tCONST type=char :%c\n", (char)root->attributes.num);
 		break;
 	case AST_ASSGN:
 		printf("\tASSIGNMENT\n");

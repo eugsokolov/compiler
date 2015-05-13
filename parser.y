@@ -220,7 +220,7 @@ array_declarator
 		else {
 			$$ = ast_newnode(AST_ARY);
 			$$->left = $1;
-			$$->attributes.ary = $3->attributes.yynum; 
+			$$->attributes.ary = $3->attributes.num; 
 		}
 	}
         ;
@@ -518,12 +518,12 @@ primary_expression
 	}
         | NUMBER { 
 		$$ = ast_newnode(AST_NUM); 
-		$$->attributes.yynum = yylval.number.yyint; 
+		$$->attributes.num = yylval.number.yyint; 
 		$$->attributes.linestart = lineno;
 	}
         | CHARLIT { 
 		$$ = ast_newnode(AST_CHAR); 
-		$$->attributes.yynum =(int)(yylval.yychar); 
+		$$->attributes.num =(int)(yylval.yychar); 
 		$$->attributes.linestart = lineno;
 	}
         | STRING { 
