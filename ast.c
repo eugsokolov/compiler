@@ -97,7 +97,6 @@ void ast_dump(struct ast_node *root, char *fn_name){
 	}
 	
 	printf("\n-----------------------------------------------\n");
-	exit(0);
 }
 
 void ast_print_node(struct ast_node *root){

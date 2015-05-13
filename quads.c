@@ -3,6 +3,7 @@
 // quads.c
 
 #include "quads.h"
+//#include "parser.tab.h"
 
 extern int qdebug;
 
@@ -14,7 +15,8 @@ int tmp_count = 1;
 
 struct quad *new_quad(enum quad_opcode op, struct quad_arg *result, struct quad_arg *s1, struct quad_arg *s2){
 
-	if((struct quad *q = malloc()) == NULL);{
+	struct quad *q = malloc(sizeof(struct quad));
+	if(q == NULL){
 		fprintf(stderr, "Error allocating memory: quad_new");
 		return NULL;
 	}
@@ -23,20 +25,29 @@ struct quad *new_quad(enum quad_opcode op, struct quad_arg *result, struct quad_
 	q->source1 = s1;
 	q->source2 = s2;
 
-	bb_list_push(current_bb, q);
+	quad_list_push(current_bb->quads, q);
 	return q;
 
 }
 
-struct quad_list *quads_gen_fn(struct ast_node *ast){
+struct quad_list *quads_gen_fn(struct ast_node *ast_fn, struct ast_node *ast){
 
+	if(ast_fn->type != AST_VAR || ast_fn->type != AST_FN)
+		fprintf(stderr, "Error: quads_gen_fn\n");
+fprintf(stderr,"IS: %d\n", ast_fn->type);
 	fn_bb_list = new_bb_list();
-	struct basic_block *b = new_basic_block();
-	current_bb = b;
-	while(head != NULL){
-		quads_gen_statement(head);
-		head=head->next;
+	struct basic_block *bb = new_basic_block();
+	current_bb = bb;
+	
+fprintf(stderr,"1\n");
+	while(ast != NULL){
+		quads_gen_statement(ast);
+		ast=ast->next;
 	}
+	
+	printf("\n%s:\n", ast_fn->attributes.identifier);
+	quads_print_bb(bb);
+
 	fn_count++;
 }
 
@@ -91,25 +102,29 @@ struct quad_arg *quads_gen_expr(struct ast_node *ast){
 
 }
 
-struct quad_list *quads_gen_rval(struct ast_node *ast, struct ast_node *target){}
+//struct quad_list *quads_gen_rval(struct ast_node *ast, struct ast_node *target){}
+struct quad_list *quads_gen_lval(struct ast_node *ast, int *direct){
+
+}
 
 
 void quads_gen_if(struct ast_node *ast){
 
+	struct basic_block *bt, *bf, *bn;
 	bt = new_basic_block();
 	bf = new_basic_block();
-	if(if_node->else_arm)
+	if(ast->next != NULL)
 		bn = new_basic_block();
 	else
 		bn = bf;
 	
-	quads_gen_condexpr(if_node, bt,bf);
+	quads_gen_condexpr(ast->cond, bt, bf);
 	current_bb=bt;
-	quads_gen_statement(if_node->then_arm);
-	basic_block_link(current_bb,ALWAYS, bn, NULL);
-	if(if_node->else arm){
+	quads_gen_statement(ast->body);
+	basic_block_link(current_bb, ALWAYS, bn, NULL);
+	if(ast->next != NULL){
 		current_bb=bf;
-		quads_gen_statement(if_node->else_arm);
+		quads_gen_statement(ast->next);
 		basic_block_link(current_bb, ALWAYS, bn, NULL);
 	}
 	current_bb=bn;
@@ -135,7 +150,8 @@ struct quad_list *emit(){
 
 struct quad_list *new_quad_list(){
 
-	if((struct quad_list *ql = malloc()) == NULL);{
+	struct quad_list *ql = malloc(sizeof(struct quad_list));
+	if(ql == NULL){
 		fprintf(stderr, "Error allocating memory: quad_list_new");
 		return NULL;
 	}
@@ -163,12 +179,13 @@ struct quad_list *quad_list_push(struct quad_list *list, struct quad *new_quad){
 
 struct basic_block *new_basic_block(){
 
-	if((struct basic_block *bb = malloc()) == NULL);{
+	struct basic_block *bb = malloc(sizeof(struct basic_block));
+	if(bb == NULL){
 		fprintf(stderr, "Error allocating memory: basic_block_new");
 		return NULL;
 	}
 	char id[MAX_STRING_LENGTH] = {0};
-	sprintf(id, "BB:%d@\d"fn_count, bb_count++);
+	sprintf(id, "BB:%d@%d",fn_count, bb_count++);
 	bb->id = strdup(id);
 	bb->quads = new_quad_list();
 
@@ -176,15 +193,15 @@ struct basic_block *new_basic_block(){
 	return bb;
 }
 
-struct basic_block *basic_block_link(struct basic_block *bb){
-
+struct basic_block *basic_block_link(struct basic_block *bb, int branch, struct basic_block *left, struct basic_block *right){
 
 
 }
 
 struct basic_block_list *new_bb_list(){
 
-	if((struct basic_block_list *bbl = malloc()) == NULL);{
+	struct basic_block_list *bbl = malloc(sizeof(struct basic_block_list));
+	if(bbl == NULL);{
 		fprintf(stderr, "Error allocating memory: basic_block_list_new");
 		return NULL;
 	}
@@ -197,7 +214,7 @@ struct basic_block_list *new_bb_list(){
 struct basic_block_list *bb_list_push(struct basic_block_list *bb_list, struct basic_block *bb){
 
 	if(bb_list->size == 0)
-		bb_list->head = list->tail = bb;
+		bb_list->head = bb_list->tail = bb;
 	else{
 		bb_list->tail->next = bb;
 		bb_list->tail = bb;
@@ -209,17 +226,23 @@ struct basic_block_list *bb_list_push(struct basic_block_list *bb_list, struct b
 void quads_print_bb(struct basic_block *bb){
 
 	if(bb != NULL){
-	if(bb->size == 0) return;
+	//if(bb->size == 0) return;
 	
 	struct basic_block *tmp_bb = bb;
 	struct quad *tmp_q = bb->quads->head;
 	printf("BB%s:\n", bb->id);
 
 	while(tmp_q != NULL){
-		quads_print(tmp_q);
+		quads_print_inst(tmp_q);
 		tmp_q = tmp_q->next;
 	}
 	
 	quads_print_bb(bb->next);
-	}	
+	}
+	else
+		fprintf(stderr, "Error: BB:%s empty in quads_print_bb\n", bb->id);	
+}
+
+void quads_print_inst(struct quad *q){
+
 }

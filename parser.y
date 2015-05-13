@@ -939,8 +939,11 @@ function_definition
 
 	if(astdebug)
 	ast_dump($4, $1->attributes.identifier);
-	//if(qdebug)
-	//quads();
+	if(qdebug){
+	printf("*********************************\n");
+	quads_gen_fn($1, $4);
+	}
+
 	}
         ;
 

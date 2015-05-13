@@ -10,7 +10,6 @@
 #include <string.h>
 #include <errno.h>
 #include "def.h"
-#include "parser.tab.h"
 #include "ast.h"
 
 enum quad_opcode{
@@ -32,6 +31,19 @@ enum quad_arg_type{
         QA_IDENT,
         QA_STRING,
         QA_BASIC_BLOCK
+};
+
+enum branching {
+	NEVER,
+	ALWAYS,
+	COND_LT,
+	COND_GT,
+	COND_LE,
+	COND_GE,
+	COND_EQ,
+	COND_NE,
+	COND_OR,
+	COND_AND
 };
 
 struct quad{
@@ -60,7 +72,8 @@ struct quad_list{
 struct basic_block{
 	char *id;
 	struct quad_list *quads;
-
+	struct basic_block *left, *right, *next;
+	int branch;
 
 };
 
@@ -74,7 +87,7 @@ struct loop_bb{
 };
 
 struct quad *new_quad(enum quad_opcode op, struct quad_arg *result, struct quad_arg *s1, struct quad_arg *s2);
-struct quad_list *quads_gen_fn(struct ast_node *ast);
+struct quad_list *quads_gen_fn(struct ast_node *ast_fn, struct ast_node *ast);
 struct quad_list *quads_gen_statement(struct ast_node *ast);
 struct quad_list *quads_gen_assignment(struct ast_node *ast);
 //struct quad_list *quads_gen_rval(struct ast_node *ast, struct ast_node *target);
@@ -88,11 +101,12 @@ struct quad_list *quad_list_cat(struct quad_list *root, struct quad_list *tail);
 struct quad_list *quad_list_push(struct quad_list *list, struct quad *new_quad);
 
 struct basic_block *new_basic_block();
-struct basic_block *basic_block_link(struct basic_block *bb);
+struct basic_block *basic_block_link(struct basic_block *bb, int branch, struct basic_block *left, struct basic_block *right);
 struct basic_block_list *new_bb_list();
 struct basic_block_list *bb_list_push(struct basic_block_list *bb_list, struct basic_block *bb);
 
 void quads_print(struct quad *q, struct basic_block *bb);
 void quads_print_bb(struct basic_block *bb);
+void quads_print_inst(struct quad *q);
 
 #endif
