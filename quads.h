@@ -77,7 +77,7 @@ struct quad *new_quad(enum quad_opcode op, struct quad_arg *result, struct quad_
 struct quad_list *quads_gen_fn(struct ast_node *ast);
 struct quad_list *quads_gen_statement(struct ast_node *ast);
 struct quad_list *quads_gen_assignment(struct ast_node *ast);
-struct quad_list *quads_gen_rval(struct ast_node *ast, struct ast_node *target);
+//struct quad_list *quads_gen_rval(struct ast_node *ast, struct ast_node *target);
 struct quad_list *quads_gen_lval(struct ast_node *ast, int *direct);
 void quads_gen_if(struct ast_node *ast);
 void quads_gen_condexpr(struct ast_node *ast, struct basic_block *true, struct basic_block *false);

@@ -42,6 +42,7 @@ struct quad_list *quads_gen_fn(struct ast_node *ast){
 
 
 struct quad_list *quads_gen_statement(struct ast_node *ast){
+//append to current_bb
 
 	struct quad_list *new = new_quad_list();
 	switch(ast->type){
