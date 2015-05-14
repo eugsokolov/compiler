@@ -47,19 +47,20 @@ struct quad_list *quads_gen_fn(struct ast_node *ast_fn, struct ast_node *ast){
 	current_bb = bb;
 	
 	printf("%s:\n", ast_fn->attributes.identifier);
-//	quads_print_bb(current_bb);
 
 	while(ast != NULL){
 		quads_gen_statement(ast);
+		
 		ast=ast->next;
 	}
-
+	
+	quads_print_bb(current_bb);
+	
 	fn_count++;
 }
 
 
 struct quad_list *quads_gen_statement(struct ast_node *ast){
-//append to current_bb
 
 	struct quad_list *new = new_quad_list();
 	switch(ast->type){
@@ -89,13 +90,6 @@ struct quad_list *quads_gen_statement(struct ast_node *ast){
 		break;
 	}
 	
-	struct quad *q = malloc(sizeof(struct quad));
-	q = new->head;
-printf("%p\n", q);
-	while(q!=NULL){
-		quad_print(q);
-		q=q->next;
-	}
 	return new;
 }
 
@@ -190,33 +184,9 @@ void quads_gen_if(struct ast_node *ast){
 
 void quads_gen_for(struct ast_node *ast){
         
-/*
-	struct for_statement *fs = &(n->data.for_statement);
 
-        struct basic_block *b_condition = basic_block_new();
-        struct basic_block *b_body = basic_block_new();
-        struct basic_block *b_increment = basic_block_new();
-        struct basic_block *b_next = basic_block_new();
 
-        struct quad_arg *qa_condition = basic_block_quad(b_condition);
-        struct quad_arg *qa_body = basic_block_quad(b_body);
-        struct quad_arg *qa_increment = basic_block_quad(b_increment);
-        struct quad_arg *qa_next = basic_block_quad(b_next);
 
-        expression_quad(fs->init);
-        loop_new(b_body, b_next);
-        quad_link_basic_block(qa_condition);
-        current_bb = b_condition;
-        quad_conditional_expression(fs->condition, qa_body, qa_next);
-        current_bb = b_body;
-        statement_quad(fs->body);
-        quad_link_basic_block(qa_increment);
-        current_bb = b_increment;
-        expression_quad(fs->increment);
-        quad_link_basic_block(qa_condition);
-        current_bb = b_next;
-        loop_end();
-*/
 
 }
 
@@ -312,14 +282,16 @@ struct basic_block_list *bb_list_push(struct basic_block_list *bb_list, struct b
 
 void quad_print(struct quad *q){
 
-printf("printing..\n");
 
 }
 
 void quads_print_bb(struct basic_block *bb){
-
-	if(bb != NULL){
-	//if(bb->size == 0) return;
+//printf("addr %p\n", bb);
+	if(!bb){
+		fprintf(stderr, "Error: BB:%s empty in quads_print_bb\n", bb->id);	
+		return;
+	}	
+	else{
 	
 	struct basic_block *tmp_bb = bb;
 	struct quad *tmp_q = bb->quads->head;
@@ -332,10 +304,44 @@ void quads_print_bb(struct basic_block *bb){
 	
 	quads_print_bb(bb->next);
 	}
-	else
-		fprintf(stderr, "Error: BB:%s empty in quads_print_bb\n", bb->id);	
 }
 
 void quads_print_inst(struct quad *q){
 
+//printf("q: %p\n", q);
+
+	if(q){
+	if(q->result){
+		if(q->result->type == AST_TMP)
+		printf("\t \%%T%05d\t=\t", q->result->attributes.num);
+		
+		else if(q->result->type == AST_VAR)
+		printf("\t %s\t=\t", q->result->attributes.identifier);
+	}
+	else
+		printf("\t\t");
+
+	switch(q->q_opcode){
+	case Q_LEA:
+		printf("LEA \t%s\n",q->source1->attributes.identifier );
+		break;
+	case Q_STORE:
+		printf("STORE \t%s , %s\n", q->source1->attributes.identifier, q->source2->attributes.identifier);
+		break;
+	case Q_MOV:
+		printf("MOV \t%d\n",q->source1->attributes.num );
+		break;
+	case Q_CMP:
+		printf("CMP \n" );
+		break;
+
+	case Q_LOAD:
+		printf("LOAD \n" );
+		break;
+
+
+	}
+	}
+	else
+	printf("Error: quad null\n");
 }
