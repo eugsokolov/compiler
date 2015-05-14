@@ -298,6 +298,7 @@ void quads_print_bb(struct basic_block *bb){
 	printf("%s:\n", bb->id);
 
 	while(tmp_q != NULL){
+printf("q: %p\n", tmp_q);
 		quads_print_inst(tmp_q);
 		tmp_q = tmp_q->next;
 	}
@@ -308,7 +309,7 @@ void quads_print_bb(struct basic_block *bb){
 
 void quads_print_inst(struct quad *q){
 
-//printf("q: %p\n", q);
+printf("q: %p\n", q);
 
 	if(q){
 	if(q->result){

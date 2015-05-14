@@ -846,7 +846,6 @@ if_statement
 		$$ = ast_newnode(AST_IF);
 		$$->cond = $3;
 		$$->body = $5;
-		$$->body = NULL;
 	}
         ;
 
