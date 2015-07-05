@@ -101,7 +101,7 @@ struct ast_node *quads_gen_lval(struct ast_node *ast, int *dstmode);
 struct ast_node *quads_gen_rval(struct ast_node *ast, struct ast_node *target);
 void quads_gen_if(struct ast_node *ast);
 void quads_gen_for(struct ast_node *ast);
-void quads_gen_condexpr(struct ast_node *ast, struct basic_block *true, struct basic_block *false);
+void quads_gen_condexpr(struct ast_node *ast, struct basic_block *true_b, struct basic_block *false_b);
 
 struct quad_list *new_quad_list();
 struct quad_list *quad_list_cat(struct quad_list *root, struct quad_list *tail);

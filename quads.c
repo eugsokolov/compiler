@@ -140,6 +140,8 @@ struct ast_node *quads_gen_rval(struct ast_node *ast, struct ast_node *target){
 		return target;	
 */
 	break;
+	default:
+		return NULL;
 	}
 }
 
@@ -192,16 +194,62 @@ void quads_gen_for(struct ast_node *ast){
 
 }
 
-void quads_gen_condexpr(struct ast_node *ast, struct basic_block *true, struct basic_block *false){
+void quads_gen_condexpr(struct ast_node *ast, struct basic_block *true_b, struct basic_block *false_b){
 
+	struct ast_node *left, *right, *tmp1, *tmp2;
 	switch(ast->type){
+		case AST_VAR:
+		tmp1 = quads_gen_rval(ast, NULL);
+		tmp2 = ast_newnode(AST_NUM);
+		tmp2->attributes.num = 0;
+		emit(Q_CMP, tmp1, tmp2, NULL);
+		basic_block_link(current_bb, COND_NE, true_b, false_b);
+		break;
+		case AST_NUM:
+		case AST_CHAR:
+		tmp2 = ast_newnode(AST_NUM);
+		tmp2->attributes.num = 0;
+		emit(Q_CMP, ast, tmp2, NULL);
+		basic_block_link(current_bb, COND_NE, true_b, false_b);
+		break;
+		case AST_STR:
+		basic_block_link(current_bb, ALWAYS, true_b, false_b);
+		break;
+		case AST_BINOP:
+		switch (ast->attributes.op){
+			case '<':
+				left = quads_gen_rval(ast->left, NULL);
+				right = quads_gen_rval(ast->right, NULL);
+				emit(Q_CMP, left, right, NULL);
+				basic_block_link(current_bb, COND_LT, true_b, false_b);
+				break;
+			case '>':
+				left = quads_gen_rval(ast->left, NULL);
+				right = quads_gen_rval(ast->right, NULL);
+				emit(Q_CMP, left, right, NULL);
+				basic_block_link(current_bb, COND_LT, true_b, false_b);
+				break;
 
-
-
-
-
-
+			default:
+				printf("BINOP not fully implemented\n");
+		}
+		break;
+		case AST_UNOP:
+		left = quads_gen_rval(ast, NULL);
+		right = ast_newnode(AST_NUM);
+		right->attributes.num = 0;
+		emit(Q_CMP, left, right, NULL);
+		basic_block_link(current_bb, COND_NE, true_b, false_b);
+		break;
+		case AST_ASSGN:
+		left = quads_gen_assignment(ast);
+		right = ast_newnode(AST_NUM);
+		right->attributes.num = 0;
+		emit(Q_CMP, left, right, NULL);
+		basic_block_link(current_bb, COND_NE, true_b, false_b);
+		break;
 	}
+		
 }
 
 
