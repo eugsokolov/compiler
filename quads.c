@@ -313,34 +313,34 @@ printf("q: %p\n", tmp_q);
 	if (bb != NULL){
 		struct basic_block *cur_bb = bb;
 		struct quad *cur = bb->quads->head;
-		printf(".BB%s\n", bb->id);
+		printf("$%s\n", bb->id);
 		while (cur != NULL){
-		quads_print_instr(cur);
+		quads_print_inst(cur);
 		cur = cur->next;
 		}
 		switch (bb->branch){
 		case NEVER:
 			break;
 		case ALWAYS:
-			printf("\t\t\tBR\t.BB%s\n", bb->left->id);
+			printf("\t\t\tBR\t %s\n", bb->left->id);
 			break;
 		case COND_LT:
-			printf("\t\t\tBRLT\t.BB%s.BB%s\n",bb->left->id, bb->right->id); 
+			printf("\t\t\tBRLT\t %s %s\n",bb->left->id, bb->right->id); 
 			break;
 		case COND_GT:
-			printf("\t\t\tBRGT\t.BB%s.BB%s\n",bb->left->id, bb->right->id); 
+			printf("\t\t\tBRGT\t %s %s\n",bb->left->id, bb->right->id); 
 			break;
 		case COND_LE:
-			printf("\t\t\tBRLE\t.BB%s.BB%s\n",bb->left->id , bb->right->id); 
+			printf("\t\t\tBRLE\t %s %s\n",bb->left->id , bb->right->id); 
 			break;
 		case COND_GE:
-			printf("\t\t\tBRGE\t.BB%s.BB%s\n",bb->left->id , bb->right->id); 
+			printf("\t\t\tBRGE\t %s %s\n",bb->left->id , bb->right->id); 
 			break;
 		case COND_EQ:
-			printf("\t\t\tBREQ\t.BB%s.BB%s\n",bb->left->id , bb->right->id); 
+			printf("\t\t\tBREQ\t %s %s\n",bb->left->id , bb->right->id); 
 			break;
 		case COND_NE:
-			printf("\t\t\tBRNE\t.BB%s.BB%s\n",bb->left->id , bb->right->id); 
+			printf("\t\t\tBRNE\t %s %s\n",bb->left->id , bb->right->id); 
 			break;
 		}
 		quads_print_bb(bb->next);
@@ -403,9 +403,10 @@ printf("q: %p\n", q);
 	printf("Error: quad null\n");
 }
 
-void quads_print_var_or_tmp(struct quad *cur){
+void quads_print_vt(struct ast_node *cur){
 	if (cur->type == AST_VAR)
 		printf("%s", cur->attributes.identifier);
-	else if (cur->type == AST_TMP){
+	else if (cur->type == AST_TMP)
 		printf("%%T%05d", cur->attributes.num);
+
 }

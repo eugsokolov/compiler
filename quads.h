@@ -116,5 +116,6 @@ void quad_print(struct quad *q);
 void quads_print(struct quad *q, struct basic_block *bb);
 void quads_print_bb(struct basic_block *bb);
 void quads_print_inst(struct quad *q);
+void quads_print_vt(struct ast_node *cur);
 
 #endif
