@@ -53,14 +53,14 @@ struct quad_list *quads_gen_fn(struct ast_node *ast_fn, struct ast_node *ast){
 		ast=ast->next;
 	}
 	
-	quads_print_bb(current_bb);
+	quads_print_bb(bb);
 	fn_count++;
 }
 
 
 struct quad_list *quads_gen_statement(struct ast_node *ast){
 
-printf("ast type:%d\n", ast->type);
+//printf("ast type:%d\n", ast->type);
 	struct quad_list *new = new_quad_list();
 	switch(ast->type){
 	case AST_ASSGN:
@@ -288,6 +288,7 @@ void quad_print(struct quad *q){
 }
 
 void quads_print_bb(struct basic_block *bb){
+/*
 printf("addr %p\n", bb);
 	if(!bb){
 		fprintf(stderr, "Error: BB:%s empty in quads_print_bb\n", bb->id);	
@@ -306,6 +307,43 @@ printf("q: %p\n", tmp_q);
 	}
 	
 	quads_print_bb(bb->next);
+	}
+*/
+
+	if (bb != NULL){
+		struct basic_block *cur_bb = bb;
+		struct quad *cur = bb->quads->head;
+		printf(".BB%s\n", bb->id);
+		while (cur != NULL){
+		quads_print_instr(cur);
+		cur = cur->next;
+		}
+		switch (bb->branch){
+		case NEVER:
+			break;
+		case ALWAYS:
+			printf("\t\t\tBR\t.BB%s\n", bb->left->id);
+			break;
+		case COND_LT:
+			printf("\t\t\tBRLT\t.BB%s.BB%s\n",bb->left->id, bb->right->id); 
+			break;
+		case COND_GT:
+			printf("\t\t\tBRGT\t.BB%s.BB%s\n",bb->left->id, bb->right->id); 
+			break;
+		case COND_LE:
+			printf("\t\t\tBRLE\t.BB%s.BB%s\n",bb->left->id , bb->right->id); 
+			break;
+		case COND_GE:
+			printf("\t\t\tBRGE\t.BB%s.BB%s\n",bb->left->id , bb->right->id); 
+			break;
+		case COND_EQ:
+			printf("\t\t\tBREQ\t.BB%s.BB%s\n",bb->left->id , bb->right->id); 
+			break;
+		case COND_NE:
+			printf("\t\t\tBRNE\t.BB%s.BB%s\n",bb->left->id , bb->right->id); 
+			break;
+		}
+		quads_print_bb(bb->next);
 	}
 }
 
@@ -336,15 +374,38 @@ printf("q: %p\n", q);
 		break;
 	case Q_CMP:
 		printf("CMP \n" );
+		if (q->source1->type == AST_NUM || q->source1->type == AST_CHAR)
+			printf("%d", q->source1->attributes.num);
+		else 
+			quads_print_vt(q->source1);
+		
+		printf(",");
+		if(q->source2->type == AST_NUM || q->source2->type == AST_CHAR)
+			printf("%d", q->source2->attributes.num);
+		else
+			quads_print_vt(q->source2);
+		
+		printf("\n");
 		break;
 
 	case Q_LOAD:
 		printf("LOAD \n" );
+		if(q->source1->type == AST_TMP)
+			printf("LOAD\t[%%T%05d]\n", q->source1->attributes.num);
+		else 
+			printf("LOAD\t%s\n", q->source1->attributes.identifier);
 		break;
 
-
 	}
+
 	}
 	else
 	printf("Error: quad null\n");
+}
+
+void quads_print_var_or_tmp(struct quad *cur){
+	if (cur->type == AST_VAR)
+		printf("%s", cur->attributes.identifier);
+	else if (cur->type == AST_TMP){
+		printf("%%T%05d", cur->attributes.num);
 }
