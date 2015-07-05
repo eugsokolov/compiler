@@ -11,7 +11,7 @@
 
 int yydebug = 0;
 int stdebug = 0;
-int astdebug = 1;
+int astdebug = 0;
 int qdebug = 1;
 
 extern int yylex();
@@ -117,7 +117,8 @@ declaration
 		    	$2 = $2->next;
 		}
 		$$ = head;
-		$$ = NULL;
+//		$$ = NULL;
+	
 	}
         ;
 
@@ -935,14 +936,11 @@ function_definition
        	declaration_or_statement_list '}'  { 
 
 	curr_scope = symTable_pop(curr_scope);
-
 	if(astdebug)
 	ast_dump($4, $1->attributes.identifier);
-	if(qdebug){
-	printf("*********************************\n");
+	printf("\n\n*********************************\n\n");
+	if(qdebug)
 	quads_gen_fn($1, $4);
-	}
-
 	}
         ;
 

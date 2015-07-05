@@ -89,6 +89,8 @@ void ast_dump(struct ast_node *root, char *fn_name){
 		printf("\nAST DUMP for function NULL\n");
 
 	printf("\n---------------------AST-----------------------\n");
+
+//printf("root: %d\n", root->type);
 	
 	while(root != NULL){
 		ast_print_node(root);
@@ -103,7 +105,7 @@ void ast_print_node(struct ast_node *root){
 	int i=0,size=0;
 	struct ast_node *tmp;
 	
-//printf("node type:%d\n", root->type);
+printf("node type:%d\n", root->type);
 
 	switch(root->type){
 	case AST_VAR:

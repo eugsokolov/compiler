@@ -50,18 +50,17 @@ struct quad_list *quads_gen_fn(struct ast_node *ast_fn, struct ast_node *ast){
 
 	while(ast != NULL){
 		quads_gen_statement(ast);
-		
 		ast=ast->next;
 	}
 	
 	quads_print_bb(current_bb);
-	
 	fn_count++;
 }
 
 
 struct quad_list *quads_gen_statement(struct ast_node *ast){
 
+printf("ast type:%d\n", ast->type);
 	struct quad_list *new = new_quad_list();
 	switch(ast->type){
 	case AST_ASSGN:
@@ -84,11 +83,14 @@ struct quad_list *quads_gen_statement(struct ast_node *ast){
 		if(qdebug) printf("WHILE  quad\n");
 		
 	break;
-	default:
+	case AST_BINOP:
+		if(qdebug) printf("BINOP  quad\n");
+	break;
+/*	default:
 		fprintf(stderr, "Invalid statement type: quad_gen_statement\n");
 		exit(1);
 		break;
-	}
+*/	}
 	
 	return new;
 }
@@ -286,7 +288,7 @@ void quad_print(struct quad *q){
 }
 
 void quads_print_bb(struct basic_block *bb){
-//printf("addr %p\n", bb);
+printf("addr %p\n", bb);
 	if(!bb){
 		fprintf(stderr, "Error: BB:%s empty in quads_print_bb\n", bb->id);	
 		return;
@@ -295,7 +297,7 @@ void quads_print_bb(struct basic_block *bb){
 	
 	struct basic_block *tmp_bb = bb;
 	struct quad *tmp_q = bb->quads->head;
-	printf("%s:\n", bb->id);
+	printf("%s #\n", bb->id);
 
 	while(tmp_q != NULL){
 printf("q: %p\n", tmp_q);
