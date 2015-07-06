@@ -11,7 +11,7 @@
 
 int yydebug = 0;
 int stdebug = 0;
-int astdebug = 0;
+int astdebug = 1;
 int qdebug = 1;
 
 extern int yylex();
