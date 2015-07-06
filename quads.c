@@ -421,7 +421,7 @@ printf("q: %p\n", q);
 		printf("MOV \t%d\n",q->source1->attributes.num );
 		break;
 	case Q_CMP:
-		printf("CMP \n" );
+		printf("\tCMP \t");
 		if (q->source1->type == AST_NUM || q->source1->type == AST_CHAR)
 			printf("%d", q->source1->attributes.num);
 		else 
