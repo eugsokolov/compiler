@@ -195,15 +195,15 @@ void quads_gen_for(struct ast_node *ast){
 
 	quads_gen_assignment(ast->left);
 //	loop_new();
-//link cond quad	
+	basic_block_link(current_bb, ALWAYS, b_cond, NULL);
 	current_bb = b_cond;
 	quads_gen_condexpr(ast->cond, b_body, b_next);
 	current_bb = b_body;
-//body quad
-//link body quad
+	quads_gen_statement(ast->body);
+	basic_block_link(current_bb, ALWAYS, b_body, NULL);
 	current_bb = b_inc;
-//increment quad
-//link inc quad
+	quads_gen_statement(ast->right);
+	basic_block_link(current_bb, ALWAYS, b_inc, NULL);
 	current_bb = b_next;	
 //	loop_end();
 
