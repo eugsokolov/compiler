@@ -30,7 +30,8 @@ enum ast_type{
 	AST_WHILE,	//15
 	AST_FOR,	//16
 	AST_SWITCH,	//17
-	AST_TMP		//18
+	AST_TMP,	//18
+	AST_IF_E	//19
 };
 
 struct ast_node {

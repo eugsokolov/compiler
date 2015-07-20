@@ -188,7 +188,15 @@ void quads_gen_if(struct ast_node *ast){
 
 void quads_gen_for(struct ast_node *ast){
         
+	struct basic_block *b_cond = new_basic_block();
+	struct basic_block *b_body = new_basic_block();
+	struct basic_block *b_inc = new_basic_block();
+	struct basic_block *b_next = new_basic_block();
 
+	quads_gen_assignment(ast->left);
+
+
+	quads_gen_condexpr(ast->cond, b_body, b_next);
 
 
 

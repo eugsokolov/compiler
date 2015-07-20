@@ -847,12 +847,13 @@ if_statement
 		$$ = ast_newnode(AST_IF);
 		$$->cond = $3;
 		$$->body = $5;
+		$$->next = NULL;
 	}
         ;
 
 if_else_statement
         : IF '(' expression ')' statement ELSE statement {
-		$$ = ast_newnode(AST_IF);
+		$$ = ast_newnode(AST_IF_E);
 		$$->cond = $3;
 		$$->body = $5;
 		$$->next = $7;

@@ -184,7 +184,7 @@ printf("node type:%d\n", root->type);
                 	tmp = tmp->next;
            	}
         	break;
-	case AST_IF:
+	case AST_IF_E:
 		printf("\tIF\n");
 		printf("\tCOND:\n\t\t");
 			ast_print_node(root->cond);
@@ -194,6 +194,13 @@ printf("node type:%d\n", root->type);
 			printf("\tELSE:\n\t");
 			ast_print_node(root->next);
 		}
+		break;
+	case AST_IF:
+		printf("\tIF\n");
+		printf("\tCOND:\n\t\t");
+			ast_print_node(root->cond);
+		printf("\tTHEN:\n\t\t");
+			ast_print_node(root->body);
 		break;
 	case AST_WHILE:
 		printf("\tWHILE\n");
