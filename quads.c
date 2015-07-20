@@ -194,11 +194,18 @@ void quads_gen_for(struct ast_node *ast){
 	struct basic_block *b_next = new_basic_block();
 
 	quads_gen_assignment(ast->left);
-
-
+//	loop_new();
+//link cond quad	
+	current_bb = b_cond;
 	quads_gen_condexpr(ast->cond, b_body, b_next);
-
-
+	current_bb = b_body;
+//body quad
+//link body quad
+	current_bb = b_inc;
+//increment quad
+//link inc quad
+	current_bb = b_next;	
+//	loop_end();
 
 }
 
