@@ -38,8 +38,7 @@ struct ast_node * quads_new_tmp(){
 	tmp->type = AST_TMP;
 	tmp->attributes.num = tmp_count;
 
-	if(qdebug)
-	printf("Generating TMP T:%d\n", tmp->attributes.num);
+	if(qdebug) printf("Generating TMP T:%d\n", tmp->attributes.num);
 
 	return tmp;
 }
@@ -82,6 +81,8 @@ struct quad_list *quads_gen_fncall(struct ast_node *ast){
 
 struct quad_list *quads_gen_statement(struct ast_node *ast){
 
+	if(qdebug) printf("generate statement type: %d\n", ast->type);
+
 	struct quad_list *new = new_quad_list();
 	switch(ast->type){
 	case AST_ASSGN:
@@ -119,11 +120,12 @@ struct quad_list *quads_gen_statement(struct ast_node *ast){
 		if(qdebug) printf("UNOP  quad\n");
 		emit(Q_INC,ast,NULL,NULL);
 	break;
-/*	default:
+
+	case AST_VAR: break;
+	default:
 		fprintf(stderr, "Invalid statement type: quad_gen_statement\n");
-		exit(1);
 		break;
-*/	}
+	}
 	
 	return new;
 }
@@ -155,7 +157,7 @@ struct ast_node *quads_gen_assignment(struct ast_node *ast){
 struct ast_node *quads_gen_rval(struct ast_node *ast, struct ast_node *target){
 
 	struct ast_node *tmp, *left, *right;
-	struct ast_node *new_node1, *new_node2;
+	struct ast_node *n1, *n2;
 	int ptr_left, ptr_right;
 	switch(ast->type){
 	case AST_VAR:
@@ -167,57 +169,50 @@ struct ast_node *quads_gen_rval(struct ast_node *ast, struct ast_node *target){
 		return ast;
 	break;
 	case AST_BINOP:
-/*		left = quads_gen_lval(ast->left, NULL);
-		right = quads_gen_rval(ast->right, NULL);
-		if(!target)
-			target = quads_new_tmp();
-		emit(ast->attributes.op, left, right, target);
-		return target;	
-*/
 
-            if (qdebug){
-                printf("Found binary op\n");
-            }
-            ptr_left = get_pointer(ast->left, 0);
-            ptr_right = get_pointer(ast->right, 0);
-            if (ptr_left && ptr_right){
-                if (ast->attributes.op != '-'){
-                    fprintf(stderr, "Error Invalid binary operation on 2 pointers\n");
-                }
+		if(qdebug) printf("Found binary op\n");
+            
+		ptr_left = get_pointer(ast->left, 0);
+		ptr_right = get_pointer(ast->right, 0);
                 
-            } else if (ptr_left){
-                if (ast->attributes.op != '-' && ast->attributes.op != '+'){
-                    fprintf(stderr, "Error Invalid binary operation for pointer arithmetic\n");
-                }
-                left = quads_gen_rval(ast->left, NULL);
-                tmp = quads_gen_rval(ast->right, NULL);
-                new_node1 = ast_newnode(AST_BINOP);
-                new_node1->attributes.op = '*';
-                new_node1->left = tmp;
-                new_node2 = ast_newnode(AST_NUM);
-                new_node2->attributes.num = ptr_left;
-                new_node1->right = new_node2;
-                right = quads_gen_rval(new_node1, NULL);
-            } else if (ptr_right){
-                if (ast->attributes.op != '-' && ast->attributes.op != '+'){
-                    fprintf(stderr, "Error Invalid binary operation for pointer arithmetic\n");
-                }
-                right = quads_gen_rval(ast->right, NULL);
-                tmp = quads_gen_rval(ast->left, NULL);
-                new_node1 = ast_newnode(AST_BINOP);
-                new_node1->attributes.op = '*';
-                new_node1->right = tmp;
-                new_node2 = ast_newnode(AST_NUM);
-                new_node2->attributes.num = ptr_right;
-                new_node1->left = new_node2;
-                left = quads_gen_rval(new_node1, NULL);
-            } else {
-                left = quads_gen_rval(ast->left, NULL);
-                right = quads_gen_rval(ast->right, NULL);
-            }
-            if (target == NULL) target = quads_new_tmp();
-            emit(ast->attributes.op, left, right, target);
-            return target;
+		if(ptr_left){
+		        if (ast->attributes.op != '-' && ast->attributes.op != '+')
+			fprintf(stderr, "Invalid operation on pointer arithmetic\n");
+		        
+		        left = quads_gen_rval(ast->left, NULL);
+		        tmp = quads_gen_rval(ast->right, NULL);
+		        n1 = ast_newnode(AST_BINOP);
+		        n1->attributes.op = '*';
+		        n1->left = tmp;
+		        n2 = ast_newnode(AST_NUM);
+		        n2->attributes.num = ptr_left;
+		        n1->right = n2;
+		        right = quads_gen_rval(n1, NULL);
+		}
+		else if(ptr_right){
+		        if (ast->attributes.op != '-' && ast->attributes.op != '+')
+			fprintf(stderr, "Invalid operation on pointer arithmetic\n");
+		        
+		        right = quads_gen_rval(ast->right, NULL);
+		        tmp = quads_gen_rval(ast->left, NULL);
+		        n1 = ast_newnode(AST_BINOP);
+		        n1->attributes.op = '*';
+		        n1->right = tmp;
+		        n2 = ast_newnode(AST_NUM);
+		        n2->attributes.num = ptr_right;
+		        n1->left = n2;
+		        left = quads_gen_rval(n1, NULL);
+		}
+		else{
+		        left = quads_gen_rval(ast->left, NULL);
+		        right = quads_gen_rval(ast->right, NULL);
+		}
+
+		if (target == NULL) 
+			target = quads_new_tmp();
+
+		emit(ast->attributes.op, left, right, target);
+		return target;
         break;
 	default:
 		return NULL;
@@ -226,60 +221,56 @@ struct ast_node *quads_gen_rval(struct ast_node *ast, struct ast_node *target){
 
 int get_pointer(struct ast_node *node, int deref){
 
-    struct ast_node *size_node = node;
-    int r,l,i=0;
-    if (node->type == AST_UNOP){
-        return get_pointer(node->left, deref+1);
-    } else if (node->type == AST_BINOP){
-        l = get_pointer(node->left, deref);
-        r = get_pointer(node->right, deref);
-        if (l && r){
-            printf("I dont know why you are adding 2 pointers");
-        } else if (l){
-            return l;
-        } else if (r){
-            return r;
-        }
-    } else if (node->type == AST_VAR && node->left && (node->left->type == AST_PTR || node->left->type == AST_ARY)){
-        while (i++ < deref){
-            printf("pointer deref\n");
-            size_node = node->left;
-        }
-        return get_sizeof(size_node->left->left);
-    }
-    return 0;
+	struct ast_node *size_node = node;
+	int r=0,l=0,i=0;
+	
+	if(node->type == AST_UNOP)
+		return get_pointer(node->left, deref+1);
+	else if(node->type == AST_BINOP){
+		l = get_pointer(node->left, deref);
+		r = get_pointer(node->right, deref);
+		if(l) return l;
+		else if(r) return r;
+		else if (node->type == AST_VAR && node->left && (node->left->type == AST_PTR || node->left->type == AST_ARY)){
+ 			while (i++ < deref){
+			if(qdebug) printf("pointer deref\n");
+			size_node = node->left;
+			}
+			return get_sizeof(size_node->left->left);
+		}	
+	}
+	else 
+		return 0;
 }
 
 int get_sizeof(struct ast_node *node){
-    if (node->type == AST_SCALAR){
-        if (node->attributes.scalar_type == SCALAR_INT){
-            return 4;
-        } else if (node->attributes.scalar_type == SCALAR_CHAR){
-            return 1;
-        } else {
-            return 4;
+
+	if(node->type == AST_SCALAR){
+		if(node->attributes.scalar_type == SCALAR_CHAR)
+			return 1;
+		else
+			return 4;
         }
-    } else if (node->type == AST_PTR){
-        return 8;
-    } else if (node->type == AST_UNOP){
-        if (node->attributes.op = '&'){
-            return 8;
-        }
-    } else if (node->type == AST_VAR){
-        return get_sizeof(node->left);
-    }
-    return 0;
+	else if(node->type == AST_PTR)
+		return 8;
+	else if(node->type == AST_UNOP){
+		if(node->attributes.op = '&')
+			return 8;
+	}
+	else if(node->type == AST_VAR)
+		return get_sizeof(node->left);
+	
+	return 0;
 }
 
 struct ast_node *quads_gen_lval(struct ast_node *ast, int *dstmode){
 
 	switch(ast->type){
 	case AST_VAR:
-	        if (ast->left != NULL && ast->left->type == AST_SCALAR)
+	        if(ast->left != NULL && ast->left->type == AST_SCALAR)
                 *dstmode = DIRECT;
-                if (qdebug){
-                    printf("Pointer: Direct Access\n");
-                }
+                if(qdebug) printf("lval pointer: direct access\n");
+                
                 return ast;
             break;
 	break;
