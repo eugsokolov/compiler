@@ -149,6 +149,9 @@ printf("node type:%d\n", root->type);
                 case '<':
                 	printf("<\n");
                 	break;
+                case '+':
+                	printf("+\n");
+                	break;
                 case '>':
                 	printf(">\n");
                 	break;
@@ -160,17 +163,22 @@ printf("node type:%d\n", root->type);
         	printf("UNOP ");
         	switch (root->attributes.op){
                 case PREINC:
-        		printf("SIZEOF\n");
+        		printf("PREINC\n");
                 	break;
 		case POSTINC:
-			printf("POSTINC\n");
+			printf("POSTINC: %d\n", root->attributes.op);
 			break;
 		default:
-			printf("%c\n", root->attributes.op);
+			printf("lazy unop %d\n", root->attributes.op);
 		}
 		break;
 	case AST_ARY:
 		printf("\tArray size=%d\n", root->attributes.ary);
+		break;
+	case AST_FN:
+		printf("Function \' %s @%s.%d \' def:\n", root->attributes.identifier,
+								root->attributes.filename,
+								root->attributes.linestart);
 		break;
         case AST_FNCALL:
 	        size = ast_list_size(root->right, NEXT);
@@ -216,11 +224,12 @@ printf("node type:%d\n", root->type);
 		printf("\tCOND:\n\t\t");
 			ast_print_node(root->cond);
 		printf("\tINCR:\n\t\t");
+printf("identfor: %s\n",root->right->attributes.identifier);
 			ast_print_node(root->right);
 		printf("\tBODY:\n\t\t");
 			ast_print_node(root->body);
 		break;
 	default:
-		fprintf(stderr, "ERROR printing ast node");
+		fprintf(stderr, "ERROR printing ast node of type: %d", root->type);
 	}
 }

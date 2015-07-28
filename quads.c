@@ -3,6 +3,7 @@
 // quads.c
 
 #include "quads.h"
+#include "parser.tab.h"
 
 extern int qdebug;
 
@@ -11,6 +12,7 @@ struct basic_block_list *fn_bb_list;
 int fn_count = 1;
 int bb_count = 1;
 int tmp_count = 1;
+struct loop *current_l;
 
 struct quad *emit(enum quad_opcode op, struct ast_node *s1, struct ast_node *s2, struct ast_node *result){
 
@@ -33,7 +35,12 @@ struct ast_node * quads_new_tmp(){
 
 	tmp_count++;
 	struct ast_node *tmp = ast_newnode(AST_TMP);
+	tmp->type = AST_TMP;
 	tmp->attributes.num = tmp_count;
+
+	if(qdebug)
+	printf("Generating TMP T:%d\n", tmp->attributes.num);
+
 	return tmp;
 }
 
@@ -57,10 +64,24 @@ struct quad_list *quads_gen_fn(struct ast_node *ast_fn, struct ast_node *ast){
 	fn_count++;
 }
 
+struct quad_list *quads_gen_fncall(struct ast_node *ast){
+
+	struct ast_node *arg = ast->right;
+	if(arg != NULL){
+		while(arg != NULL){
+			emit(Q_FNCALL, arg, NULL, NULL);
+			arg = arg->next;
+		}
+	}
+
+//	struct ast_node *dest = quads_tmp_quad();
+//	struct ast_node *source = quads_gen_statement
+//	emit(Q_FUNC_CALL, dest, source, 0)	
+	return NULL;
+}
 
 struct quad_list *quads_gen_statement(struct ast_node *ast){
 
-//printf("ast type:%d\n", ast->type);
 	struct quad_list *new = new_quad_list();
 	switch(ast->type){
 	case AST_ASSGN:
@@ -81,10 +102,22 @@ struct quad_list *quads_gen_statement(struct ast_node *ast){
 	break;
 	case AST_WHILE:
 		if(qdebug) printf("WHILE  quad\n");
-		
+	break;	
+	case AST_FN:
+		if(qdebug) printf("FN  quad\n");
+		quads_gen_fn(ast, ast->right);
+	break;
+	case AST_FNCALL:
+		if(qdebug) printf("FNCALL  quad\n");
+		quads_gen_fncall(ast);
 	break;
 	case AST_BINOP:
-		if(qdebug) printf("BINOP  quad\n");
+		if(qdebug) printf("BINOP quad\n");
+		emit(ast->attributes.op,ast->right,ast->left,NULL);
+	break;
+	case AST_UNOP:
+		if(qdebug) printf("UNOP  quad\n");
+		emit(Q_INC,ast,NULL,NULL);
 	break;
 /*	default:
 		fprintf(stderr, "Invalid statement type: quad_gen_statement\n");
@@ -95,20 +128,22 @@ struct quad_list *quads_gen_statement(struct ast_node *ast){
 	return new;
 }
 
-
-
 struct ast_node *quads_gen_assignment(struct ast_node *ast){
 
 	struct ast_node *tmp, *dest;
 	int dstmode;
 	dest = quads_gen_lval(ast->left, &dstmode);
-
 	if(dest == NULL){
 		fprintf(stderr, "Error: quads_gen_assigment: LHS invalid");
 	}	
 	if(dstmode == DIRECT){
+		if(ast->right->type == AST_BINOP){
+		tmp = quads_gen_rval(ast->right, dest);
+		}
+		else{
 		tmp = quads_gen_rval(ast->right, dest);
 		emit(Q_MOV, tmp, NULL, dest);
+		}
 	}
 	else{
 		tmp = quads_gen_rval(ast->right, NULL);
@@ -119,8 +154,9 @@ struct ast_node *quads_gen_assignment(struct ast_node *ast){
 
 struct ast_node *quads_gen_rval(struct ast_node *ast, struct ast_node *target){
 
-	struct ast_node *tmp;
-	int left, right;
+	struct ast_node *tmp, *left, *right;
+	struct ast_node *new_node1, *new_node2;
+	int ptr_left, ptr_right;
 	switch(ast->type){
 	case AST_VAR:
 		return ast;
@@ -131,27 +167,121 @@ struct ast_node *quads_gen_rval(struct ast_node *ast, struct ast_node *target){
 		return ast;
 	break;
 	case AST_BINOP:
-/*
-		left = quads_gen_lval(ast->left, NULL);
+/*		left = quads_gen_lval(ast->left, NULL);
 		right = quads_gen_rval(ast->right, NULL);
 		if(!target)
 			target = quads_new_tmp();
 		emit(ast->attributes.op, left, right, target);
 		return target;	
 */
-	break;
+
+            if (qdebug){
+                printf("Found binary op\n");
+            }
+            ptr_left = get_pointer(ast->left, 0);
+            ptr_right = get_pointer(ast->right, 0);
+            if (ptr_left && ptr_right){
+                if (ast->attributes.op != '-'){
+                    fprintf(stderr, "Error Invalid binary operation on 2 pointers\n");
+                }
+                
+            } else if (ptr_left){
+                if (ast->attributes.op != '-' && ast->attributes.op != '+'){
+                    fprintf(stderr, "Error Invalid binary operation for pointer arithmetic\n");
+                }
+                left = quads_gen_rval(ast->left, NULL);
+                tmp = quads_gen_rval(ast->right, NULL);
+                new_node1 = ast_newnode(AST_BINOP);
+                new_node1->attributes.op = '*';
+                new_node1->left = tmp;
+                new_node2 = ast_newnode(AST_NUM);
+                new_node2->attributes.num = ptr_left;
+                new_node1->right = new_node2;
+                right = quads_gen_rval(new_node1, NULL);
+            } else if (ptr_right){
+                if (ast->attributes.op != '-' && ast->attributes.op != '+'){
+                    fprintf(stderr, "Error Invalid binary operation for pointer arithmetic\n");
+                }
+                right = quads_gen_rval(ast->right, NULL);
+                tmp = quads_gen_rval(ast->left, NULL);
+                new_node1 = ast_newnode(AST_BINOP);
+                new_node1->attributes.op = '*';
+                new_node1->right = tmp;
+                new_node2 = ast_newnode(AST_NUM);
+                new_node2->attributes.num = ptr_right;
+                new_node1->left = new_node2;
+                left = quads_gen_rval(new_node1, NULL);
+            } else {
+                left = quads_gen_rval(ast->left, NULL);
+                right = quads_gen_rval(ast->right, NULL);
+            }
+            if (target == NULL) target = quads_new_tmp();
+            emit(ast->attributes.op, left, right, target);
+            return target;
+        break;
 	default:
 		return NULL;
 	}
+}
+
+int get_pointer(struct ast_node *node, int deref){
+
+    struct ast_node *size_node = node;
+    int r,l,i=0;
+    if (node->type == AST_UNOP){
+        return get_pointer(node->left, deref+1);
+    } else if (node->type == AST_BINOP){
+        l = get_pointer(node->left, deref);
+        r = get_pointer(node->right, deref);
+        if (l && r){
+            printf("I dont know why you are adding 2 pointers");
+        } else if (l){
+            return l;
+        } else if (r){
+            return r;
+        }
+    } else if (node->type == AST_VAR && node->left && (node->left->type == AST_PTR || node->left->type == AST_ARY)){
+        while (i++ < deref){
+            printf("pointer deref\n");
+            size_node = node->left;
+        }
+        return get_sizeof(size_node->left->left);
+    }
+    return 0;
+}
+
+int get_sizeof(struct ast_node *node){
+    if (node->type == AST_SCALAR){
+        if (node->attributes.scalar_type == SCALAR_INT){
+            return 4;
+        } else if (node->attributes.scalar_type == SCALAR_CHAR){
+            return 1;
+        } else {
+            return 4;
+        }
+    } else if (node->type == AST_PTR){
+        return 8;
+    } else if (node->type == AST_UNOP){
+        if (node->attributes.op = '&'){
+            return 8;
+        }
+    } else if (node->type == AST_VAR){
+        return get_sizeof(node->left);
+    }
+    return 0;
 }
 
 struct ast_node *quads_gen_lval(struct ast_node *ast, int *dstmode){
 
 	switch(ast->type){
 	case AST_VAR:
-		if(ast->left != NULL && ast->left->type == AST_SCALAR)
-		*dstmode = DIRECT;
-		return ast;
+	        if (ast->left != NULL && ast->left->type == AST_SCALAR)
+                *dstmode = DIRECT;
+                if (qdebug){
+                    printf("Pointer: Direct Access\n");
+                }
+                return ast;
+            break;
 	break;
 	case AST_NUM:
 	case AST_CHAR:
@@ -194,18 +324,18 @@ void quads_gen_for(struct ast_node *ast){
 	struct basic_block *b_next = new_basic_block();
 
 	quads_gen_assignment(ast->left);
-//	loop_new();
+	loop_new(b_inc, b_next);
 	basic_block_link(current_bb, ALWAYS, b_cond, NULL);
 	current_bb = b_cond;
 	quads_gen_condexpr(ast->cond, b_body, b_next);
 	current_bb = b_body;
 	quads_gen_statement(ast->body);
-	basic_block_link(current_bb, ALWAYS, b_body, NULL);
+	basic_block_link(current_bb, ALWAYS, b_inc, NULL);
 	current_bb = b_inc;
 	quads_gen_statement(ast->right);
-	basic_block_link(current_bb, ALWAYS, b_inc, NULL);
+	basic_block_link(current_bb, ALWAYS, b_cond, NULL);
 	current_bb = b_next;	
-//	loop_end();
+	loop_end();
 
 }
 
@@ -233,20 +363,20 @@ void quads_gen_condexpr(struct ast_node *ast, struct basic_block *true_b, struct
 		case AST_BINOP:
 		switch (ast->attributes.op){
 			case '<':
-				left = quads_gen_rval(ast->left, NULL);
-				right = quads_gen_rval(ast->right, NULL);
-				emit(Q_CMP, left, right, NULL);
-				basic_block_link(current_bb, COND_LT, true_b, false_b);
-				break;
 			case '>':
+			case EQEQ:
+			case NOTEQ:
 				left = quads_gen_rval(ast->left, NULL);
 				right = quads_gen_rval(ast->right, NULL);
 				emit(Q_CMP, left, right, NULL);
 				basic_block_link(current_bb, COND_LT, true_b, false_b);
 				break;
-
 			default:
-				printf("BINOP not fully implemented\n");
+				left = quads_gen_rval(ast, NULL);
+				right = ast_newnode(AST_NUM);
+				right->attributes.num=0;
+				emit(Q_CMP, left, right, NULL);
+				basic_block_link(current_bb, COND_NE, true_b, false_b);
 		}
 		break;
 		case AST_UNOP:
@@ -267,6 +397,25 @@ void quads_gen_condexpr(struct ast_node *ast, struct basic_block *true_b, struct
 		
 }
 
+struct loop *loop_new(struct basic_block *b_continue, struct basic_block *b_break){
+
+	struct loop *l = malloc(sizeof(struct loop));
+	if(l == NULL)
+		fprintf(stderr, "Error creating loop struct\n");
+
+	l->b_continue = b_continue;
+	l->b_break = b_break;
+	l->previous = current_l;
+	current_l = l;
+	return l;
+
+}
+
+struct loop *loop_end(){
+	struct loop *l = current_l;
+	current_l = current_l->previous;
+	free(l);
+}
 
 struct quad_list *new_quad_list(){
 
@@ -317,6 +466,15 @@ struct basic_block *basic_block_link(struct basic_block *bb, int branch, struct 
 	bb->branch = branch;
 	bb->left = left;
 	bb->right = right;
+
+	if(qdebug){
+		printf("BB Linked .BB%s to ",bb->id);
+		if(left)
+			printf("(L) BB%s", bb->left->id);
+		if(right)
+			printf(" (R) BB%s", bb->right->id);
+		printf(" as: %d\n", bb->branch);
+	}
 }
 
 struct basic_block_list *new_bb_list(){
@@ -381,6 +539,7 @@ printf("q: %p\n", tmp_q);
 		quads_print_inst(cur);
 		cur = cur->next;
 		}
+
 		switch (bb->branch){
 		case NEVER:
 			break;
@@ -412,8 +571,6 @@ printf("q: %p\n", tmp_q);
 
 void quads_print_inst(struct quad *q){
 
-printf("q: %p\n", q);
-
 	if(q){
 	if(q->result){
 		if(q->result->type == AST_TMP)
@@ -423,7 +580,7 @@ printf("q: %p\n", q);
 		printf("\t %s\t=\t", q->result->attributes.identifier);
 	}
 	else
-		printf("\t\t");
+		printf("\t");
 
 	switch(q->q_opcode){
 	case Q_LEA:
@@ -433,6 +590,9 @@ printf("q: %p\n", q);
 		printf("STORE \t%s , %s\n", q->source1->attributes.identifier, q->source2->attributes.identifier);
 		break;
 	case Q_MOV:
+		if(q->source1->type == AST_TMP)
+		printf("MOV \t@T%d\n",q->source1->attributes.num );
+		else	
 		printf("MOV \t%d\n",q->source1->attributes.num );
 		break;
 	case Q_CMP:
@@ -459,6 +619,54 @@ printf("q: %p\n", q);
 			printf("LOAD\t%s\n", q->source1->attributes.identifier);
 		break;
 
+	case Q_FNCALL:
+		printf("FNCALL QUAD\n");
+		break;
+	case Q_INC:
+		printf("%s\t = \t ADD %s,1\n",q->source1->left->attributes.identifier,
+						q->source1->left->attributes.identifier);
+		break;
+
+	case '-':
+		printf("SUB ");
+		if(q->source1->attributes.identifier) printf("%s",q->source1->attributes.identifier);
+		if(q->source1->attributes.num) printf("%d",q->source1->attributes.num);
+		printf(",");
+		if(q->source2->attributes.identifier) printf("%s",q->source2->attributes.identifier);
+		if(q->source2->attributes.num) printf("%d",q->source2->attributes.num);
+		printf("\n");
+		break;			
+	case '+':
+		printf("ADD ");
+		if(q->source1->attributes.identifier) printf("%s",q->source1->attributes.identifier);
+		if(q->source1->attributes.num) printf("%d",q->source1->attributes.num);
+		printf(",");
+		if(q->source2->attributes.identifier) printf("%s",q->source2->attributes.identifier);
+		if(q->source2->attributes.num) printf("%d",q->source2->attributes.num);
+		printf("\n");
+		break;			
+	case '*':
+		printf("MUL ");
+		if(q->source1->attributes.identifier) printf("%s",q->source1->attributes.identifier);
+		if(q->source1->attributes.num) printf("%d",q->source1->attributes.num);
+		printf(",");
+		if(q->source2->attributes.identifier) printf("%s",q->source2->attributes.identifier);
+		if(q->source2->attributes.num) printf("%d",q->source2->attributes.num);
+		printf("\n");
+		break;			
+	case '/':
+		printf("DIV ");
+		if(q->source1->attributes.identifier) printf("%s",q->source1->attributes.identifier);
+		if(q->source1->attributes.num) printf("%d",q->source1->attributes.num);
+		printf(",");
+		if(q->source2->attributes.identifier) printf("%s",q->source2->attributes.identifier);
+		if(q->source2->attributes.num) printf("%d",q->source2->attributes.num);
+		printf("\n");
+		break;			
+	
+	
+	default:
+		printf("Invalid quad opcode: %d\n",q->q_opcode);
 	}
 
 	}

@@ -11,8 +11,8 @@
 
 int yydebug = 0;
 int stdebug = 0;
-int astdebug = 1;
-int qdebug = 1;
+int astdebug = 0;
+int qdebug = 0;
 
 extern int yylex();
 extern int yyleng;
@@ -234,6 +234,8 @@ function_declarator
         : direct_declarator '(' parameter_type_list ')' { error_msg("function prototype",lineno,filename); }
         | direct_declarator '(' ')' { 
 		$$ = ast_newnode(AST_FN); 
+		strcpy($$->attributes.filename,strdup(filename));
+		$$->attributes.linestart = lineno;
 		ast_push_back($$,$1,LEFT); 
 	}
         | direct_declarator '(' identifier_list ')' { error_msg("function argument",lineno,filename);}
@@ -516,6 +518,7 @@ primary_expression
 		//ident[yylval.yystring_size] = '\0';
 		struct ast_node *var = symTable_getSymbol(curr_scope, ident, NAMESPACE_OTHER);
 		$$ = var;
+	//	strcpy($$->attributes.identifier, yylval.yystring);
 	}
         | NUMBER { 
 		$$ = ast_newnode(AST_NUM); 
@@ -590,7 +593,8 @@ expression_list
         ;
 
 postincrement_expression
-        : postfix_expression PLUSPLUS { $$ = ast_newnode(AST_UNOP); $$->attributes.op = POSTINC; $$->left = $1; }
+        : postfix_expression PLUSPLUS { $$ = ast_newnode(AST_UNOP); $$->attributes.op = POSTINC; $$->left = $1;} 
+        //: postfix_expression PLUSPLUS { $$ = ast_newnode(AST_BINOP); $$->attributes.op = '+'; $$->left = $1; struct ast_node *tmp = ast_newnode(AST_NUM); tmp->attributes.num = 1; $$->right = tmp; }
         ;
 
 postdecrement_expression
@@ -748,7 +752,7 @@ logical_and_expression
 
 
 conditional_expression
-        : logical_or_expression
+        : logical_or_expression 
         | logical_or_expression '?' expression ':' conditional_expression {  error_msg("conditional expression",lineno,filename);$$ = NULL; }
         ;
 
@@ -940,7 +944,6 @@ function_definition
 	if(astdebug)
 	ast_dump($4, $1->attributes.identifier);
 	printf("\n\n*********************************\n\n");
-	if(qdebug)
 	quads_gen_fn($1, $4);
 	}
         ;
