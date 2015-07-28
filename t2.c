@@ -1,4 +1,6 @@
 int a;
+printf(){ a=3;}
+
 int f()
 {
 	int foo;
@@ -9,7 +11,8 @@ int f()
 	}
         int b, c;
         for(a=1;a<b;a++)
-                printf(a);
+		printf("%d\n",a);
+
 }
 
 

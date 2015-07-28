@@ -116,9 +116,9 @@ printf("node type:%d\n", root->type);
 		break;
 	case AST_STR:
 		printf("\tCONST type:char * :%s\n", root->attributes.str);
-		for(i=0; i<strlen(root->attributes.str); i++)
-			printf("%c", root->attributes.str[i]);
-		printf("\n");
+	//	for(i=0; i<strlen(root->attributes.str); i++)
+	//		printf("%c", root->attributes.str[i]);
+	//	printf("\n");
 		break;
 	case AST_CHAR:
 		printf("\tCONST type=char :%c\n", (char)root->attributes.num);
@@ -155,6 +155,12 @@ printf("node type:%d\n", root->type);
                 case '>':
                 	printf(">\n");
                 	break;
+                case EQEQ:
+                	printf("==\n");
+                	break;
+                case NOTEQ:
+                	printf("!=\n");
+                	break;
 		default:
 			printf("lazy binop\n");
 		}
@@ -176,7 +182,7 @@ printf("node type:%d\n", root->type);
 		printf("\tArray size=%d\n", root->attributes.ary);
 		break;
 	case AST_FN:
-		printf("Function \' %s @%s.%d \' def:\n", root->attributes.identifier,
+		printf("Function  def \'%s @%s.%d\'\n", root->attributes.identifier,
 								root->attributes.filename,
 								root->attributes.linestart);
 		break;
@@ -224,7 +230,6 @@ printf("node type:%d\n", root->type);
 		printf("\tCOND:\n\t\t");
 			ast_print_node(root->cond);
 		printf("\tINCR:\n\t\t");
-printf("identfor: %s\n",root->right->attributes.identifier);
 			ast_print_node(root->right);
 		printf("\tBODY:\n\t\t");
 			ast_print_node(root->body);

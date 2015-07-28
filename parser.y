@@ -11,8 +11,8 @@
 
 int yydebug = 0;
 int stdebug = 0;
-int astdebug = 0;
-int qdebug = 0;
+int astdebug = 1;
+int qdebug = 1;
 
 extern int yylex();
 extern int yyleng;
@@ -235,6 +235,7 @@ function_declarator
         | direct_declarator '(' ')' { 
 		$$ = ast_newnode(AST_FN); 
 		strcpy($$->attributes.filename,strdup(filename));
+		strcpy($$->attributes.identifier,strdup($1->attributes.identifier));
 		$$->attributes.linestart = lineno;
 		ast_push_back($$,$1,LEFT); 
 	}
