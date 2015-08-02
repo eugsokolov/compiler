@@ -132,6 +132,6 @@ void target_print_vt(struct ast_node *cur);
 char *target_id(struct ast_node *ast, char *buffer);
 void target_globl(struct ast_node *ast_fn);
 void target_print();
-void target_print_globl();
+int target_print_globl();
 
 #endif

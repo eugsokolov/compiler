@@ -22,16 +22,23 @@ int arg = 0;
 
 void target_print(){
 
-	target_print_globl();
-
+	int i = target_print_globl();
+	if(i == 0){
+		printf("\t.text\n");
+		printf("\t.globl %s\n", fn_bb_list->func);
+		printf("\t.type %s, @function\n", fn_bb_list->func);
+	}
 	printf("\n%s:\n", fn_bb_list->func);
+	printf("\tpushl %%ebp\n");
+	printf("\tmovl %%esp, %%ebp\n");
+	printf("\tsubl $-%d, %%esp\n", variable_size * 4);
 
-	int i = 0;
+	int j = 0;
 	while(fn_bb_list->head != NULL){
 		target_print_bb(fn_bb_list->head);
 		fn_bb_list->head = fn_bb_list->head->next;
-		i++;	
-		if(fn_bb_list->bbend == i) exit(0);
+		j++;	
+		if(fn_bb_list->bbend == j) exit(0);
 	}
 }
 
@@ -62,8 +69,9 @@ struct ast_node * target_new_tmp(){
 	return tmp;
 }
 
-void target_print_globl(){
+int target_print_globl(){
 
+	int i=0;
 	struct ast_node *tmp = current_bb->next->quads->head->result;
 	while(tmp != NULL){
 		if(tmp->type == 16){
@@ -75,12 +83,15 @@ void target_print_globl(){
 				printf("\t.text\n");
 				printf("\t.globl %s\n", fn_bb_list->func);
 				printf("\t.type %s, @function\n", fn_bb_list->func);
+				i++;
 			}	
 		}
 			
 		tmp=tmp->next;
+
 	}
 
+	return i;
 }
 
 void target_globl(struct ast_node *ast){
@@ -655,7 +666,6 @@ void target_print_inst(struct quad *q){
                 printf("\tmovl %%edx, (%%eax)\n");
 		break;
 	case Q_MOV:
-                printf("\tpush %%eax\n");
                 printf("\tmovl %s, %%eax\n", s1);
                 printf("\tmovl %%eax, %s\n", r);
 		break;
@@ -670,7 +680,7 @@ void target_print_inst(struct quad *q){
 		break;
 	case Q_FNCALL_ARG:
 		if(q->source1->type == 5)
-			printf("\tmovl %s, (%%esp)\n", q->source1->attributes.identifier);
+			printf("\tmovl $%s, (%%esp)\n", q->source1->attributes.identifier);
 		else if(q->source1->type == 0){
 			printf("\tmovl %s, %%eax\n", q->source1->attributes.identifier);
 			printf("\tmovl %%eax, %d(%%esp)\n", arg * variable_size);
@@ -682,8 +692,9 @@ void target_print_inst(struct quad *q){
 		break;
 	case Q_RETURN:
 		if(r) printf("\tmovl %s, %%eax\n", r);
-		printf("\tmovl %%ebp, %%esp\n");
-                printf("\tpopl %%ebp\n");
+		//printf("\tmovl %%ebp, %%esp\n");
+                //printf("\tpopl %%ebp\n");
+                printf("\tleave\n");
                 printf("\tret\n");
 		break;
 	case Q_INC:
