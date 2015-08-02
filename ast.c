@@ -186,10 +186,14 @@ printf("node type:%d\n", root->type);
 								root->attributes.filename,
 								root->attributes.linestart);
 		break;
+	case AST_FNCALL_ARG:
+		printf("FN CALL ARG!!\n");
         case AST_FNCALL:
 	        size = ast_list_size(root->right, NEXT);
-	        printf("\tFNCALL, %d arguments\n\t\t",size);
+		root->attributes.num = size;
+	        printf("\tFNCALL line:%d, %d arguments\n\t\t",root->right->attributes.linestart,size);
         	ast_print_node(root->left);
+        	ast_print_node(root->right);
         	tmp = root->right;
         	for(i=0; i<size; i++){
         	        printf("arg#%d= ",i+1);
@@ -233,6 +237,9 @@ printf("node type:%d\n", root->type);
 			ast_print_node(root->right);
 		printf("\tBODY:\n\t\t");
 			ast_print_node(root->body);
+		break;
+	case AST_RET:
+		printf("RETURN \n");
 		break;
 	default:
 		fprintf(stderr, "ERROR printing ast node of type: %d", root->type);

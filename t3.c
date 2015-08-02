@@ -1,5 +1,5 @@
 int a;
-int z();
+int printf();
 int f()
 {
 	int foo;
@@ -10,8 +10,8 @@ int f()
 	}
         int b, c;
         for(a=1;a<b;a++)
-		z(a,foo);
-	return 1;
-}
+		printf("%d",a);
 
+	return 0;
+}
 

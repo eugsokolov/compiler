@@ -11,8 +11,8 @@
 
 int yydebug = 0;
 int stdebug = 0;
-int astdebug = 1;
-int qdebug = 1;
+int astdebug = 0;
+int qdebug = 0;
 
 extern int yylex();
 extern int yyleng;
@@ -89,6 +89,7 @@ struct sym_table *curr_scope;
 
 %type <node> translation_unit top_level_declaration
 %type <node> function_declarator function_definition function_call function_specifier
+%type <node> return_statement
 
 %start translation_unit
 
@@ -519,7 +520,7 @@ primary_expression
 		//ident[yylval.yystring_size] = '\0';
 		struct ast_node *var = symTable_getSymbol(curr_scope, ident, NAMESPACE_OTHER);
 		$$ = var;
-	//	strcpy($$->attributes.identifier, yylval.yystring);
+		if(var != NULL) sprintf($$->attributes.identifier,"%s",ident);
 	}
         | NUMBER { 
 		$$ = ast_newnode(AST_NUM); 
@@ -801,7 +802,7 @@ statement
         | switch_statement 
         | break_statement { error_msg("break statement",lineno,filename);$$ = NULL; }
         | continue_statement { error_msg("continue statement",lineno,filename);$$ = NULL; }
-        | return_statement { error_msg("return statement",lineno,filename);$$ = NULL; }
+        | return_statement 
         | goto_statement { error_msg("go to statement",lineno,filename);$$ = NULL; }
         | null_statement
         ;
@@ -908,8 +909,8 @@ continue_statement
         ;
 
 return_statement
-        : RETURN ';'
-        | RETURN expression ';'
+        : RETURN ';' { $$ = ast_newnode(AST_RET); $$->left = NULL; }
+        | RETURN expression ';' { $$ = ast_newnode(AST_RET); $$->left = $2; }
         ;
 
 goto_statement
@@ -931,8 +932,8 @@ translation_unit
         ;
 
 top_level_declaration
-        : declaration
-        | function_definition
+        : declaration { target_globl($1); }
+        | function_definition { target_gen_fn($1,$1->body); }
         ;
 
 function_definition
@@ -942,10 +943,17 @@ function_definition
        	declaration_or_statement_list '}'  { 
 
 	curr_scope = symTable_pop(curr_scope);
-	if(astdebug)
-	ast_dump($4, $1->attributes.identifier);
-	printf("\n\n*********************************\n\n");
-	quads_gen_fn($1, $4);
+	if(astdebug){
+		ast_dump($4, $1->attributes.identifier);
+		printf("\n\n*********************************\n\n");
+	}
+	if(qdebug){
+		quads_gen_fn($1, $4);
+		printf("\n\n*********************************\n\n");
+	}
+	
+	$1->body = $4;
+//	target_gen_globl($1,$4);
 	}
         ;
 
@@ -1015,6 +1023,11 @@ int main(int argc, char** argv){
         strcpy(filename,infile);
 	curr_scope = symTable_new(FILE_SCOPE, 1, filename, NULL);
 
+	printf("\t.file \"%s\"\n",filename);
+
 	yyparse();
+	
+	target_print();
+	
 	return 0;
 }

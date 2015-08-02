@@ -9,12 +9,12 @@ extern int qdebug;
 
 struct basic_block *current_bb;
 struct basic_block_list *fn_bb_list;
-int fn_count = 1;
-int bb_count = 1;
-int tmp_count = 1;
+int q_fn_count = 1;
+int q_bb_count = 1;
+int q_tmp_count = 1;
 struct loop *current_l;
 
-struct quad *emit(enum quad_opcode op, struct ast_node *s1, struct ast_node *s2, struct ast_node *result){
+struct quad *quad_emit(enum quad_opcode op, struct ast_node *s1, struct ast_node *s2, struct ast_node *result){
 
 	struct quad *q = malloc(sizeof(struct quad));
 	if(q == NULL){
@@ -33,10 +33,10 @@ struct quad *emit(enum quad_opcode op, struct ast_node *s1, struct ast_node *s2,
 
 struct ast_node * quads_new_tmp(){
 
-	tmp_count++;
+	q_tmp_count++;
 	struct ast_node *tmp = ast_newnode(AST_TMP);
 	tmp->type = AST_TMP;
-	tmp->attributes.num = tmp_count;
+	tmp->attributes.num = q_tmp_count;
 
 	if(qdebug) printf("Generating TMP T:%d\n", tmp->attributes.num);
 
@@ -45,14 +45,18 @@ struct ast_node * quads_new_tmp(){
 
 struct quad_list *quads_gen_fn(struct ast_node *ast_fn, struct ast_node *ast){
 
-	if(ast_fn->type != AST_VAR || ast_fn->left->type != AST_FN)
+	if(ast_fn->type != AST_VAR || ast_fn->left->type != AST_FN){
 		fprintf(stderr, "Error: quads_gen_fn\n");
-	
-	fn_bb_list = new_bb_list();
-	struct basic_block *bb = new_basic_block();
+		return NULL;
+	}
+		
+	fn_bb_list = quad_new_bb_list();
+	struct basic_block *bb = quad_new_basic_block();
 	current_bb = bb;
 	
 	printf("%s:\n", ast_fn->attributes.identifier);
+	bb->func = strdup(ast_fn->attributes.identifier);
+//	printf("%s:\n", bb->func);
 
 	while(ast != NULL){
 		quads_gen_statement(ast);
@@ -60,7 +64,7 @@ struct quad_list *quads_gen_fn(struct ast_node *ast_fn, struct ast_node *ast){
 	}
 	
 	quads_print_bb(bb);
-	fn_count++;
+	q_fn_count++;
 }
 
 struct quad_list *quads_gen_fncall(struct ast_node *ast){
@@ -68,14 +72,11 @@ struct quad_list *quads_gen_fncall(struct ast_node *ast){
 	struct ast_node *arg = ast->right;
 	if(arg != NULL){
 		while(arg != NULL){
-			emit(Q_FNCALL, arg, NULL, NULL);
+			quad_emit(Q_FNCALL, arg, NULL, NULL);
 			arg = arg->next;
 		}
 	}
-
-//	struct ast_node *dest = quads_tmp_quad();
-//	struct ast_node *source = quads_gen_statement
-//	emit(Q_FUNC_CALL, dest, source, 0)	
+// ADDDED HERE
 	return NULL;
 }
 
@@ -83,7 +84,7 @@ struct quad_list *quads_gen_statement(struct ast_node *ast){
 
 	if(qdebug) printf("generate statement type: %d\n", ast->type);
 
-	struct quad_list *new = new_quad_list();
+	struct quad_list *new = quad_new_quad_list();
 	switch(ast->type){
 	case AST_ASSGN:
 		if(qdebug) printf("ASSIGN quad\n");
@@ -114,14 +115,18 @@ struct quad_list *quads_gen_statement(struct ast_node *ast){
 	break;
 	case AST_BINOP:
 		if(qdebug) printf("BINOP quad\n");
-		emit(ast->attributes.op,ast->right,ast->left,NULL);
+		quad_emit(ast->attributes.op,ast->right,ast->left,NULL);
 	break;
 	case AST_UNOP:
 		if(qdebug) printf("UNOP  quad\n");
-		emit(Q_INC,ast,NULL,NULL);
+		quad_emit(Q_INC,ast,NULL,NULL);
 	break;
 
 	case AST_VAR: break;
+	case AST_RET:
+	//ADDED HERE
+	printf("RETURN \n");
+	break;
 	default:
 		fprintf(stderr, "Invalid statement type: quad_gen_statement\n");
 		break;
@@ -144,12 +149,12 @@ struct ast_node *quads_gen_assignment(struct ast_node *ast){
 		}
 		else{
 		tmp = quads_gen_rval(ast->right, dest);
-		emit(Q_MOV, tmp, NULL, dest);
+		quad_emit(Q_MOV, tmp, NULL, dest);
 		}
 	}
 	else{
 		tmp = quads_gen_rval(ast->right, NULL);
-		emit(Q_STORE, tmp, NULL, dest);
+		quad_emit(Q_STORE, tmp, NULL, dest);
 	}
 	return dest;
 }
@@ -172,8 +177,8 @@ struct ast_node *quads_gen_rval(struct ast_node *ast, struct ast_node *target){
 
 		if(qdebug) printf("Found binary op\n");
             
-		ptr_left = get_pointer(ast->left, 0);
-		ptr_right = get_pointer(ast->right, 0);
+		ptr_left = quad_get_pointer(ast->left, 0);
+		ptr_right = quad_get_pointer(ast->right, 0);
                 
 		if(ptr_left){
 		        if (ast->attributes.op != '-' && ast->attributes.op != '+')
@@ -211,7 +216,7 @@ struct ast_node *quads_gen_rval(struct ast_node *ast, struct ast_node *target){
 		if (target == NULL) 
 			target = quads_new_tmp();
 
-		emit(ast->attributes.op, left, right, target);
+		quad_emit(ast->attributes.op, left, right, target);
 		return target;
         break;
 	default:
@@ -219,16 +224,16 @@ struct ast_node *quads_gen_rval(struct ast_node *ast, struct ast_node *target){
 	}
 }
 
-int get_pointer(struct ast_node *node, int deref){
+int quad_get_pointer(struct ast_node *node, int deref){
 
 	struct ast_node *size_node = node;
 	int r=0,l=0,i=0;
 	
 	if(node->type == AST_UNOP)
-		return get_pointer(node->left, deref+1);
+		return quad_get_pointer(node->left, deref+1);
 	else if(node->type == AST_BINOP){
-		l = get_pointer(node->left, deref);
-		r = get_pointer(node->right, deref);
+		l = quad_get_pointer(node->left, deref);
+		r = quad_get_pointer(node->right, deref);
 		if(l) return l;
 		else if(r) return r;
 		else if (node->type == AST_VAR && node->left && (node->left->type == AST_PTR || node->left->type == AST_ARY)){
@@ -236,14 +241,14 @@ int get_pointer(struct ast_node *node, int deref){
 			if(qdebug) printf("pointer deref\n");
 			size_node = node->left;
 			}
-			return get_sizeof(size_node->left->left);
+			return quad_get_sizeof(size_node->left->left);
 		}	
 	}
 	else 
 		return 0;
 }
 
-int get_sizeof(struct ast_node *node){
+int quad_get_sizeof(struct ast_node *node){
 
 	if(node->type == AST_SCALAR){
 		if(node->attributes.scalar_type == SCALAR_CHAR)
@@ -258,7 +263,7 @@ int get_sizeof(struct ast_node *node){
 			return 8;
 	}
 	else if(node->type == AST_VAR)
-		return get_sizeof(node->left);
+		return quad_get_sizeof(node->left);
 	
 	return 0;
 }
@@ -287,46 +292,46 @@ struct ast_node *quads_gen_lval(struct ast_node *ast, int *dstmode){
 void quads_gen_if(struct ast_node *ast){
 
 	struct basic_block *bt, *bf, *bn;
-	bt = new_basic_block();
-	bf = new_basic_block();
+	bt = quad_new_basic_block();
+	bf = quad_new_basic_block();
 	if(ast->next != NULL)
-		bn = new_basic_block();
+		bn = quad_new_basic_block();
 	else
 		bn = bf;
 	
 	quads_gen_condexpr(ast->cond, bt, bf);
 	current_bb=bt;
 	quads_gen_statement(ast->body);
-	basic_block_link(current_bb, ALWAYS, bn, NULL);
+	quad_basic_block_link(current_bb, ALWAYS, bn, NULL);
 	if(ast->next != NULL){
 		current_bb=bf;
 		quads_gen_statement(ast->next);
-		basic_block_link(current_bb, ALWAYS, bn, NULL);
+		quad_basic_block_link(current_bb, ALWAYS, bn, NULL);
 	}
 	current_bb=bn;
-
+printf("GEN IF\n");
 }
 
 void quads_gen_for(struct ast_node *ast){
         
-	struct basic_block *b_cond = new_basic_block();
-	struct basic_block *b_body = new_basic_block();
-	struct basic_block *b_inc = new_basic_block();
-	struct basic_block *b_next = new_basic_block();
+	struct basic_block *b_cond = quad_new_basic_block();
+	struct basic_block *b_body = quad_new_basic_block();
+	struct basic_block *b_inc = quad_new_basic_block();
+	struct basic_block *b_next = quad_new_basic_block();
 
 	quads_gen_assignment(ast->left);
-	loop_new(b_inc, b_next);
-	basic_block_link(current_bb, ALWAYS, b_cond, NULL);
+	quad_loop_new(b_inc, b_next);
+	quad_basic_block_link(current_bb, ALWAYS, b_cond, NULL);
 	current_bb = b_cond;
 	quads_gen_condexpr(ast->cond, b_body, b_next);
 	current_bb = b_body;
 	quads_gen_statement(ast->body);
-	basic_block_link(current_bb, ALWAYS, b_inc, NULL);
+	quad_basic_block_link(current_bb, ALWAYS, b_inc, NULL);
 	current_bb = b_inc;
 	quads_gen_statement(ast->right);
-	basic_block_link(current_bb, ALWAYS, b_cond, NULL);
+	quad_basic_block_link(current_bb, ALWAYS, b_cond, NULL);
 	current_bb = b_next;	
-	loop_end();
+	quad_loop_end();
 
 }
 
@@ -338,18 +343,18 @@ void quads_gen_condexpr(struct ast_node *ast, struct basic_block *true_b, struct
 		tmp1 = quads_gen_rval(ast, NULL);
 		tmp2 = ast_newnode(AST_NUM);
 		tmp2->attributes.num = 0;
-		emit(Q_CMP, tmp1, tmp2, NULL);
-		basic_block_link(current_bb, COND_NE, true_b, false_b);
+		quad_emit(Q_CMP, tmp1, tmp2, NULL);
+		quad_basic_block_link(current_bb, COND_NE, true_b, false_b);
 		break;
 		case AST_NUM:
 		case AST_CHAR:
 		tmp2 = ast_newnode(AST_NUM);
 		tmp2->attributes.num = 0;
-		emit(Q_CMP, ast, tmp2, NULL);
-		basic_block_link(current_bb, COND_NE, true_b, false_b);
+		quad_emit(Q_CMP, ast, tmp2, NULL);
+		quad_basic_block_link(current_bb, COND_NE, true_b, false_b);
 		break;
 		case AST_STR:
-		basic_block_link(current_bb, ALWAYS, true_b, false_b);
+		quad_basic_block_link(current_bb, ALWAYS, true_b, false_b);
 		break;
 		case AST_BINOP:
 		switch (ast->attributes.op){
@@ -359,36 +364,36 @@ void quads_gen_condexpr(struct ast_node *ast, struct basic_block *true_b, struct
 			case NOTEQ:
 				left = quads_gen_rval(ast->left, NULL);
 				right = quads_gen_rval(ast->right, NULL);
-				emit(Q_CMP, left, right, NULL);
-				basic_block_link(current_bb, COND_LT, true_b, false_b);
+				quad_emit(Q_CMP, left, right, NULL);
+				quad_basic_block_link(current_bb, COND_LT, true_b, false_b);
 				break;
 			default:
 				left = quads_gen_rval(ast, NULL);
 				right = ast_newnode(AST_NUM);
 				right->attributes.num=0;
-				emit(Q_CMP, left, right, NULL);
-				basic_block_link(current_bb, COND_NE, true_b, false_b);
+				quad_emit(Q_CMP, left, right, NULL);
+				quad_basic_block_link(current_bb, COND_NE, true_b, false_b);
 		}
 		break;
 		case AST_UNOP:
 		left = quads_gen_rval(ast, NULL);
 		right = ast_newnode(AST_NUM);
 		right->attributes.num = 0;
-		emit(Q_CMP, left, right, NULL);
-		basic_block_link(current_bb, COND_NE, true_b, false_b);
+		quad_emit(Q_CMP, left, right, NULL);
+		quad_basic_block_link(current_bb, COND_NE, true_b, false_b);
 		break;
 		case AST_ASSGN:
 		left = quads_gen_assignment(ast);
 		right = ast_newnode(AST_NUM);
 		right->attributes.num = 0;
-		emit(Q_CMP, left, right, NULL);
-		basic_block_link(current_bb, COND_NE, true_b, false_b);
+		quad_emit(Q_CMP, left, right, NULL);
+		quad_basic_block_link(current_bb, COND_NE, true_b, false_b);
 		break;
 	}
 		
 }
 
-struct loop *loop_new(struct basic_block *b_continue, struct basic_block *b_break){
+struct loop *quad_loop_new(struct basic_block *b_continue, struct basic_block *b_break){
 
 	struct loop *l = malloc(sizeof(struct loop));
 	if(l == NULL)
@@ -402,13 +407,13 @@ struct loop *loop_new(struct basic_block *b_continue, struct basic_block *b_brea
 
 }
 
-struct loop *loop_end(){
+struct loop *quad_loop_end(){
 	struct loop *l = current_l;
 	current_l = current_l->previous;
 	free(l);
 }
 
-struct quad_list *new_quad_list(){
+struct quad_list *quad_new_quad_list(){
 
 	struct quad_list *ql = malloc(sizeof(struct quad_list));
 	if(ql == NULL){
@@ -435,7 +440,7 @@ struct quad_list *quad_list_push(struct quad_list *list, struct quad *new_quad){
 	return list;
 }
 
-struct basic_block *new_basic_block(){
+struct basic_block *quad_new_basic_block(){
 
 	struct basic_block *bb = malloc(sizeof(struct basic_block));
 	if(bb == NULL){
@@ -444,15 +449,15 @@ struct basic_block *new_basic_block(){
 	}
 
 	char id[MAX_STRING_LENGTH] = {0};
-	sprintf(id, "BB:%d@%d",fn_count, bb_count++);
+	sprintf(id, "BB:%d@%d",q_fn_count, q_bb_count++);
 	bb->id = strdup(id);
-	bb->quads = new_quad_list();
+	bb->quads = quad_new_quad_list();
 
-	bb_list_push(fn_bb_list, bb);
+	quad_bb_list_push(fn_bb_list, bb);
 	return bb;
 }
 
-struct basic_block *basic_block_link(struct basic_block *bb, int branch, struct basic_block *left, struct basic_block *right){
+struct basic_block *quad_basic_block_link(struct basic_block *bb, int branch, struct basic_block *left, struct basic_block *right){
 
 	bb->branch = branch;
 	bb->left = left;
@@ -468,7 +473,7 @@ struct basic_block *basic_block_link(struct basic_block *bb, int branch, struct 
 	}
 }
 
-struct basic_block_list *new_bb_list(){
+struct basic_block_list *quad_new_bb_list(){
 
 	struct basic_block_list *bbl;
 	
@@ -482,7 +487,7 @@ struct basic_block_list *new_bb_list(){
 	return bbl;
 }
 
-struct basic_block_list *bb_list_push(struct basic_block_list *bb_list, struct basic_block *bb){
+struct basic_block_list *quad_bb_list_push(struct basic_block_list *bb_list, struct basic_block *bb){
 
 	if(bb_list->size == 0)
 		bb_list->head = bb_list->tail = bb;
