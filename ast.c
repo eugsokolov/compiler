@@ -21,6 +21,7 @@ struct ast_node *ast_newnode(int type){
 	node->next=NULL;
 	node->cond=NULL;
 	node->body=NULL;
+	node->attributes.ary = 0;
 
 //fprintf(stderr, "NEW NODE: %d\n", type);
 	

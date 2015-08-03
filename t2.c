@@ -1,6 +1,6 @@
 int a;
 int z();
-int f()
+int main()
 {
 	int foo;
 	foo=3;

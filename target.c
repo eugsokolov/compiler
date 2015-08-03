@@ -19,6 +19,7 @@ const int alignment = 4;
 const int variable_size = 4;
 int strvar = 0;
 int arg = 0;
+int arg2 = 1;
 
 void target_print(){
 
@@ -144,7 +145,7 @@ struct quad_list *target_gen_fncall(struct ast_node *ast){
 			else if(arg->left->attributes.scalar_type == 1) arg->attributes.num = 1;	
 			else if(arg->left->attributes.scalar_type == 2) arg->attributes.num = 16;
 		}
-
+		
 		emit(Q_FNCALL_ARG, arg, NULL, NULL);
 //		if(arg->next != NULL) ast_push_back(list,arg,NEXT);
 		arg = arg->next;
@@ -377,7 +378,7 @@ void target_gen_if(struct ast_node *ast){
 	basic_block_link(current_bb, ALWAYS, bn, NULL);
 	if(ast->next != NULL){
 		current_bb=bf;
-		target_gen_statement(ast->next);
+		//target_gen_statement(ast->next);
 		basic_block_link(current_bb, ALWAYS, bn, NULL);
 	}
 	current_bb=bn;
@@ -567,13 +568,20 @@ struct basic_block_list *bb_list_push(struct basic_block_list *bb_list, struct b
 }
 
 char *target_id(struct ast_node *ast, char *buffer){
-	
-	int offset;
+
+	int offset = 0;
 
 	switch(ast->type){
 	case AST_VAR:
-		offset = 4;
-                sprintf(buffer, "-%d(%%ebp)", offset * variable_size);
+		if(ast->attributes.ary == 0){
+			offset = arg++;
+			ast->attributes.ary = offset;
+		}
+		else
+			 offset = ast->attributes.ary;
+
+//printf("ID %s,%d\n", ast->attributes.identifier, offset);
+                sprintf(buffer, "%d(%%ebp)", offset * variable_size);
 		break;
 	case AST_NUM:
 		sprintf(buffer, "$%d", ast->attributes.num);
@@ -682,8 +690,8 @@ void target_print_inst(struct quad *q){
 		if(q->source1->type == 5)
 			printf("\tmovl $%s, (%%esp)\n", q->source1->attributes.identifier);
 		else if(q->source1->type == 0){
-			printf("\tmovl %s, %%eax\n", q->source1->attributes.identifier);
-			printf("\tmovl %%eax, %d(%%esp)\n", arg * variable_size);
+			printf("\tmovl %s, %%eax\n", target_id(q->source1,buffer1));
+			printf("\tmovl %%eax, %d(%%esp)\n", arg2++*variable_size);
 		}
 		arg++;
 		break;	

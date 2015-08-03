@@ -579,6 +579,8 @@ void quads_print_inst(struct quad *q){
 		printf("\t");
 
 	switch(q->q_opcode){
+	case Q_RETURN:
+		printf("RET\n");
 	case Q_LEA:
 		printf("LEA \t%s\n",q->source1->attributes.identifier );
 		break;
