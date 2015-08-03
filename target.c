@@ -32,7 +32,7 @@ void target_print(){
 	printf("\n%s:\n", fn_bb_list->func);
 	printf("\tpushl %%ebp\n");
 	printf("\tmovl %%esp, %%ebp\n");
-	printf("\tsubl $-%d, %%esp\n", variable_size * 4);
+	printf("\tsubl $%d, %%esp\n", variable_size * 4 * 4);
 
 	int j = 0;
 	while(fn_bb_list->head != NULL){
@@ -581,7 +581,7 @@ char *target_id(struct ast_node *ast, char *buffer){
 			 offset = ast->attributes.ary;
 
 //printf("ID %s,%d\n", ast->attributes.identifier, offset);
-                sprintf(buffer, "%d(%%ebp)", offset * variable_size);
+                sprintf(buffer, "-%d(%%ebp)", offset * variable_size);
 		break;
 	case AST_NUM:
 		sprintf(buffer, "$%d", ast->attributes.num);
@@ -707,7 +707,7 @@ void target_print_inst(struct quad *q){
 		break;
 	case Q_INC:
                 printf("\tmovl %s, %%eax\n", s1);
-                printf("\taddl %%eax, 1\n");
+                printf("\taddl $1, %%eax\n");
                 printf("\tmovl %%eax, %s\n", s1);
 		break;
         case '+':

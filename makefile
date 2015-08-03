@@ -25,4 +25,4 @@ hash.o: hash.c hash.h
 	gcc -c hash.c
 
 cn: 
-	rm *.o parser.tab.* lex.yy.* *.output escc *~
+	rm a.out *.o parser.tab.* lex.yy.* *.output escc *~
